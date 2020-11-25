@@ -14,6 +14,7 @@ FEATURES:=squashfs gpio
 MAINTAINER:=Anlix <contato@anlix.io>
 
 KERNEL_PATCHVER:=4.14
+KERNEL_TESTING_PATCHVER:=5.4
 
 define Target/Description
 	Build firmware images for Realtek based boards.
