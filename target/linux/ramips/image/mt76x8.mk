@@ -468,6 +468,14 @@ define Device/xiaomi_mir4a-100m
 endef
 TARGET_DEVICES += xiaomi_mir4a-100m
 
+define Device/zbtlink_zbt-we2126
+  DTS := ZBT-WE2126
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := ZBTlink ZBT-WE2126 (16M)
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-we2126
+
 define Device/zbtlink_zbt-we1226
   DTS := ZBT-WE1226
   IMAGE_SIZE := $(ralink_default_fw_size_8M)
