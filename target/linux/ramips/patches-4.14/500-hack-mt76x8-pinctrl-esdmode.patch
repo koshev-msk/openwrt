@@ -1,0 +1,26 @@
+--- a/arch/mips/ralink/mt7620.c
++++ b/arch/mips/ralink/mt7620.c
+@@ -149,6 +149,7 @@ static struct rt2880_pmx_func refclk_grp
+ static struct rt2880_pmx_func perst_grp_mt7628[] = { FUNC("perst", 0, 36, 1) };
+ static struct rt2880_pmx_func wdt_grp_mt7628[] = { FUNC("wdt", 0, 38, 1) };
+ static struct rt2880_pmx_func spi_grp_mt7628[] = { FUNC("spi", 0, 7, 4) };
++static struct rt2880_pmx_func esd_mode_grp_mt7628[] = { FUNC("sdxc", 1, 0, 0) };
+ 
+ static struct rt2880_pmx_func sd_mode_grp_mt7628[] = {
+ 	FUNC("jtag", 3, 22, 8),
+@@ -297,6 +298,7 @@ static struct rt2880_pmx_func wled_an_gr
+ #define MT7628_GPIO_MODE_I2C		20
+ #define MT7628_GPIO_MODE_REFCLK		18
+ #define MT7628_GPIO_MODE_PERST		16
++#define MT7628_GPIO_MODE_ESDMODE	15
+ #define MT7628_GPIO_MODE_WDT		14
+ #define MT7628_GPIO_MODE_SPI		12
+ #define MT7628_GPIO_MODE_SDMODE		10
+@@ -319,6 +321,7 @@ static struct rt2880_pmx_group mt7628an_
+ 				1, MT7628_GPIO_MODE_I2C),
+ 	GRP("refclk", refclk_grp_mt7628, 1, MT7628_GPIO_MODE_REFCLK),
+ 	GRP("perst", perst_grp_mt7628, 1, MT7628_GPIO_MODE_PERST),
++	GRP_G("esdmode", esd_mode_grp_mt7628, 1, 0, MT7628_GPIO_MODE_ESDMODE),
+ 	GRP("wdt", wdt_grp_mt7628, 1, MT7628_GPIO_MODE_WDT),
+ 	GRP("spi", spi_grp_mt7628, 1, MT7628_GPIO_MODE_SPI),
+ 	GRP_G("sdmode", sd_mode_grp_mt7628, MT7628_GPIO_MODE_MASK,
