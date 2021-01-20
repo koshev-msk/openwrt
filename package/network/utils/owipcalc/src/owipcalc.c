@@ -361,11 +361,11 @@ static struct cidr * cidr_parse6(const char *s)
 	if (!addr || (strlen(s) >= sizeof(addr->buf.v6)))
 		goto err;
 
-	snprintf(addr->buf.v4, sizeof(addr->buf.v6), "%s", s);
+	snprintf(addr->buf.v6, sizeof(addr->buf.v6), "%s", s);
 
 	addr->family = AF_INET6;
 
-	if ((p = strchr(addr->buf.v4, '/')) != NULL)
+	if ((p = strchr(addr->buf.v6, '/')) != NULL)
 	{
 		*p++ = 0;
 
@@ -379,9 +379,9 @@ static struct cidr * cidr_parse6(const char *s)
 		addr->prefix = 128;
 	}
 
-	if (p == addr->buf.v4+1)
+	if (p == addr->buf.v6+1)
 		memset(&addr->addr.v6, 0, sizeof(addr->addr.v6));
-	else if (inet_pton(AF_INET6, addr->buf.v4, &addr->addr.v6) != 1)
+	else if (inet_pton(AF_INET6, addr->buf.v6, &addr->addr.v6) != 1)
 		goto err;
 
 	return addr;
@@ -527,18 +527,17 @@ static bool cidr_network6(struct cidr *a)
 
 static bool cidr_contains6(struct cidr *a, struct cidr *b)
 {
-	struct cidr *n = cidr_clone(a);
-	struct in6_addr *x = &n->addr.v6;
+	struct in6_addr *x = &a->addr.v6;
 	struct in6_addr *y = &b->addr.v6;
-	uint8_t i = (128 - n->prefix) / 8;
-	uint8_t m = ~((1 << ((128 - n->prefix) % 8)) - 1);
+	uint8_t i = (128 - a->prefix) / 8;
+	uint8_t m = ~((1 << ((128 - a->prefix) % 8)) - 1);
 	uint8_t net1 = x->s6_addr[15-i] & m;
 	uint8_t net2 = y->s6_addr[15-i] & m;
 
 	if (printed)
 		qprintf(" ");
 
-	if ((b->prefix >= n->prefix) && (net1 == net2) &&
+	if ((b->prefix >= a->prefix) && (net1 == net2) &&
 	    ((i == 15) || !memcmp(&x->s6_addr, &y->s6_addr, 15-i)))
 	{
 		qprintf("1");
