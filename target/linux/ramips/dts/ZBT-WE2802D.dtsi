@@ -1,4 +1,3 @@
-/dts-v1/;
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/gpio/gpio.h>
 
@@ -6,7 +5,6 @@
 
 / {
 	compatible = "zbtlink,zbt-we2802d", "mediatek,mt7628an-soc";
-	model = "ZBT-WE2802D";
 
 	aliases {
 		led-boot = &led_sys;
@@ -66,46 +64,6 @@
 		gpio {
 			ralink,group = "p0led_an", "p1led_an", "p4led_an", "wdt", "wled_an";
 			ralink,function = "gpio";
-		};
-	};
-};
-
-&spi0 {
-	status = "okay";
-
-	m25p80@0 {
-		compatible = "jedec,spi-nor";
-		reg = <0>;
-		spi-max-frequency = <10000000>;
-
-		partitions {
-			compatible = "fixed-partitions";
-			#address-cells = <1>;
-			#size-cells = <1>;
-
-			partition@0 {
-				label = "u-boot";
-				reg = <0x0 0x30000>;
-				read-only;
-			};
-
-			partition@30000 {
-				label = "u-boot-env";
-				reg = <0x30000 0x10000>;
-				read-only;
-			};
-
-			factory: partition@40000 {
-				label = "factory";
-				reg = <0x40000 0x10000>;
-				read-only;
-			};
-
-			partition@50000 {
-				compatible = "denx,uimage";
-				label = "firmware";
-				reg = <0x50000 0x7b0000>;
-			};
 		};
 	};
 };

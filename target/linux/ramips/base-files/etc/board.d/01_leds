@@ -443,7 +443,8 @@ zbtlink,zbt-we2126)
 	ucidef_set_led_switch "wan" "wan" "$boardname:blue:wan" "switch0" "0x010"
 	set_wifi_led "$boardname:blue:wlan"
 	;;
-zbtlink,zbt-we2802d)
+zbtlink,zbt-we2802d-8m|\
+zbtlink,zbt-we2802d-16m)
 	set_wifi_led "$boardname:green:wlan"
 	ucidef_set_led_switch "lan" "LAN" "$boardname:green:lan" "switch0" "0x01"
 	ucidef_set_led_switch "wan" "WAN" "$boardname:green:wan" "switch0" "0x10"
