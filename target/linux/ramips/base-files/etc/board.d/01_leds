@@ -445,10 +445,10 @@ zbtlink,zbt-we2126)
 	;;
 zbtlink,zbt-we2802d-8m|\
 zbtlink,zbt-we2802d-16m)
-	set_wifi_led "$boardname:green:wlan"
-	ucidef_set_led_switch "lan" "LAN" "$boardname:green:lan" "switch0" "0x01"
-	ucidef_set_led_switch "wan" "WAN" "$boardname:green:wan" "switch0" "0x10"
-	ucidef_set_led_timer "hwdt" "HWDT" "$boardname:green:hwdt" "timer" "30000" "30000"
+	set_wifi_led "zbt-we2802d:green:wlan"
+	ucidef_set_led_switch "lan" "LAN" "zbt-we2802d:green:lan" "switch0" "0x01"
+	ucidef_set_led_switch "wan" "WAN" "zbt-we2802d:green:wan" "switch0" "0x10"
+	ucidef_set_led_timer "hwdt" "HWDT" "zbt-we2802d:green:hwdt" "timer" "30000" "30000"
 	;;
 zorlik,zl5900v2)
 	ucidef_set_led_netdev "lan" "lan" "$boardname:green:lan" eth0
