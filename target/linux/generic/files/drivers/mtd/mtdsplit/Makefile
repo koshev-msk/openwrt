@@ -12,4 +12,8 @@ obj-$(CONFIG_MTD_SPLIT_EVA_FW) += mtdsplit_eva.o
 obj-$(CONFIG_MTD_SPLIT_WRGG_FW) += mtdsplit_wrgg.o
 obj-$(CONFIG_MTD_SPLIT_MINOR_FW) += mtdsplit_minor.o
 obj-$(CONFIG_MTD_SPLIT_JIMAGE_FW) += mtdsplit_jimage.o
+<<<<<<< HEAD
 obj-$(CONFIG_MTD_SPLIT_ELF_FW) += mtdsplit_elf.o
+=======
+obj-$(CONFIG_MTD_SPLIT_CVIMG_FW) += mtdsplit_cvimg.o
+>>>>>>> ccdcb5dc011b1eff5fca816fca23e80181cd590c
