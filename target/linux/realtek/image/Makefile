@@ -274,6 +274,23 @@ define Device/GWR300N
 endef
 TARGET_DEVICES += GWR300N
 
+define Device/JWNR2000-4EMRUS
+  $(Device/RealtekDTS)
+  DEVICE_DTS := JWNR2000-4EMRUS
+  DEVICE_TITLE := Netgear JWNR2000-4EMRUS
+  SUPPORTED_DEVICES := jwnr2000-4emrus
+  IMAGE_SIZE := 16320k
+  DEV_PROFILE := JWNR2000-4EMRUS
+  CMDLINE := console=ttyS0,38400
+  KERNEL := kernel-bin | append-dtb | lzma | loader-cmdline-compile
+  CVIMG_KERNEL_BURN_ADDR := 0x10000
+  CVIMG_LOADER_START_ADDR := 0x81000000
+  IMAGES := factory.bin sysupgrade.bin
+  IMAGE/factory.bin = append-kernel | append-fake-rootfs | append-rootfs | cvimg-kernel | cvimg-pad-rootfs
+  IMAGE/sysupgrade.bin = append-kernel | append-fake-rootfs | append-rootfs | cvimg-kernel | pad-rootfs
+endef
+TARGET_DEVICES += JWNR2000-4EMRUS
+
 define Device/RE172
   $(Device/RealtekDTS)
   DEVICE_DTS := RE172
