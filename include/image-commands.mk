@@ -3,6 +3,10 @@
 IMAGE_KERNEL = $(word 1,$^)
 IMAGE_ROOTFS = $(word 2,$^)
 
+define ModelNameLimit16
+$(shell expr substr "$(word 2, $(subst _, ,$(1)))" 1 16)
+endef
+
 define rootfs_align
 $(patsubst %-256k,0x40000,$(patsubst %-128k,0x20000,$(patsubst %-64k,0x10000,$(patsubst squashfs%,0x4,$(patsubst root.%,%,$(1))))))
 endef
@@ -153,6 +157,38 @@ define Build/check-size
 		echo "WARNING: Image file $@ is too big: $$imagesize > $$limitsize" >&2; \
 		rm -f $@; \
 	}
+endef
+
+define Build/elecom-product-header
+	$(eval product=$(word 1,$(1)))
+	$(eval fw=$(if $(word 2,$(1)),$(word 2,$(1)),$@))
+
+	( \
+		echo -n -e "ELECOM\x00\x00$(product)" | dd bs=40 count=1 conv=sync; \
+		echo -n "0.00" | dd bs=16 count=1 conv=sync; \
+		dd if=$(fw); \
+	) > $(fw).new
+	mv $(fw).new $(fw)
+endef
+
+define Build/elx-header
+	$(eval hw_id=$(word 1,$(1)))
+	$(eval xor_pattern=$(word 2,$(1)))
+	( \
+		echo -ne "\x00\x00\x00\x00\x00\x00\x00\x03" | \
+			dd bs=42 count=1 conv=sync; \
+		hw_id="$(hw_id)"; \
+		echo -ne "\x$${hw_id:0:2}\x$${hw_id:2:2}\x$${hw_id:4:2}\x$${hw_id:6:2}" | \
+			dd bs=20 count=1 conv=sync; \
+		echo -ne "$$(printf '%08x' $$(stat -c%s $@) | fold -s2 | xargs -I {} echo \\x{} | tr -d '\n')" | \
+			dd bs=8 count=1 conv=sync; \
+		echo -ne "$$($(STAGING_DIR_HOST)/bin/mkhash md5 $@ | fold -s2 | xargs -I {} echo \\x{} | tr -d '\n')" | \
+			dd bs=58 count=1 conv=sync; \
+	) > $(KDIR)/tmp/$(DEVICE_NAME).header
+	$(call Build/xor-image,-p $(xor_pattern) -x)
+	cat $(KDIR)/tmp/$(DEVICE_NAME).header $@ > $@.new
+	mv $@.new $@
+	rm -rf $(KDIR)/tmp/$(DEVICE_NAME).header
 endef
 
 define Build/eva-image

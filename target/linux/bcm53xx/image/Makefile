@@ -1,9 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Copyright (C) 2013 OpenWrt.org
-#
-# This is free software, licensed under the GNU General Public License v2.
-# See /LICENSE for more information.
-#
+
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
@@ -335,10 +333,8 @@ define Device/meraki_mr32
 	pad-to 10362880
   KERNEL := kernel-bin | fit none $$(DTS_DIR)/$$(DEVICE_DTS).dtb
   IMAGES := sysupgrade.bin
-  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-
 # Currently the only device that uses the new image check
-  SUPPORTED_DEVICES := meraki,mr32
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 
 # The loader is specifically looking for fdt@2:
 # [    3.190000] find_itb_subimage: error finding fdt@2: FDT_ERR_NOTFOUND
