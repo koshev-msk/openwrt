@@ -274,6 +274,14 @@ define Device/hc5962
 endef
 TARGET_DEVICES += hc5962
 
+define Device/hlk-7621a
+  DTS := HLK-7621A
+  IMAGE_SIZE := $(ralink_default_fw_size_32M)
+  DEVICE_TITLE := HiLink HLK-7621A
+  DEVICE_PACKAGES := kmod-usb3
+endef
+TARGET_DEVICES += hlk-7621a
+
 define Device/iodata_wn-ax1167gr
   DTS := WN-AX1167GR
   IMAGE_SIZE := 15552k
