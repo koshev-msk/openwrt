@@ -93,6 +93,14 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya-neo
+  DTS := HIWOOYA-NEO
+  IMAGE_SIZE := $(ralink_default_fw_size_32M)
+  DEVICE_TITLE := HIWOOYA NEO
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-sound-mt7620 kmod-i2c-mt7628
+endef
+TARGET_DEVICES += hiwooya-neo
+
 define Device/LinkIt7688
   DTS := LINKIT7688
   IMAGE_SIZE := $(ralink_default_fw_size_32M)

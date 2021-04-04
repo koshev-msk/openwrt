@@ -189,6 +189,11 @@ gl-mt300n-v2)
 	set_wifi_led "$boardname:red:wlan"
 	ucidef_set_led_switch "wan" "wan" "$boardname:green:wan" "switch0" "0x1"
 	;;
+hiwooya-neo)
+	set_wifi_led "hiwooya:blue:wlan"
+	ucidef_set_led_switch "wan" "WAN" "hiwooya:orange:wan" "switch0" "0x1"
+	ucidef_set_led_switch "lan" "LAN" "hiwooya:orange:lan" "switch0" "0x2"
+	;;
 hc5661|\
 hc5661a)
 	ucidef_set_led_netdev "internet" "internet" "$boardname:blue:internet" "eth0.2"

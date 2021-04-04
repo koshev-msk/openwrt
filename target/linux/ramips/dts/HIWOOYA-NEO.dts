@@ -1,0 +1,24 @@
+/dts-v1/;
+
+#include "HIWOOYA.dtsi"
+
+
+
+/ {
+	compatible = "hiwooya-neo", "hiwooya", "mediatek,mt7628an-soc";
+	model = "HIWOOYA NEO";
+};
+
+&pinctrl {
+        state_default: pinctrl0 {
+                gpio {
+                        ralink,group = "gpio", "p0led_an", "p1led_an", "wled_an", "wdt", "spis";
+                        ralink,function = "gpio";
+                };
+        };
+};
+
+&esw {
+	mediatek,portmap = <0x3>;
+	mediatek,portdisable = <0x3c>;
+};
