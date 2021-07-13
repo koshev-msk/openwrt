@@ -848,3 +848,93 @@ define Device/zte-q7
   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci
 endef
 TARGET_DEVICES += zte-q7
+
+define Device/kroks_ap205m1
+  DTS := mt7620a_kroks_ap205m1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP205M1
+endef
+TARGET_DEVICES += kroks_ap205m1
+
+define Device/kroks_ap221
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221
+  DEVICE_TITLE := Kroks AP221
+endef
+TARGET_DEVICES += kroks_ap221
+
+define Device/kroks_ap221-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221-w
+  DEVICE_TITLE := Kroks AP221-W
+  SUPPORTED_DEVICES := kroks_ap221
+endef
+TARGET_DEVICES += ap221-w
+
+define Device/kroks_kndrt22r1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_kndrt22r1
+  DEVICE_TITLE := Kroks Rt-Brd eX
+  SUPPORTED_DEVICES := kroks_kndrt22r1 kroks_ap221m2
+endef
+TARGET_DEVICES += kroks_kndrt22r1
+
+define Device/kroks_kndrt22r1-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_kndrt22r1-w
+  DEVICE_TITLE := Kroks Rt-Brd eXW
+  SUPPORTED_DEVICES := kroks_kndrt22r1 kroks_ap221m2
+endef
+TARGET_DEVICES += kroks_kndrt22r1-w
+
+define Device/kroks_ap221m3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m3
+  DEVICE_TITLE := Kroks AP221M3
+  SUPPORTED_DEVICES := kroks_ap221m3 kroks_ap221m1
+endef
+TARGET_DEVICES += kroks_ap221m3
+
+define Device/kroks_ap221m3-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m3-w
+  DEVICE_TITLE := Kroks AP221M3-W
+  SUPPORTED_DEVICES := kroks_ap221m3 kroks_ap221m1
+endef
+TARGET_DEVICES += kroks_ap221m3-w
+
+define Device/kroks_ap221m4
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m4
+  DEVICE_TITLE := Kroks AP221M4
+endef
+TARGET_DEVICES += kroks_ap221m4
+
+define Device/kroks_ap222
+  DTS := mt7620a_kroks_ap222
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP222
+endef
+TARGET_DEVICES += kroks_ap222
+
+define Device/kroks_ap223
+  DTS := mt7620a_kroks_ap223
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223
+endef
+TARGET_DEVICES += kroks_ap223
+
+define Device/kroks_ap223m1
+  DTS := mt7620a_kroks_ap223m1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223M1
+  SUPPORTED_DEVICES := kroks_ap223m1 kroks_ap223
+endef
+TARGET_DEVICES += kroks_ap223m1
+
+define Device/kroks_ap223m3
+  DTS := mt7620a_kroks_ap223m3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223M3
+endef
+TARGET_DEVICES += kroks_ap223m3

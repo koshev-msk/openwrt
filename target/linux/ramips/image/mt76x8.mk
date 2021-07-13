@@ -506,6 +506,14 @@ define Device/zbtlink_zbt-we2802d-16m
 endef
 TARGET_DEVICES += zbtlink_zbt-we2802d-16m
 
+define Device/zbtlink_zbt-we4626
+  DTS := ZBT-WE4626
+  IMAGE_SIZE := $(ralink_default_fw_size_8M)
+  DEVICE_TITLE := ZBTlink ZBT-WE4626
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-sdhci-mt7620
+endef
+TARGET_DEVICES += zbtlink_zbt-we4626
+
 define Device/zyxel_keenetic-extra-ii
   DTS := ki_rb
   IMAGE_SIZE := 14912k
@@ -517,3 +525,196 @@ define Device/zyxel_keenetic-extra-ii
 	check-size $$$$(IMAGE_SIZE) | zyimage -d 6162 -v "ZyXEL Keenetic Extra II"
 endef
 TARGET_DEVICES += zyxel_keenetic-extra-ii
+
+define Device/kroks_kndrt31r1
+  DTS := mt7628an_kroks_kndrt31r1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 sXW
+  SUPPORTED_DEVICES := kndrt31r1 ap315m1
+endef
+TARGET_DEVICES += kroks_kndrt31r1
+
+define Device/kroks_kndrt31r2
+  DTS := mt7628an_kroks_kndrt31r2
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot sXw DS
+endef
+TARGET_DEVICES += kroks_kndrt31r2
+
+define Device/kroks_kndrt31r3
+  DTS := mt7628an_kroks_kndrt31r3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 mXW
+endef
+TARGET_DEVICES += kroks_kndrt31r3
+
+define Device/kroks_kndrt31r4
+  DTS := mt7628an_kroks_kndrt31r4
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot mXw DS
+endef
+TARGET_DEVICES += kroks_kndrt31r4
+
+define Device/kroks_kndrt31r5
+  DTS := mt7628an_kroks_kndrt31r5
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot sXw
+endef
+TARGET_DEVICES += kroks_kndrt31r5
+
+define Device/kroks_kndrt31r6
+  DTS := mt7628an_kroks_kndrt31r6
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-SAN2
+  SUPPORTED_DEVICES := kroks_kndrt31r6 kroks_ap312m1
+endef
+TARGET_DEVICES += kroks_kndrt31r6
+
+define Device/kroks_kndrt31r7
+  DTS := mt7628an_kroks_kndrt31r7
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Brd Xw
+  SUPPORTED_DEVICES := kroks_kndrt31r7 kroks_ap311m1 kroks_ap311m2
+endef
+TARGET_DEVICES += kroks_kndrt31r7
+
+define Device/kroks_kndrt31r8
+  DTS := mt7628an_kroks_kndrt31r8
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Ubx mXw 4PoE-48 DS
+endef
+TARGET_DEVICES += kroks_kndrt31r8
+
+define Device/kroks_kndrt31r9
+  DTS := mt7628an_kroks_kndrt31r9
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 sXW DS
+endef
+TARGET_DEVICES += kroks_kndrt31r9
+
+define Device/kroks_kndrt31r10
+  DTS := mt7628an_kroks_kndrt31r10
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot mXw
+endef
+TARGET_DEVICES += kroks_kndrt31r10
+
+define Device/kroks_kndrt31r11
+  DTS := mt7628an_kroks_kndrt31r11
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Ubx mX RSIM
+endef
+TARGET_DEVICES += kroks_kndrt31r11
+
+define Device/kroks_kndrt31r12
+  DTS := mt7628an_kroks_kndrt31r12
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Ubx sX RSIM
+endef
+TARGET_DEVICES += kroks_kndrt31r12
+
+define Device/kroks_kndrt31r13
+  DTS := mt7628an_kroks_kndrt31r13
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot sXw DS RSIM
+endef
+TARGET_DEVICES += kroks_kndrt31r13
+
+define Device/kroks_kndrt31r14
+  DTS := mt7628an_kroks_kndrt31r14
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 UW
+  DEVICE_PACKAGES += kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += kroks_kndrt31r14
+
+define Device/kroks_kndrt31r15
+  DTS := mt7628an_kroks_kndrt31r15
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot mX DS RSIM
+ endef
+TARGET_DEVICES += kroks_kndrt31r15
+
+define Device/kroks_kndrt31r17
+  DTS := mt7628an_kroks_kndrt31r17
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 sXW
+endef
+TARGET_DEVICES += kroks_kndrt31r17
+
+define Device/kroks_kndrt31r18
+  DTS := mt7628an_kroks_kndrt31r18
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 mXW
+endef
+TARGET_DEVICES += kroks_kndrt31r18
+
+define Device/kroks_kndrt31r19
+  DTS := mt7628an_kroks_kndrt31r19
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Pot mXw DS RSIM
+endef
+TARGET_DEVICES += kroks_kndrt31r19
+
+define Device/kroks_kndrt31r20
+  DTS := mt7628an_kroks_kndrt31r20
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 mXW DS
+endef
+TARGET_DEVICES += kroks_kndrt31r20
+
+define Device/kroks_kndrt31r21
+  DTS := mt7628an_kroks_kndrt31r21
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 2mXW EC DS 2U GPS
+endef
+TARGET_DEVICES += kroks_kndrt31r21
+
+define Device/kroks_kndrt31r22
+  DTS := mt7628an_kroks_kndrt31r22
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 mXW DS
+endef
+TARGET_DEVICES += kroks_kndrt31r22
+
+define Device/kroks_kndrt31r23
+  DTS := mt7628an_kroks_kndrt31r23
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 sXW DS
+endef
+TARGET_DEVICES += kroks_kndrt31r23
+
+define Device/kroks_kndrt31r24
+  DTS := mt7628an_kroks_kndrt31r24
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 UW
+endef
+TARGET_DEVICES += kroks_kndrt31r24
+
+define Device/kroks_kndrt31r26
+  DTS := mt7628an_kroks_kndrt31r26
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 mXW
+endef
+TARGET_DEVICES += kroks_kndrt31r26
+
+define Device/kroks_kndrt31r27
+  DTS := mt7628an_kroks_kndrt31r27
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 mXW DS
+endef
+TARGET_DEVICES += kroks_kndrt31r27
+
+define Device/kroks_kndrt31r28
+  DTS := mt7628an_kroks_kndrt31r28
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse4 2mXW EC DS 2U GPS
+endef
+TARGET_DEVICES += kroks_kndrt31r28
+
+define Device/kroks_kndrt31r29
+  DTS := mt7628an_kroks_kndrt31r29
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks Rt-Cse5 UW 4PoE-48
+endef
+TARGET_DEVICES += kroks_kndrt31r29

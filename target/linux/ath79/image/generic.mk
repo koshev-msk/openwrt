@@ -751,3 +751,31 @@ define Device/zbtlink_zbt-wd323
 		     kmod-usb-serial kmod-usb-serial-cp210x uqmi
 endef
 TARGET_DEVICES += zbtlink_zbt-wd323
+
+define Device/kroks_kndrt11r1
+  ATH_SOC := ar9331
+  $(Device/tplink-16mlzma)
+  DEVICE_DTS := ar9331_kroks_kndrt11r1
+  DEVICE_TITLE := Kroks Rt-Brd Uw Lite
+  TPLINK_HWID := 0x3C000201
+endef
+TARGET_DEVICES += kroks_kndrt11r1
+
+define Device/kroks_kndrt11r2
+  ATH_SOC := ar9331
+  $(Device/tplink-16mlzma)
+  DEVICE_DTS := ar9331_kroks_kndrt11r2
+  DEVICE_TITLE := Kroks Rt-Brd U Lite
+  TPLINK_HWID := 0x3C000201
+endef
+TARGET_DEVICES += kroks_kndrt11r2
+
+define Device/kroks_kndrt11r3
+  ATH_SOC := ar9331
+  $(Device/tplink-16mlzma)
+  DEVICE_DTS := ar9331_kroks_kndrt11r3
+  DEVICE_TITLE := Kroks Rt-Cse2 sXW
+  TPLINK_HWID := 0x3C000101
+endef
+TARGET_DEVICES += kroks_kndrt11r3
+
