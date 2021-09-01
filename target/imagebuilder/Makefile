@@ -47,7 +47,7 @@ endif
 	$(VERSION_SED_SCRIPT) $(PKG_BUILD_DIR)/repositories.conf
 
 ifeq ($(CONFIG_IB_STANDALONE),)
-	(cd $(call FeedPackageDir,libc); $(FIND) -type f -name 'libc_*.ipk' -or -name 'kernel_*.ipk' -or -name 'kmod-*.ipk') | \
+	(cd $(call FeedPackageDir,libc); $(FIND) -type f -name 'libc_*.ipk' -or -name 'kernel_*.ipk' -or -name 'kmod-*.ipk' -or -name 'base-files_*.ipk') | \
 		while read path; do \
 			mkdir -p "$(PKG_BUILD_DIR)/packages/$${path%/*}"; \
 			cp "$(call FeedPackageDir,libc)/$$path" "$(PKG_BUILD_DIR)/packages/$$path"; \

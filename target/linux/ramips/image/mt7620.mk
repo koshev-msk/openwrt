@@ -77,6 +77,97 @@ define Device/amit_jboot
   DEVICE_PACKAGES := jboot-tools kmod-usb2 kmod-usb-ohci
 endef
 
+define Device/ap205m1
+  DTS := mt7620a_kroks_ap205m1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP205M1
+endef
+TARGET_DEVICES += ap205m1
+
+define Device/ap221
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221
+  DEVICE_TITLE := Kroks AP221
+endef
+TARGET_DEVICES += ap221
+
+define Device/ap221-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221-w
+  DEVICE_TITLE := Kroks AP221-W
+  SUPPORTED_DEVICES := ap221
+endef
+TARGET_DEVICES += ap221-w
+
+define Device/kndrt22r1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_kndrt22r1
+  DEVICE_TITLE := Kroks Rt-Brd eX
+  SUPPORTED_DEVICES := kndrt22r1 ap221m2
+endef
+TARGET_DEVICES += kndrt22r1
+
+define Device/kndrt22r1-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_kndrt22r1-w
+  DEVICE_TITLE := Kroks Rt-Brd eXW
+  SUPPORTED_DEVICES := kndrt22r1 ap221m2
+endef
+TARGET_DEVICES += kndrt22r1-w
+
+define Device/ap221m3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m3
+  DEVICE_TITLE := Kroks AP221M3
+  SUPPORTED_DEVICES := ap221m3 ap221m1
+endef
+TARGET_DEVICES += ap221m3
+
+define Device/ap221m3-w
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m3-w
+  DEVICE_TITLE := Kroks AP221M3-W
+  SUPPORTED_DEVICES := ap221m3 ap221m1
+endef
+TARGET_DEVICES += ap221m3-w
+
+define Device/ap221m4
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DTS := mt7620a_kroks_ap221m4
+  DEVICE_TITLE := Kroks AP221M4
+endef
+TARGET_DEVICES += ap221m4
+
+define Device/ap222
+  DTS := mt7620a_kroks_ap222
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP222
+endef
+TARGET_DEVICES += ap222
+
+define Device/ap223
+  DTS := mt7620a_kroks_ap223
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223
+endef
+TARGET_DEVICES += ap223
+
+define Device/ap223m1
+  DTS := mt7620a_kroks_ap223m1
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223M1
+  SUPPORTED_DEVICES := ap223m1 ap223
+endef
+TARGET_DEVICES += ap223m1
+
+define Device/ap223m3
+  DTS := mt7620a_kroks_ap223m3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+  DEVICE_TITLE := Kroks AP223M3
+  IMAGE_SIZE := $(ralink_default_fw_size_16M)
+endef
+TARGET_DEVICES += ap223m3
+
 define Device/Archer
   TPLINK_HWREVADD := 0
   TPLINK_HVERSION := 3
@@ -643,6 +734,7 @@ define Device/tplink_c20-v1
   TPLINK_HWID := 0xc2000001
   TPLINK_HWREV := 0x44
   TPLINK_HWREVADD := 0x1
+  IMAGES += factory.bin
   DEVICE_TITLE := TP-Link ArcherC20 v1
   DEVICE_PACKAGES := kmod-mt76x0e kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
 endef
