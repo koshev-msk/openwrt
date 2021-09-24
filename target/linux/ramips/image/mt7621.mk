@@ -1648,7 +1648,7 @@ define Device/zbtlink_zbt-wg1608-16m
   DEVICE_MODEL := ZBT-WG1608
   DEVICE_VARIANT := 16M
   DEVICE_PACKAGES := kmod-sdhci-mt7620 kmod-mt7603 kmod-mt7615e \
-		kmod-mt7615-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+		kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
   SUPPORTED_DEVICES += zbt-wg1608 zbt-wg3526-16M
 endef
 TARGET_DEVICES += zbtlink_zbt-wg1608-16m
@@ -1661,7 +1661,7 @@ define Device/zbtlink_zbt-wg1608-32m
   DEVICE_MODEL := ZBT-WG1608
   DEVICE_VARIANT := 32M
   DEVICE_PACKAGES := kmod-sdhci-mt7620 kmod-mt7603 kmod-mt7615e \
-		kmod-mt7615-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+		kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
   SUPPORTED_DEVICES += zbt-wg1608 zbt-wg3526-32M
 endef
 TARGET_DEVICES += zbtlink_zbt-wg1608-32m
