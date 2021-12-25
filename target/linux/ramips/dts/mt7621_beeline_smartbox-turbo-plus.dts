@@ -16,6 +16,7 @@
 		led-running = &led_status_green;
 		led-upgrade = &led_status_red;
 		label-mac-device = &gmac0;
+		serial3 = &uartlite3;
 	};
 
 	chosen {
@@ -56,6 +57,28 @@
 			label = "reset";
 			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
+		};
+	};
+	palmbus: palmbus@1E000000 {
+		uartlite3: uartlite3@e00 {
+			compatible = "ns16550a";
+			reg = <0xe00 0x100>;
+
+			clocks = <&sysclock>;
+			clock-frequency = <50000000>;
+
+			interrupt-parent = <&gic>;
+			interrupts = <GIC_SHARED 28 IRQ_TYPE_LEVEL_HIGH>;
+
+			reg-shift = <2>;
+			reg-io-width = <4>;
+
+			no-loopback-test;
+			current-speed = <115200>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&uart3_pins>;
+
+			status = "okay";
 		};
 	};
 };
@@ -214,7 +237,7 @@
 
 &state_default {
 	gpio {
-		groups = "uart3", "uart2", "jtag", "wdt";
+		groups = "uart2", "jtag", "wdt";
 		function = "gpio";
 	};
 };

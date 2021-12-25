@@ -195,6 +195,14 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya_neo-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := 32M
+endef
+TARGET_DEVICES += hiwooya_neo-32m
+
 define Device/iptime_a3
   IMAGE_SIZE := 7936k
   UIMAGE_NAME := a3
@@ -821,6 +829,31 @@ define Device/zbtlink_zbt-we1226
   DEVICE_MODEL := ZBT-WE1226
 endef
 TARGET_DEVICES += zbtlink_zbt-we1226
+
+define Device/zbtlink_zbt-we2802d-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802
+  DEVICE_VARIANT := 8M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-8m
+
+define Device/zbtlink_zbt-we2802d-16m
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802
+  DEVICE_VARIANT := 16M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
+define Device/zbtlink_zbt-we2126
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2126
+  DEVICE_PACKAGES := kmod-mt76x0e kmod-usb2 kmod-usb-ohci kmod-sdhci-mt7620
+endef
+TARGET_DEVICES += zbtlink_zbt-we2126
+	 
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 14912k

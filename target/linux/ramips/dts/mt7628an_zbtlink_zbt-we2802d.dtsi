@@ -1,0 +1,79 @@
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+
+#include "mt7628an.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-we2802d", "mediatek,mt7628an-soc";
+
+	aliases {
+		led-boot = &led_sys;
+		led-failsafe = &led_sys;
+		led-running = &led_sys;
+		led-upgrade = &led_sys;
+	};
+
+	chosen {
+		bootargs = "console=ttyS1,115200";
+	};
+
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <20>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_sys: sys {
+			label = "green:sys";
+			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
+		};
+
+		led_wan: wan {
+			label = "green:wan";
+			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
+		};
+
+		led_lan: lan {
+			label = "green:lan";
+			gpios = <&gpio 43 GPIO_ACTIVE_LOW>;
+		};
+
+		led_wlan: wlan {
+			label = "green:wlan";
+			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
+		};
+
+		led_hwdt: hwdt {
+			label = "green:hwdt";
+			gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "timer";
+	        };
+	};
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "p0led_an", "p1led_an", "p4led_an", "wdt", "wled_an";
+			ralink,function = "gpio";
+		};
+	};
+};
+
+&wmac {
+	status = "okay";
+	ralink,mtd-eeprom = <&factory 0x4>;
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x2e>;
+};
+
