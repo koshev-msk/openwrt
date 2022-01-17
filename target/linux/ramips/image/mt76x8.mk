@@ -343,6 +343,14 @@ define Device/onion_omega2p
 endef
 TARGET_DEVICES += onion_omega2p
 
+define Device/pixlink_lv-24ac
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := PIX-LINK
+  DEVICE_MODEL := LV-24AC
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7663-firmware-ap
+endef
+TARGET_DEVICES += pixlink_lv-24ac
+
 define Device/rakwireless_rak633
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Rakwireless
