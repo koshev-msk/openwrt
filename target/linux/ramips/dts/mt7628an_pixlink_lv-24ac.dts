@@ -12,38 +12,28 @@
 
 		reset {
 			label = "reset";
-			gpios = <&gpio 43 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
 		};
 
-		wps {
-			label = "wps";
-			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_WPS_BUTTON>;
-		};
 	};
 
 	leds {
 		compatible = "gpio-leds";
 
-		wifi-high {
-			label = "green:wifi-high";
+		led-wps {
+			label = "green:led-wps";
 			gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
 		};
 
-		wifi-med {
-			label = "green:wifi-med";
-			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
-		};
-
-		wifi-low {
-			label = "green:wifi-low";
+		wifi2g {
+			label = "green:wifi2g";
 			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
 		};
 
-		wps {
-			label = "green:wps";
-			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
+		wifi5g {
+			label = "green:wifi5g";
+			gpios = <&gpio 42 GPIO_ACTIVE_LOW>;
 		};
 	};
 };
