@@ -7,6 +7,13 @@
 	compatible = "pixlink,lv-24ac", "mediatek,mt7628an-soc";
 	model = "PIX-LINK LV-24AC";
 
+	aliases {
+		led-boot = &led_wps;
+		led-failsafe = &led_wps;
+		led-running = &led_wps;
+		led-upgrade = &led_wps;
+	};
+
 	keys {
 		compatible = "gpio-keys";
 
@@ -21,8 +28,8 @@
 	leds {
 		compatible = "gpio-leds";
 
-		led-wps {
-			label = "green:led-wps";
+		led_wps: wps {
+			label = "green:wps";
 			gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
 		};
 
