@@ -95,7 +95,7 @@
 		};
 
 		lan4 {
-			label = "lan4";
+			label = "blue:lan4";
 			gpios = <&gpio 43 GPIO_ACTIVE_LOW>;
 		};
 
@@ -163,19 +163,19 @@
 &pinctrl {
 	sdxc_router_pins: sdxc_router_mode {
 		gpio {
-			ralink,group = "i2s", "sdmode", "uart1", "gpio";
-			ralink,function = "gpio";
+			groups = "i2s", "sdmode", "uart1", "gpio";
+			function = "gpio";
 		};
 
 		esdmode {
-			ralink,group = "esdmode";
-			ralink,function = "sdxc";
+			groups = "esdmode";
+			function = "sdxc";
 		};
 	};
 	state_default: pinctrl0 {
 		gpio {
-			ralink,group = "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "wdt", "wled_an";
-			ralink,function = "gpio";
+			groups = "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "wdt", "wled_an";
+			function = "gpio";
 		};
 	};
 }
