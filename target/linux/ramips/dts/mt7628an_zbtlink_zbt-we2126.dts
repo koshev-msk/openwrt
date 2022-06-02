@@ -75,7 +75,7 @@
 		};
 
 		wan {
-			label = "zbt-we2126:blue:wan";
+			label = "blue:wan";
 			gpios = <&gpio 39 GPIO_ACTIVE_LOW>;
 		};
 
