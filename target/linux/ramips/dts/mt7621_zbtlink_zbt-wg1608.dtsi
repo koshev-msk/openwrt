@@ -35,6 +35,27 @@
 			label = "green:status";
 			gpios = <&gpio 24 GPIO_ACTIVE_LOW>;
 		};
+
+		wlan2g {
+			label = "green:wifi2g";
+			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
+		};
+		
+		wlan5g {
+			label = "green:wifi5g";
+			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
+		};
+		
+		led_wan {
+			label = "green:wan";
+			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+		};
+		
+		led_wwan {
+			label = "green:wwan";
+			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
+		};
+
 	};
 };
 
