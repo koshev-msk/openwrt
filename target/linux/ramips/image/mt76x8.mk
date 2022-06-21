@@ -854,6 +854,16 @@ define Device/zbtlink_zbt-we2802d-16m
 endef
 TARGET_DEVICES += zbtlink_zbt-we2802d-16m
 
+define Device/zbtlink_zbt-we2806-a-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2806-A
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+	kmod-i2c-core kmod-i2c-algo-bit kmod-i2c-gpio kmod-i2c-gpio-custom kmod-gpio-pcf857x
+endef
+TARGET_DEVICES += zbtlink_zbt-we2806-a-8m
+
 define Device/zbtlink_zbt-we2126
   IMAGE_SIZE := 15808k
   DEVICE_VENDOR := Zbtlink
