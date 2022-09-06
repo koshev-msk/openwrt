@@ -135,6 +135,10 @@ kingston,mlwg2|\
 sanlinking,d240)
 	ucidef_set_led_netdev "wifi_led" "wifi" "blue:wifi" "wlan0"
 	;;
+kroks,ap221m3)
+	ucidef_set_led_netdev "lan" "LAN" "green:lan" "eth0" "tx rx"
+	ucidef_set_led_netdev "wwan" "WWAN" "gren:wifi" "wwan0" "tx rx"
+	;;
 lava,lr-25g001)
 	ucidef_set_led_netdev "wlan2g" "WiFi 2.4GHz" "green:wlan2g" "wlan1"
 	ucidef_set_led_netdev "wlan5g" "WiFi 5GHz" "green:wlan5g" "wlan0"

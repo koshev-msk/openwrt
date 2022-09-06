@@ -166,6 +166,10 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1" "0:wan" "6@eth0"
 		;;
+	kroks,ap221m3)
+		ucidef_add_switch "switch0" \
+			"2:lan" "6@eth0"
+		;;
 	lava,lr-25g001)
 		ucidef_add_switch "switch0" \
 			"1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "0@eth0"

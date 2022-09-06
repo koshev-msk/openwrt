@@ -603,6 +603,15 @@ define Device/kingston_mlwg2
 endef
 TARGET_DEVICES += kingston_mlwg2
 
+define Device/kroks-ap221m3
+  SOC := mt7620a
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Kroks
+  DEVICE_MODEL := AP221M3
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci
+endef
+TARGET_DEVICES += kroks-ap221m3
+
 define Device/lava_lr-25g001
   $(Device/amit_jboot)
   SOC := mt7620a
