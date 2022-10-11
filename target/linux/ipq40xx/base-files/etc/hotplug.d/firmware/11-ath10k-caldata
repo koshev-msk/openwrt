@@ -100,6 +100,7 @@ case "$FIRMWARE" in
 	edgecore,oap100 |\
 	engenius,eap1300 |\
 	engenius,eap2200 |\
+	hooolink,hl-wr832v1 |\
 	luma,wrtq-329acn|\
 	openmesh,a42 |\
 	openmesh,a62 |\
@@ -209,6 +210,7 @@ case "$FIRMWARE" in
 	edgecore,oap100 |\
 	engenius,eap1300 |\
 	engenius,eap2200 |\
+	hooolink,hl-wr832v1 |\
 	luma,wrtq-329acn|\
 	openmesh,a42 |\
 	openmesh,a62 |\

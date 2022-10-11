@@ -1,0 +1,139 @@
+#include "mt7620a.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	compatible = "kroks,ap221m3", "ralink,mt7620a-soc";
+	model = "Kroks AP221M3";
+
+	aliases {
+		led-boot = &led_status;
+		led-failsafe = &led_status;
+		led-running = &led_status;
+		led-upgrade = &led_status;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_status: status {
+			label = "green:status";
+			gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
+		};
+
+		lan {
+			label = "green:lan";
+			gpios = <&gpio2 1 GPIO_ACTIVE_LOW>;
+		};
+
+		wifi {
+			label = "green:wlan";
+			gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		modempower {
+			gpio-export,name = "modempower";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+
+&state_default {
+
+	gpio_led {
+		groups = "ephy", "wled";
+		function = "gpio";
+	};
+
+	gpio {
+		groups = "pcie";
+		function = "gpio";
+	};
+
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpio3 {
+	status = "okay";
+};
+
+&ehci {
+	status = "okay";
+};
+
+&ohci {
+	status = "okay";
+};
+
+&gsw {
+	mediatek,port4 = "ephy";
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x4>;
+	mediatek,portmap = "wllll";
+};
+
+&spi0 {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		m25p,fast-read;
+
+		partitions: partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+			};
+
+			factory: partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x10000>;
+			};
+
+			partition@50000 {
+				compatible = "denx,uimage";
+				label = "firmware";
+				reg = <0x50000 0xfb0000>;
+			};
+
+		};
+	};
+};
+

@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7628an_zbtlink_zbt-we2806-a.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-we2806-a-8m", "zbtlink,zbt-we2806-a", "mediatek,mt7628an-soc";
+	model = "ZBT-WE2806-A (8M)";
+};
+
+&firmware {
+	reg = <0x50000 0x7b0000>;
+};

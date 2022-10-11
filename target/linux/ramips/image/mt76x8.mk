@@ -195,6 +195,14 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya_neo-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := 32M
+endef
+TARGET_DEVICES += hiwooya_neo-32m
+
 define Device/iptime_a3
   IMAGE_SIZE := 7936k
   UIMAGE_NAME := a3
@@ -334,6 +342,14 @@ define Device/onion_omega2p
   SUPPORTED_DEVICES += omega2p
 endef
 TARGET_DEVICES += onion_omega2p
+
+define Device/pixlink_lv-24ac
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := PIX-LINK
+  DEVICE_MODEL := LV-24AC
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7663-firmware-ap
+endef
+TARGET_DEVICES += pixlink_lv-24ac
 
 define Device/rakwireless_rak633
   IMAGE_SIZE := 7872k
@@ -821,6 +837,41 @@ define Device/zbtlink_zbt-we1226
   DEVICE_MODEL := ZBT-WE1226
 endef
 TARGET_DEVICES += zbtlink_zbt-we1226
+
+define Device/zbtlink_zbt-we2802d-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802
+  DEVICE_VARIANT := 8M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-8m
+
+define Device/zbtlink_zbt-we2802d-16m
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802
+  DEVICE_VARIANT := 16M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
+define Device/zbtlink_zbt-we2806-a-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2806-A
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+	kmod-i2c-core kmod-i2c-algo-bit kmod-i2c-gpio kmod-i2c-gpio-custom kmod-gpio-pcf857x
+endef
+TARGET_DEVICES += zbtlink_zbt-we2806-a-8m
+
+define Device/zbtlink_zbt-we2126
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2126
+  DEVICE_PACKAGES := kmod-mt76x0e kmod-usb2 kmod-usb-ohci kmod-sdhci-mt7620
+endef
+TARGET_DEVICES += zbtlink_zbt-we2126
+	 
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 14912k

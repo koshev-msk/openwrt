@@ -226,6 +226,68 @@ define Device/asus_rt-n56u-b1
 endef
 TARGET_DEVICES += asus_rt-n56u-b1
 
+define Device/beeline_smartbox-pro
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 255488k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox PRO
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-pro
+
+define Device/beeline_smartbox-turbo-plus
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox TURBO+
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-mt7615-firmware kmod-usb3 \
+	kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-turbo-plus
+
+define Device/beeline_smartbox-giga
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  IMAGE_SIZE := 255488k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox GIGA
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-mt7663-firmware-ap kmod-usb3 \
+	kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-giga
+
 define Device/buffalo_wsr-1166dhp
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
@@ -1396,6 +1458,16 @@ define Device/wavlink_wl-wn531a6
 endef
 TARGET_DEVICES += wavlink_wl-wn531a6
 
+define Device/weblink_hdrm200
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := WebLink
+  DEVICE_MODEL := HDRM200
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += weblink_hdrm200
+
 define Device/wevo_11acnas
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
@@ -1422,6 +1494,26 @@ define Device/wevo_w2914ns-v2
   SUPPORTED_DEVICES += w2914nsv2
 endef
 TARGET_DEVICES += wevo_w2914ns-v2
+
+ define Device/wifire_s1500
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Wifire
+  DEVICE_MODEL := S1500
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += wifire_s1500
 
 define Device/winstars_ws-wn583a6
   $(Device/dsa-migration)
@@ -1487,6 +1579,8 @@ define Device/xiaomi_mi-router-3-pro
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
 	check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
   DEVICE_PACKAGES := kmod-mt7615e kmod-mt7615-firmware kmod-usb3 \
 	kmod-usb-ledtrig-usbport uboot-envtools
   SUPPORTED_DEVICES += xiaomi,mir3p
@@ -1586,6 +1680,32 @@ define Device/zbtlink_zbt-we1326
   SUPPORTED_DEVICES += zbt-we1326
 endef
 TARGET_DEVICES += zbtlink_zbt-we1326
+
+define Device/zbtlink_zbt-wg1608-16m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WG1608
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-sdhci-mt7620 kmod-mt7603 kmod-mt7615e \
+		kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += zbt-wg1608 zbt-wg3526-16M
+endef
+TARGET_DEVICES += zbtlink_zbt-wg1608-16m
+
+define Device/zbtlink_zbt-wg1608-32m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WG1608
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-sdhci-mt7620 kmod-mt7603 kmod-mt7615e \
+		kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += zbt-wg1608 zbt-wg3526-32M
+endef
+TARGET_DEVICES += zbtlink_zbt-wg1608-32m
 
 define Device/zbtlink_zbt-we3526
   $(Device/dsa-migration)

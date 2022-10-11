@@ -1,0 +1,204 @@
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+
+#include "mt7628an.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-we2806-a", "mediatek,mt7628an-soc";
+
+	aliases {
+		led-boot = &led_wlan;
+		led-failsafe = &led_wlan;
+		led-running = &led_wlan;
+		led-upgrade = &led_wlan;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200";
+	};
+
+	i2c-gpio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "i2c-gpio";
+		gpios = <&gpio 2 4 &gpio 3 4>;
+		i2c-gpio,delay-us = <10>;
+
+		pcf0: iexp@20 {
+			#gpio-cells = <2>;
+			compatible = "nxp,pca9671";
+			reg = <0x20>;
+			gpio-controller;
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <20>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_wlan: wlan {
+			label = "green:wlan";
+			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy0pt";
+		};
+
+		lan1 {
+			label = "green:lan1";
+			gpios = <&gpio 43 GPIO_ACTIVE_LOW>;
+		};
+		
+		lan2 {
+			label = "green:lan2";
+			gpios = <&gpio 42 GPIO_ACTIVE_LOW>;
+		};
+
+		lan3 {
+			label = "green:lan3";
+			gpios = <&gpio 41 GPIO_ACTIVE_LOW>;
+		};
+
+		wan {
+                        label = "green:wan";
+                        gpios = <&gpio 39 GPIO_ACTIVE_LOW>;
+                };
+
+		hwdt {
+                        label = "green:hwdt";
+                        gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
+                        linux,default-trigger = "timer";
+                };
+
+		wwan {
+                        label = "green:wwan";
+                        gpios = <&pcf0 1 GPIO_ACTIVE_LOW>;
+                };
+
+		sim1 {
+			label = "green:sim1";
+			gpios = <&pcf0 2 GPIO_ACTIVE_LOW>;
+		};
+		
+		sim2 {
+			label = "green:sim2";
+			gpios = <&pcf0 3 GPIO_ACTIVE_LOW>;
+		};
+		
+		rssi3 {
+			label = "green:rssi3";
+			gpios = <&pcf0 6 GPIO_ACTIVE_LOW>;
+		};
+		
+		rssi2 {
+			label = "green:rssi2";
+			gpios = <&pcf0 7 GPIO_ACTIVE_LOW>;
+		};
+		
+		rssi1 {
+			label = "green:rssi1";
+			gpios = <&pcf0 8 GPIO_ACTIVE_LOW>;
+		};
+
+	};
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+		simswitch {
+			gpio-export,name = "simswitch";
+			gpio-export,output = <0>;
+			gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
+		};
+		modempower {
+			gpio-export,name = "modempower";
+			gpio-export,output = <1>;
+			gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+
+&i2c {
+	status = "okay";
+};
+
+&i2s {
+	status = "okay";
+};
+
+&ehci {
+        status = "okay";
+};
+
+&ohci {
+        status = "okay";
+};
+
+&spi0 {
+        status = "okay";
+
+        m25p80@0 {
+                compatible = "jedec,spi-nor";
+                reg = <0>;
+                spi-max-frequency = <10000000>;
+
+                partitions {
+                        compatible = "fixed-partitions";
+                        #address-cells = <1>;
+                        #size-cells = <1>;
+
+                        partition@0 {
+                                label = "u-boot";
+                                reg = <0x0 0x30000>;
+                                read-only;
+                        };
+
+                        partition@30000 {
+                                label = "u-boot-env";
+                                reg = <0x30000 0x10000>;
+                                read-only;
+                        };
+
+                        factory: partition@40000 {
+                                label = "factory";
+                                reg = <0x40000 0x10000>;
+                                read-only;
+                        };
+
+                        firmware: partition@50000 {
+                                compatible = "denx,uimage";
+                                label = "firmware";
+                                reg = <0x50000 0x7b0000>;
+                        };
+                };
+        };
+};
+
+
+&pinctrl {
+        state_default: pinctrl0 {
+                gpio {
+                        groups = "refclk", "wled_an", "i2s", "i2c", "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "wdt", "gpio";
+                        function = "gpio";
+                };
+        };
+};
+
+&wmac {
+	status = "okay";
+	mtd-eeprom = <&factory 0x0>;
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x28>;
+};
+
+
