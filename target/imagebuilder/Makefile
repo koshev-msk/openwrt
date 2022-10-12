@@ -58,7 +58,7 @@ endif
 ifeq ($(CONFIG_BUILDBOT),)
   ifeq ($(CONFIG_IB_STANDALONE),)
 	$(FIND) $(call FeedPackageDir,libc) -type f \
-		\( -name 'libc_*.ipk' -or -name 'kernel_*.ipk' -or -name 'kmod-*.ipk' -or -name 'base-files*.ipk' \) \
+		\( -name 'libc_*.ipk' -or -name 'kernel_*.ipk' -or -name 'kmod-*.ipk' -or -name 'base-files_*.ipk' \) \
 		-exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
   else
 	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f -name '*.ipk' \
@@ -69,6 +69,10 @@ else
 		\( -name 'libc_*.ipk' -or -name 'kernel_*.ipk' \) \
 		-exec $(CP) -t $(IB_LDIR)/ {} +
 endif
+
+	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f \
+		\( -name 'base-files_*.ipk' \) \
+		 -exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
 
 ifneq ($(CONFIG_SIGNATURE_CHECK),)
 	echo ''                                                        >> $(PKG_BUILD_DIR)/repositories.conf
