@@ -528,6 +528,22 @@ define Device/tplink_tl-mr3020-v3
 endef
 TARGET_DEVICES += tplink_tl-mr3020-v3
 
+define Device/tplink_tl-mr3020-v3-usb
+  $(Device/tplink-v2)
+  IMAGE_SIZE := 7808k
+  DEVICE_MODEL := TL-MR3020
+  DEVICE_VARIANT := v3 USB
+  TPLINK_FLASHLAYOUT := 8Mmtk
+  TPLINK_HWID := 0x30200003
+  TPLINK_HWREV := 0x3
+  TPLINK_HWREVADD := 0x3
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
+  IMAGES := sysupgrade.bin tftp-recovery.bin
+  IMAGE/tftp-recovery.bin := pad-extra 128k | $$(IMAGE/factory.bin)
+  SUPPORTED_DEVICES += tplink,tl-mr3020-v3
+endef
+TARGET_DEVICES += tplink_tl-mr3020-v3-usb
+
 define Device/tplink_tl-mr3420-v5
   $(Device/tplink-v2)
   IMAGE_SIZE := 7808k
