@@ -75,6 +75,7 @@ platform_do_upgrade() {
 	netgear,wac104|\
 	netgear,wac124|\
 	netis,wf2881|\
+	perenio,pejir01-34-BA|\
 	sercomm,na502|\
 	wifire,s1500|\
 	xiaomi,mi-router-3g|\

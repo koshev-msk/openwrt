@@ -1195,6 +1195,24 @@ define Device/netis_wf2881
 endef
 TARGET_DEVICES += netis_wf2881
 
+define Device/perenio_pejir01-34-BA
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Perenio
+  DEVICE_MODEL := A1 Elegance
+  DEVICE_PACKAGES := kmod-usb3
+endef
+TARGET_DEVICES += perenio_pejir01-34-BA
+
 define Device/phicomm_k2p
   $(Device/dsa-migration)
   IMAGE_SIZE := 15744k

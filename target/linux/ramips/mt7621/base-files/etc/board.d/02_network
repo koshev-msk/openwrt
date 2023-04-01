@@ -40,6 +40,7 @@ ramips_setup_interfaces()
 	jcg,q20|\
 	lenovo,newifi-d1|\
 	mikrotik,routerboard-m33g|\
+	perenio,pejir01-34-BA|\
 	xiaomi,mi-router-3g|\
 	xiaomi,mi-router-3g-v2|\
 	xiaomi,mi-router-4|\
@@ -161,6 +162,12 @@ ramips_setup_macs()
 		label_mac=$(cat "/sys/firmware/mikrotik/hard_config/mac_base")
 		wan_mac=$label_mac
 		lan_mac=$(macaddr_add $label_mac 1)
+		;;
+	perenio,pejir01-34-BA)
+		local config="$(dd if=/dev/mtd$(find_mtd_index idata) bs=1 skip=19 count=474)"
+		wan_mac="$(echo "$config" | awk '/option mac_wan/{gsub("'\''","");print $3}')"
+		lan_mac="$(echo "$config" | awk '/option mac_lan/{gsub("'\''","");print $3}')"
+		label_mac=$lan_mac
 		;;
 	yuncore,ax820)
 		label_mac=$(mtd_get_mac_binary Factory 0x4)
