@@ -1208,7 +1208,7 @@ define Device/perenio_pejir01-34-BA
 	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   DEVICE_VENDOR := Perenio
-  DEVICE_MODEL := A1 Elegance
+  DEVICE_MODEL := Elegance PEJIR01
   DEVICE_PACKAGES := kmod-usb3
 endef
 TARGET_DEVICES += perenio_pejir01-34-BA
