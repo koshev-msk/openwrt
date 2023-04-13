@@ -10,6 +10,12 @@
 	compatible = "perenio,pejir01-34-BA", "mediatek,mt7621-soc";
 	model = "IoT Perenio Elegance PEJIR01";
 
+	aliases {
+		serial0 = &uartlite;
+		serial1 = &uartlite2;
+		serial2 = &uartlite3;
+	};
+
 	chosen {
 		bootargs = "console=ttyS0,115200n8";
 	};
@@ -30,18 +36,33 @@
 		stm_boot_1 {
 			gpio-export,name = "stm_boot_1";
 			gpio-export,output = <0>;
-			gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio 7 GPIO_ACTIVE_LOW>;
 		};
 		stm_boot_0 {
 			gpio-export,name = "stm_boot_0";
 			gpio-export,output = <0>;
-			gpios = <&gpio 15 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
 		};
 		stm_reset {
 			gpio-export,name = "stm_reset";
 			gpio-export,output = <0>;
+			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
+		};
+		efm_boot {
+			gpio-export,name = "efm_boot";
+			gpio-export,output = <0>;
+			gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
+		};
+		efm_rst {
+			gpio-export,name = "efm_rst";
+			gpio-export,output = <0>;
 			gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 		};
+		
+	};
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00 0x10000000>;
 	};
 };
 
@@ -98,12 +119,12 @@
 		partition@200000 {
 			label = "kernel0";
 			reg = <0x200000 0x400000>;
-			read-only;
 		};
 
 		partition@600000 {
 			label = "kernel1";
 			reg = <0x600000 0x400000>;
+			read-only;
 		};
 
 		partition@a00000 {
@@ -143,6 +164,11 @@
 
 &i2c {
 	status = "okay";
+	bl@51 {
+		compatible = "atmel,24c128";
+		reg = <0x51>;
+		pagesize = <32>;
+	};
 };
 
 &switch0 {

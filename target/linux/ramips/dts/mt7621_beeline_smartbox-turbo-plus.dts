@@ -178,6 +178,11 @@
 	};
 };
 
+&uartlite3 {
+	status = "okay";
+	current-speed = <57600>;
+};
+
 &pcie {
 	status = "okay";
 };
