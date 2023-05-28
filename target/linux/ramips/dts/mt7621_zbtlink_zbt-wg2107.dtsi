@@ -4,7 +4,7 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "zbtlink,zbt-wg1608", "mediatek,mt7621-soc";
+	compatible = "zbtlink,zbt-wg2107", "mediatek,mt7621-soc";
 
 	aliases {
 		led-boot = &led_status;
@@ -32,27 +32,61 @@
 		compatible = "gpio-leds";
 
 		led_status: status {
-			label = "green:status";
-			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+			label = "green:sdcard";
+			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
 		};
 
-		wlan2g {
-			label = "green:wifi2g";
-			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
+		led_wlan2 {
+			label = "green:wlan2";
+			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "phy0tpt";
 		};
-		
-		wlan5g {
-			label = "green:wifi5g";
-			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
+
+		led_wlan5 {
+			label = "green:wlan5";
+			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
 			linux,default-trigger = "phy1tpt";
 		};
 		
-		led_wwan {
-			label = "green:wwan";
+		led_wwan1 {
+			label = "green:wwan1";
 			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 		};
 
+		led_wwan2 {
+			label = "green:wwan2";
+			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+		};
+
+		hwdt {
+			label = "green:hwdt";
+			gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "timer";
+		};
+
+	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		modem1pwr {
+			gpio-export,name = "modem1pwr";
+			gpio-export,output = <1>;
+			gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
+		};
+
+		modem2pwr {
+			gpio-export,name = "modem2pwr";
+			gpio-export,output = <1>;
+			gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
+		};
+
+		usbsw {
+			gpio-export,name = "usbsw";
+			gpio-export,output = <1>;
+			gpios = <&gpio 6 GPIO_ACTIVE_HIGH>;
+		};
 	};
 };
 
@@ -61,6 +95,14 @@
 };
 
 &sdhci {
+	status = "okay";
+};
+
+&uartlite2 {
+	status = "okay";
+};
+
+&uartlite3 {
 	status = "okay";
 };
 
@@ -128,9 +170,15 @@
 	};
 };
 
+&pcie2 {
+	status = "okay";
+};
+
+
 &gmac0 {
 	mtd-mac-address = <&factory 0xe000>;
 };
+
 
 &switch0 {
 	ports {
@@ -165,7 +213,7 @@
 
 &state_default {
 	gpio {
-		groups = "wdt", "i2c", "jtag";
+		groups = "wdt", "i2c", "uart2", "uart3", "rgmii2", "jtag";
 		function = "gpio";
 	};
 };

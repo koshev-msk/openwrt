@@ -85,6 +85,11 @@
 	status = "okay";
 };
 
+&sdhci {
+        status = "okay";
+        pinctrl-0 = <&sdxc_router_pins>;
+};
+
 &ethernet {
 	mtd-mac-address = <&factory 0x28>;
 };
@@ -93,9 +98,22 @@
 	status = "okay";
 };
 
-&state_default {
-	gpio {
-		groups = "gpio", "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "refclk", "wdt", "wled_an";
-		function = "gpio";
-	};
+&pinctrl {
+        sdxc_router_pins: sdxc_router_mode {
+                gpio {
+                        groups = "i2c", "i2s", "sdmode", "uart1", "gpio";
+                        function = "gpio";
+                };
+
+                esdmode {
+                        groups = "esdmode";
+                        function = "sdxc";
+                };
+        };
+        state_default: pinctrl0 {
+                gpio {
+                        groups = "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "wdt", "refclk", "wled_an";
+                        function = "gpio";
+                };
+        };
 };
