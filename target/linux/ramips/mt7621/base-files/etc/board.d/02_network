@@ -138,6 +138,8 @@ ramips_setup_macs()
 		label_mac=$wan_mac
 		;;
 	jcg,y2|\
+	huasifei,huasifei-ws1208v2-16m|\
+	huasifei,huasifei-ws1208v2-32m|\
 	wavlink,wl-wn531a6|\
 	weblink,hdrm200|\
 	winstars,ws-wn583a6|\

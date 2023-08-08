@@ -1,0 +1,10 @@
+#include "mt7621_huasifei_ws1208v2.dtsi"
+
+/ {
+	compatible = "huasifei,huasifei-ws1208v2-32m", "huasifei,huasifei-ws1208v2", "mediatek,mt7621-soc";
+	model = "Huasifei WS1208v2 (32M)";
+};
+
+&firmware {
+	reg = <0x50000 0x1fb0000>;
+};

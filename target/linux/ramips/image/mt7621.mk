@@ -691,6 +691,30 @@ define Device/hiwifi_hc5962
 endef
 TARGET_DEVICES += hiwifi_hc5962
 
+define Device/huasifei_ws1208v2-16m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Huasifei
+  DEVICE_MODEL := WS1208v2
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += huasifei_ws1208v2
+endef
+TARGET_DEVICES += huasifei_ws1208v2-16m
+
+define Device/huasifei_ws1208v2-32m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Huasifei
+  DEVICE_MODEL := WS1208v2
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += huasifei_ws1208v2 huasifei_ws1208v2-16m huasifei_ws1208v2-32 
+endef
+TARGET_DEVICES += huasifei_ws1208v2-32m
+
 define Device/iodata_wn-ax1167gr
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
