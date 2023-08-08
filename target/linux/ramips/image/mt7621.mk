@@ -699,7 +699,7 @@ define Device/huasifei_ws1208v2-16m
   DEVICE_MODEL := WS1208v2
   DEVICE_VARIANT := 16M
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
-  SUPPORTED_DEVICES += huasifei_ws1208v2
+  SUPPORTED_DEVICES += huasifei-ws1208v2
 endef
 TARGET_DEVICES += huasifei_ws1208v2-16m
 
@@ -711,7 +711,7 @@ define Device/huasifei_ws1208v2-32m
   DEVICE_MODEL := WS1208v2
   DEVICE_VARIANT := 32M
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
-  SUPPORTED_DEVICES += huasifei_ws1208v2 huasifei_ws1208v2-16m huasifei_ws1208v2-32 
+  SUPPORTED_DEVICES += huasifei-ws1208v2 huasifei_ws1208v2-16m huasifei-ws1208v2-32 
 endef
 TARGET_DEVICES += huasifei_ws1208v2-32m
 
