@@ -325,6 +325,17 @@ define Device/netgear_r6120
 endef
 TARGET_DEVICES += netgear_r6120
 
+define Device/oem_cpe-sx-7628r09-8m
+  IMAGE_SIZE := 7744k
+  DEVICE_VENDOR := OEM
+  DEVICE_MODEL := CPE SX-7628R09
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-net-rndis
+  SUPPORTED_DEVICES += R45 R09 OEM,MT7628
+endef
+TARGET_DEVICES += oem_cpe-sx-7628r09-8m
+
+
 define Device/onion_omega2
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Onion
