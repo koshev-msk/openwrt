@@ -149,15 +149,20 @@ zbtlink,zbt-we2126)
 	ucidef_set_led_switch "lan2" "lan2" "blue:lan2" "switch0" "0x4"
 	ucidef_set_led_switch "lan3" "lan3" "blue:lan3" "switch0" "0x2"
 	ucidef_set_led_switch "lan4" "lan4" "blue:lan4" "switch0" "0x1"
-	ucidef_set_led_switch "wan" "wan" "blue:wan" "switch0" "0x010"
+	ucidef_set_led_switch "wan" "wan" "blue:wan" "switch0" "0x10"
 	ucidef_set_led_wlan "wlan" "wlan" "blue:wlan" "phy0tpt"
 	;;
+zbtlink,zbt-cpe2801-16m|\
+zbtlink,zbt-cpe2801-32m)
+        ucidef_set_led_switch "lan" "lan" "green:lan" "switch0" "0x1"
+        ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x10"
+        ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
+        ;;
 zbtlink,zbt-we2802d-8m|\
 zbtlink,zbt-we2802d-16m)
 	ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
 	ucidef_set_led_switch "lan" "LAN" "green:lan" "switch0" "0x01"
 	ucidef_set_led_switch "wan" "WAN" "green:wan" "switch0" "0x10"
-	ucidef_set_led_timer "hwdt" "HWDT" "green:hwdt" "timer" "30000" "30000"
 	;;
 zbtlink,zbt-we1226)
 	ucidef_set_led_netdev "wifi_led" "wifi" "green:wlan" "wlan0"

@@ -866,6 +866,26 @@ define Device/zbtlink_zbt-we1226
 endef
 TARGET_DEVICES += zbtlink_zbt-we1226
 
+define Device/zbtlink_zbt-cpe2801-16m
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-16m
+
+define Device/zbtlink_zbt-cpe2801-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801 zbtlink,zbt-cpe2801-16m
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-32m
+
 define Device/zbtlink_zbt-we2802d-8m
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Zbtlink
