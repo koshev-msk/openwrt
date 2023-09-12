@@ -52,6 +52,15 @@ hiwooya,neo)
 mediatek,linkit-smart-7688)
 	ucidef_set_led_wlan "wifi" "wifi" "orange:wifi" "phy0tpt"
 	;;
+oem,cpe-c100-8m)
+	ucidef_set_led_switch "eth" "eth" "green:eth" "switch0" "0x1f"
+	ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x01"
+	ucidef_set_led_switch "lan1" "lan1" "green:lan1" "switch0" "0x2"
+	ucidef_set_led_switch "lan2" "lan2" "green:lan2" "switch0" "0x4"
+	ucidef_set_led_switch "lan3" "lan3" "green:lan3" "switch0" "0x8"
+	ucidef_set_led_netdev "wlan" "wlan" "green:wlan" "wlan0"
+	ucidef_set_led_netdev "wwan" "wwan" "green:net" "eth1"
+	;;
 oem,cpe-sx-7628r09-8m)
 	ucidef_set_led_switch "wan" "wan" "green:lan" "switch0" "0x13"
 	ucidef_set_led_netdev "wlan" "wlan" "green:wlan" "wlan0"

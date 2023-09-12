@@ -1,0 +1,10 @@
+#include "mt7628an_oem_cpe-c100.dtsi"
+
+/ {
+	compatible = "oem,cpe-c100-8m", "oem,cpe-c100", "mediatek,mt7628an-soc";
+	model = "CPE C100 (8M)";
+};
+
+&firmware {
+	reg = <0x50000 0x7b0000>;
+};

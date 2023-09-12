@@ -1,0 +1,135 @@
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/gpio/gpio.h>
+
+#include "mt7628an.dtsi"
+
+/ {
+	compatible = "oem,cpe-c100", "mediatek,mt7628an-soc";
+
+	aliases {
+		led-boot = &led_net;
+		led-failsafe = &led_net;
+		led-running = &led_net;
+		led-upgrade = &led_net;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,57600";
+	};
+
+
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <20>;
+		
+		wps {
+			label = "wps";
+			gpios = <&gpio 38 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
+
+		reset {
+			label = "reset";
+			gpios = <&gpio 39 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		eth {
+			label = "green:eth";
+			gpios = <&gpio 1 GPIO_ACTIVE_LOW>;
+		};
+
+		led_net: net {
+			label = "green:net";
+			gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
+		};
+
+		lan3 {
+			label = "green:lan3";
+			gpios = <&gpio 40 GPIO_ACTIVE_LOW>;
+		};
+
+		lan2 {
+			label = "green:lan2";
+			gpios = <&gpio 41 GPIO_ACTIVE_LOW>;
+		};
+
+		lan1 {
+			label = "green:lan1";
+			gpios = <&gpio 42 GPIO_ACTIVE_LOW>;
+		};
+
+		wan {
+			label = "green:wan";
+			gpios = <&gpio 43 GPIO_ACTIVE_LOW>;
+		};
+
+		wlan {
+			label = "green:wlan";
+			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+
+&spi0 {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <12000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+				read-only;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+				read-only;
+			};
+
+			factory: partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x10000>;
+				read-only;
+			};
+
+			firmware: partition@50000 {
+				compatible = "denx,uimage";
+				label = "firmware";
+			};
+		};
+	};
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			groups = "gpio", "refclk", "i2s", "i2c", "uart1", "wled_an", "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "wdt";
+			function = "gpio";
+		};
+	};
+};
+
+&wmac {
+	status = "okay";
+	mtd-eeprom = <&factory 0x0>;
+};
+
+&ethernet {
+	mtd-mac-address = <&factory 0x28>;
+};
+
