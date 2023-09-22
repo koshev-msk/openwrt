@@ -335,6 +335,17 @@ define Device/oem_cpe-sx-7628r09-8m
 endef
 TARGET_DEVICES += oem_cpe-sx-7628r09-8m
 
+
+define Device/oem_cpe-sx-7628r29-8m
+  IMAGE_SIZE := 7744k
+  DEVICE_VENDOR := OEM
+  DEVICE_MODEL := CPE SX-7628R29
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-net-rndis
+  SUPPORTED_DEVICES += R32 R29 OEM,MT7628
+endef
+TARGET_DEVICES += oem_cpe-sx-7628r29-8m
+
 define Device/oem_cpe-c100-8m
   IMAGE_SIZE := 7744k
   DEVICE_VENDOR := OEM

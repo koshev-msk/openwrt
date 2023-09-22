@@ -73,6 +73,15 @@
 			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
 		};
 	};
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+		modempower {
+			gpio-export,name = "modempower";
+			gpio-export,output = <1>;
+			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
+		};
+	};
 };
 
 

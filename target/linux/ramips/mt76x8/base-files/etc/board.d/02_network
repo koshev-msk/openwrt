@@ -118,7 +118,8 @@ ramips_setup_interfaces()
 	netgear,r6020|\
 	netgear,r6080|\
 	netgear,r6120|\
-	zbtlink,zbt-we2126)
+	zbtlink,zbt-we2126|\
+	oem,cpe-sx-7628r29-8m)
 		ucidef_add_switch "switch0" \
 			"0:lan:4" "1:lan:3" "2:lan:2" "3:lan:1" "4:wan" "6@eth0"
 		;;

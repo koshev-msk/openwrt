@@ -1,0 +1,10 @@
+#include "mt7628an_oem_cpe-sx-7628r29.dtsi"
+
+/ {
+	compatible = "oem,cpe-sx-7628r29-8m", "oem,cpe-sx-7628r29", "mediatek,mt7628an-soc";
+	model = "CPE SX-7628R29 (8M)";
+};
+
+&firmware {
+	reg = <0x50000 0x790000>;
+};
