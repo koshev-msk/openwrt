@@ -1221,6 +1221,17 @@ define Device/netis_wf2881
 endef
 TARGET_DEVICES += netis_wf2881
 
+define Device/oem_cpe-sx-7621r40
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 65087k
+  DEVICE_VENDOR := OEM CPE
+  DEVICE_MODEL := SX-7621R40
+  DEVICE_PACKAGES := kmod-usb3 kmod-mt7603 kmod-mt76x2 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += R40 OEM,MT7621
+  DEVICE_VARIANT := 64M
+endef
+TARGET_DEVICES += oem_cpe-sx-7621r40
+
 define Device/perenio_pejir01-34-BA
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)

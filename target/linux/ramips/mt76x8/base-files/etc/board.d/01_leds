@@ -171,8 +171,8 @@ zbtlink,zbt-we2126)
 	;;
 zbtlink,zbt-cpe2801-16m|\
 zbtlink,zbt-cpe2801-32m)
-        ucidef_set_led_switch "lan" "lan" "green:lan" "switch0" "0x1"
-        ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x10"
+        ucidef_set_led_switch "lan" "lan" "green:lan" "switch0" "0x10"
+        ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x8"
         ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
         ;;
 zbtlink,zbt-we2802d-8m|\
