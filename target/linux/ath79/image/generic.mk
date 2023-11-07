@@ -1265,6 +1265,18 @@ define Device/hak5_wifi-pineapple-nano
 endef
 TARGET_DEVICES += hak5_wifi-pineapple-nano
 
+define Device/imlink_mini4g
+  $(Device/tplink-16mlzma)
+  SOC := qca9533
+  DEVICE_VENDOR := IM-Link
+  DEVICE_MODEL := MINI
+  DEVICE_VARIANT := 4G
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport
+  TPLINK_HWID := 0x8420003
+  SUPPORTED_DEVICES += mini4g tl-wr841n-v9
+endef
+TARGET_DEVICES += imlink_mini4g
+
 define Device/iodata_etg3-r
   SOC := ar9342
   DEVICE_VENDOR := I-O DATA

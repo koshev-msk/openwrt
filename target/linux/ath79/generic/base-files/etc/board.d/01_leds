@@ -237,6 +237,12 @@ tplink,cpe210-v3)
 meraki,mr16)
 	ucidef_set_led_netdev "wan" "WAN" "green:wan" "eth0"
 	;;
+imlink,mini4g)
+	ucidef_set_led_netdev "lan" "lan" "green:lan" "eth1" "link tx rx"
+	ucidef_set_led_netdev "wan" "wan" "orange:lan" "eth0" "link tx rx"
+	ucidef_set_led_netdev "wlan" "wlan" "orange:wlan" "wlan0" "link tx rx"
+	ucidef_set_led_netdev "wwan" "wwan" "green:wwan" "wwan0" "link tx rx"
+	;;
 netgear,wnr2200-8m|\
 netgear,wnr2200-16m)
 	ucidef_set_led_netdev "wan-amber" "WAN (amber)" "amber:wan" "eth0"
