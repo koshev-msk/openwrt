@@ -1,0 +1,175 @@
+make[2]: Entering directory '/mnt/2tb/build/openwrt/src/scripts/config'
+make[2]: 'conf' is up to date.
+make[2]: Leaving directory '/mnt/2tb/build/openwrt/src/scripts/config'
+make[1]: Entering directory '/mnt/2tb/build/openwrt/src'
+cd "/mnt/2tb/build/openwrt/src"; git log --format=%h -1 toolchain > /mnt/2tb/build/openwrt/src/tmp/.ver_check
+cmp -s /mnt/2tb/build/openwrt/src/tmp/.ver_check /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp/.ver_check || { \
+	rm -rf /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl /mnt/2tb/build/openwrt/src/staging_dir/target-mipsel_24kc_musl /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl /mnt/2tb/build/openwrt/src/build_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl; \
+	mkdir -p /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp; \
+	mv /mnt/2tb/build/openwrt/src/tmp/.ver_check /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp/.ver_check; \
+}
+/mnt/2tb/build/openwrt/src/scripts/check-toolchain-clean.sh
+make[2]: Entering directory '/mnt/2tb/build/openwrt/src'
+cd "/mnt/2tb/build/openwrt/src"; git log --format=%h -1 toolchain > /mnt/2tb/build/openwrt/src/tmp/.ver_check
+cmp -s /mnt/2tb/build/openwrt/src/tmp/.ver_check /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp/.ver_check || { \
+	rm -rf /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl /mnt/2tb/build/openwrt/src/staging_dir/target-mipsel_24kc_musl /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl /mnt/2tb/build/openwrt/src/build_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl; \
+	mkdir -p /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp; \
+	mv /mnt/2tb/build/openwrt/src/tmp/.ver_check /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/stamp/.ver_check; \
+}
+make[3]: Entering directory '/mnt/2tb/build/openwrt/src/target/linux'
+make[4]: Entering directory '/mnt/2tb/build/openwrt/src/target/linux/ramips'
+rm -f /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/localversion
+/mnt/2tb/build/openwrt/src/scripts/kconfig.pl  + /mnt/2tb/build/openwrt/src/target/linux/generic/config-5.15 /mnt/2tb/build/openwrt/src/target/linux/ramips/mt7621/config-5.15 > /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target
+awk '/^(#[[:space:]]+)?CONFIG_KERNEL/{sub("CONFIG_KERNEL_","CONFIG_");print}' /mnt/2tb/build/openwrt/src/.config >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target
+echo "# CONFIG_KALLSYMS_EXTRA_PASS is not set" >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target
+echo "# CONFIG_KALLSYMS_ALL is not set" >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target
+echo "CONFIG_KALLSYMS_UNCOMPRESSED=y" >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target
+/mnt/2tb/build/openwrt/src/scripts/package-metadata.pl kconfig /mnt/2tb/build/openwrt/src/tmp/.packageinfo /mnt/2tb/build/openwrt/src/.config 5.15 > /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.override
+/mnt/2tb/build/openwrt/src/scripts/kconfig.pl 'm+' '+' /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.target /dev/null /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.override > /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set
+mv /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.old
+grep -v INITRAMFS /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.old > /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set
+echo 'CONFIG_INITRAMFS_SOURCE=""' >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set
+echo '# CONFIG_INITRAMFS_FORCE is not set' >> /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set
+rm -rf /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/modules
+cmp -s /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.prev || { cp /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config; cp /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.prev; }
+export MAKEFLAGS= ; [ -d /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/user_headers ] || make -C /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137 KCFLAGS="-ffile-prefix-map=/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl=target-mipsel_24kc_musl -fno-caller-saves " HOSTCFLAGS="-O2 -I/mnt/2tb/build/openwrt/src/staging_dir/host/include  -Wall -Wmissing-prototypes -Wstrict-prototypes" CROSS_COMPILE="mipsel-openwrt-linux-musl-" ARCH="mips" KBUILD_HAVE_NLS=no KBUILD_BUILD_USER="builder" KBUILD_BUILD_HOST="buildhost" KBUILD_BUILD_TIMESTAMP="Tue Nov 14 13:38:11 2023" KBUILD_BUILD_VERSION="0" KBUILD_HOSTLDFLAGS="-L/mnt/2tb/build/openwrt/src/staging_dir/host/lib" CONFIG_SHELL="bash" V=1  cmd_syscalls=  KERNELRELEASE=5.15.137 CC="mipsel-openwrt-linux-musl-gcc"  INSTALL_HDR_PATH=/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/user_headers headers_install
+grep '=[ym]' /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.config.set | LC_ALL=C sort | /mnt/2tb/build/openwrt/src/staging_dir/host/bin/mkhash md5 > /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.vermagic
+touch /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/.configured
+rm -f /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/vmlinux /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137/System.map
+make -C /mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137 KCFLAGS="-ffile-prefix-map=/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl=target-mipsel_24kc_musl -fno-caller-saves " HOSTCFLAGS="-O2 -I/mnt/2tb/build/openwrt/src/staging_dir/host/include  -Wall -Wmissing-prototypes -Wstrict-prototypes" CROSS_COMPILE="mipsel-openwrt-linux-musl-" ARCH="mips" KBUILD_HAVE_NLS=no KBUILD_BUILD_USER="builder" KBUILD_BUILD_HOST="buildhost" KBUILD_BUILD_TIMESTAMP="Tue Nov 14 13:38:11 2023" KBUILD_BUILD_VERSION="0" KBUILD_HOSTLDFLAGS="-L/mnt/2tb/build/openwrt/src/staging_dir/host/lib" CONFIG_SHELL="bash" V=1  cmd_syscalls=  KERNELRELEASE=5.15.137 CC="mipsel-openwrt-linux-musl-gcc" vmlinux vmlinuz modules
+make[5]: Entering directory '/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137'
+make -f ./scripts/Makefile.build obj=arch/mips/kernel/syscalls all
+make -f ./scripts/Makefile.build obj=scripts/basic
+make -f ./scripts/Makefile.build obj=arch/mips/tools elf-entry
+make -f ./scripts/Makefile.build obj=arch/mips/boot/tools relocs
+make -f ./scripts/Makefile.build obj=scripts/dtc
+make -f ./scripts/Makefile.build obj=scripts
+set -e; mkdir -p include/config/; trap "rm -f include/config/.kernel.release.tmp" EXIT; { echo "5.15.137$(bash ./scripts/setlocalversion .)"; } > include/config/.kernel.release.tmp; if [ ! -r include/config/kernel.release ] || ! cmp -s include/config/kernel.release include/config/.kernel.release.tmp; then : '  UPD     include/config/kernel.release'; mv -f include/config/.kernel.release.tmp include/config/kernel.release; fi
+make -f ./scripts/Makefile.asm-generic obj=arch/mips/include/generated/uapi/asm \
+generic=include/uapi/asm-generic
+make -f ./scripts/Makefile.asm-generic obj=arch/mips/include/generated/asm \
+generic=include/asm-generic
+set -e; mkdir -p include/generated/uapi/linux/; trap "rm -f include/generated/uapi/linux/.version.h.tmp" EXIT; { 	if [  137 -gt 255 ]; then echo \#define LINUX_VERSION_CODE 331775; else echo \#define LINUX_VERSION_CODE 331657; fi; echo '#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + ((c) > 255 ? 255 : (c)))'; echo \#define LINUX_VERSION_MAJOR 5; echo \#define LINUX_VERSION_PATCHLEVEL  15; echo \#define LINUX_VERSION_SUBLEVEL  137; } > include/generated/uapi/linux/.version.h.tmp; if [ ! -r include/generated/uapi/linux/version.h ] || ! cmp -s include/generated/uapi/linux/version.h include/generated/uapi/linux/.version.h.tmp; then : '  UPD     include/generated/uapi/linux/version.h'; mv -f include/generated/uapi/linux/.version.h.tmp include/generated/uapi/linux/version.h; fi
+set -e; mkdir -p include/generated/; trap "rm -f include/generated/.utsrelease.h.tmp" EXIT; { 	if [ `echo -n "5.15.137" | wc -c ` -gt 64 ]; then echo '"5.15.137" exceeds 64 characters' >&2; exit 1; fi; echo \#define UTS_RELEASE \"5.15.137\"; } > include/generated/.utsrelease.h.tmp; if [ ! -r include/generated/utsrelease.h ] || ! cmp -s include/generated/utsrelease.h include/generated/.utsrelease.h.tmp; then : '  UPD     include/generated/utsrelease.h'; mv -f include/generated/.utsrelease.h.tmp include/generated/utsrelease.h; fi
+./scripts/remove-stale-files
+make -f ./scripts/Makefile.build obj=scripts/mod
+set -e; mkdir -p scripts/mod/; trap "rm -f scripts/mod/.devicetable-offsets.h.tmp" EXIT; { 	 echo "#ifndef __DEVICETABLE_OFFSETS_H__"; echo "#define __DEVICETABLE_OFFSETS_H__"; echo "/*"; echo " * DO NOT MODIFY."; echo " *"; echo " * This file was generated by Kbuild"; echo " */"; echo ""; sed -ne 	's:^[[:space:]]*\.ascii[[:space:]]*"\(.*\)".*:\1:; /^->/{s:->#\(.*\):/* \1 */:; s:^->\([^ ]*\) [\$#]*\([^ ]*\) \(.*\):#define \1 \2 /* \3 */:; s:->::; p;}' < scripts/mod/devicetable-offsets.s; echo ""; echo "#endif"; } > scripts/mod/.devicetable-offsets.h.tmp; if [ ! -r scripts/mod/devicetable-offsets.h ] || ! cmp -s scripts/mod/devicetable-offsets.h scripts/mod/.devicetable-offsets.h.tmp; then : '  UPD     scripts/mod/devicetable-offsets.h'; mv -f scripts/mod/.devicetable-offsets.h.tmp scripts/mod/devicetable-offsets.h; fi
+make -f ./scripts/Makefile.build obj=.
+set -e; mkdir -p include/generated/; trap "rm -f include/generated/.bounds.h.tmp" EXIT; { 	 echo "#ifndef __LINUX_BOUNDS_H__"; echo "#define __LINUX_BOUNDS_H__"; echo "/*"; echo " * DO NOT MODIFY."; echo " *"; echo " * This file was generated by Kbuild"; echo " */"; echo ""; sed -ne 	's:^[[:space:]]*\.ascii[[:space:]]*"\(.*\)".*:\1:; /^->/{s:->#\(.*\):/* \1 */:; s:^->\([^ ]*\) [\$#]*\([^ ]*\) \(.*\):#define \1 \2 /* \3 */:; s:->::; p;}' < kernel/bounds.s; echo ""; echo "#endif"; } > include/generated/.bounds.h.tmp; if [ ! -r include/generated/bounds.h ] || ! cmp -s include/generated/bounds.h include/generated/.bounds.h.tmp; then : '  UPD     include/generated/bounds.h'; mv -f include/generated/.bounds.h.tmp include/generated/bounds.h; fi
+set -e; mkdir -p include/generated/; trap "rm -f include/generated/.timeconst.h.tmp" EXIT; { echo 100 | bc -q kernel/time/timeconst.bc; } > include/generated/.timeconst.h.tmp; if [ ! -r include/generated/timeconst.h ] || ! cmp -s include/generated/timeconst.h include/generated/.timeconst.h.tmp; then : '  UPD     include/generated/timeconst.h'; mv -f include/generated/.timeconst.h.tmp include/generated/timeconst.h; fi
+set -e; mkdir -p include/generated/; trap "rm -f include/generated/.asm-offsets.h.tmp" EXIT; { 	 echo "#ifndef __ASM_OFFSETS_H__"; echo "#define __ASM_OFFSETS_H__"; echo "/*"; echo " * DO NOT MODIFY."; echo " *"; echo " * This file was generated by Kbuild"; echo " */"; echo ""; sed -ne 	's:^[[:space:]]*\.ascii[[:space:]]*"\(.*\)".*:\1:; /^->/{s:->#\(.*\):/* \1 */:; s:^->\([^ ]*\) [\$#]*\([^ ]*\) \(.*\):#define \1 \2 /* \3 */:; s:->::; p;}' < arch/mips/kernel/asm-offsets.s; echo ""; echo "#endif"; } > include/generated/.asm-offsets.h.tmp; if [ ! -r include/generated/asm-offsets.h ] || ! cmp -s include/generated/asm-offsets.h include/generated/.asm-offsets.h.tmp; then : '  UPD     include/generated/asm-offsets.h'; mv -f include/generated/.asm-offsets.h.tmp include/generated/asm-offsets.h; fi
+  bash scripts/atomic/check-atomics.sh
+make -f ./scripts/Makefile.build obj=init \
+single-build= \
+need-builtin=1 need-modorder=1
+  bash ./scripts/mkcompile_h include/generated/compile.h "mips" "y" "" "" "mipsel-openwrt-linux-musl-gcc (OpenWrt GCC 12.3.0 r23630-842932a63d) 12.3.0" "mipsel-openwrt-linux-musl-ld"
+make -f ./scripts/Makefile.build obj=usr \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/ralink \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/kernel \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/mm \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/net \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/vdso \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/boot/dts \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=arch/mips/boot/dts/ralink \
+ \
+need-builtin= \
+need-modorder=
+make -f ./scripts/Makefile.build obj=kernel \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/sched \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/locking \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/power \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/printk \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/irq \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/rcu \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/livepatch \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/dma \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/entry \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/time \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/futex \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/cgroup \
+ \
+need-builtin=1 \
+need-modorder=1
+make -f ./scripts/Makefile.build obj=kernel/bpf \
+ \
+need-builtin=1 \
+need-modorder=1
+set -e; mkdir -p kernel/; trap "rm -f kernel/.config_data.tmp" EXIT; { cat .config; } > kernel/.config_data.tmp; if [ ! -r kernel/config_data ] || ! cmp -s kernel/config_data kernel/.config_data.tmp; then : '  UPD     kernel/config_data'; mv -f kernel/.config_data.tmp kernel/config_data; fi
+make -f ./scripts/Makefile.build obj=certs \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=mm \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=fs \
+single-build= \
+need-builtin=1 need-modorder=1
+make -f ./scripts/Makefile.build obj=fs/btrfs \
+ \
+need-builtin= \
+need-modorder=1
+  mipsel-openwrt-linux-musl-gcc -Wp,-MMD,fs/btrfs/.super.o.d  -nostdinc -isystem /mnt/2tb/build/openwrt/src/staging_dir/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib/gcc/mipsel-openwrt-linux-musl/12.3.0/include -I./arch/mips/include -I./arch/mips/include/generated  -I./include -I./arch/mips/include/uapi -I./arch/mips/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/compiler-version.h -include ./include/linux/kconfig.h -include ./include/linux/compiler_types.h -D__KERNEL__ -DVMLINUX_LOAD_ADDRESS=0xffffffff80001000 -DLINKER_LOAD_ADDRESS=0x80001000 -DDATAOFFSET=0 -fmacro-prefix-map=./= -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Wno-format-security -std=gnu11 -mno-check-zero-division -mabi=32 -G 0 -mno-abicalls -fno-pic -pipe -mno-branch-likely -msoft-float -DGAS_HAS_SET_HARDFLOAT -Wa,-msoft-float -ffreestanding -EL -fno-stack-check -Wa,-mno-fix-loongson3-llsc -march=mips32r2 -mtune=34kc -Wa,--trap -DTOOLCHAIN_SUPPORTS_VIRT -DTOOLCHAIN_SUPPORTS_XPA -DTOOLCHAIN_SUPPORTS_CRC -DTOOLCHAIN_SUPPORTS_DSP -DTOOLCHAIN_SUPPORTS_GINV -I./arch/mips/include/asm/mach-ralink -I./arch/mips/include/asm/mach-ralink/mt7621 -I./arch/mips/include/asm/mach-generic -fno-asynchronous-unwind-tables -fno-delete-null-pointer-checks -Wno-frame-address -Wno-format-truncation -Wno-format-overflow -Wno-address-of-packed-member -O2 -fno-allow-store-data-races -Wframe-larger-than=1024 -fstack-protector -Werror -Wimplicit-fallthrough=5 -Wno-main -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-dangling-pointer -fomit-frame-pointer -fno-stack-clash-protection -g -fno-var-tracking -femit-struct-debug-baseonly -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop-truncation -Wno-zero-length-bounds -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-maybe-uninitialized -Wno-alloc-size-larger-than -fno-strict-overflow -fno-stack-check -fconserve-stack -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -Wno-packed-not-aligned -ffile-prefix-map=/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl=target-mipsel_24kc_musl -fno-caller-saves -Wextra -Wunused -Wno-unused-parameter -Wmissing-declarations -Wmissing-format-attribute -Wmissing-prototypes -Wold-style-definition -Wmissing-include-dirs -Wunused-but-set-variable -Wunused-const-variable -Wpacked-not-aligned -Wstringop-truncation -Wno-missing-field-initializers -Wno-sign-compare -Wno-type-limits  -DMODULE -mno-long-calls  -DKBUILD_BASENAME='"super"' -DKBUILD_MODNAME='"btrfs"' -D__KBUILD_MODNAME=kmod_btrfs -c -o fs/btrfs/super.o fs/btrfs/super.c
+make[5]: Leaving directory '/mnt/2tb/build/openwrt/src/build_dir/target-mipsel_24kc_musl/linux-ramips_mt7621/linux-5.15.137'
+make[4]: Leaving directory '/mnt/2tb/build/openwrt/src/target/linux/ramips'
+make[3]: Leaving directory '/mnt/2tb/build/openwrt/src/target/linux'
+time: target/linux/compile#5.25#1.72#6.66
+    ERROR: target/linux failed to build.
+make[2]: Leaving directory '/mnt/2tb/build/openwrt/src'
+make[1]: Leaving directory '/mnt/2tb/build/openwrt/src'
