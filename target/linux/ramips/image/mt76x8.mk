@@ -847,7 +847,8 @@ define Device/unielec_u7628-01-16m
   DEVICE_VENDOR := UniElec
   DEVICE_MODEL := U7628-01
   DEVICE_VARIANT := 16M
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+	kmod-sdhci-mt7620
   SUPPORTED_DEVICES += u7628-01-128M-16M unielec,u7628-01-128m-16m
 endef
 TARGET_DEVICES += unielec_u7628-01-16m
@@ -1036,6 +1037,14 @@ define Device/zbtlink_zbt-we1226
   DEVICE_MODEL := ZBT-WE1226
 endef
 TARGET_DEVICES += zbtlink_zbt-we1226
+
+define Device/zbtlink_zbt-we2126
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2126
+  DEVICE_PACKAGES := kmod-mt76x0e kmod-usb2 kmod-usb-ohci kmod-sdhci-mt7620
+endef
+TARGET_DEVICES += zbtlink_zbt-we2126
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k
