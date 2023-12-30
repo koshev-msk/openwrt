@@ -1046,6 +1046,22 @@ define Device/zbtlink_zbt-we2126
 endef
 TARGET_DEVICES += zbtlink_zbt-we2126
 
+define Device/zbtlink_zbt-we2802d-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 8M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-8m
+
+define Device/zbtlink_zbt-we2802d-16m
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 16M
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k
   DEVICE_VENDOR := ZyXEL
