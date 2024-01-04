@@ -1031,6 +1031,26 @@ define Device/xiaomi_mi-ra75
 endef
 TARGET_DEVICES += xiaomi_mi-ra75
 
+define Device/zbtlink_zbt-cpe2801-16m
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-16m
+
+define Device/zbtlink_zbt-cpe2801-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801 zbtlink,zbt-cpe2801-16m
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-32m
+
 define Device/zbtlink_zbt-we1226
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Zbtlink
@@ -1061,6 +1081,26 @@ define Device/zbtlink_zbt-we2802d-16m
   DEVICE_VARIANT := 16M
 endef
 TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
+define Device/zbtlink_zbt-we2806-a-8m
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2806-A
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+	kmod-i2c-core kmod-i2c-algo-bit kmod-i2c-gpio kmod-gpio-pcf857x
+endef
+TARGET_DEVICES += zbtlink_zbt-we2806-a-8m
+
+define Device/zbtlink_zbt-we2806-a-16m
+  IMAGE_SIZE := 15808k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2806-A
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+	kmod-i2c-core kmod-i2c-algo-bit kmod-i2c-gpio kmod-gpio-pcf857x
+endef
+TARGET_DEVICES += zbtlink_zbt-we2806-a-16m
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k
