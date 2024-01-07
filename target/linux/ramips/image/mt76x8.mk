@@ -481,6 +481,15 @@ define Device/oraybox_x1
 endef
 TARGET_DEVICES += oraybox_x1
 
+define Device/pixlink_lv-ac24
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := PIX-LINK
+  DEVICE_MODEL := LV-AC24
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7663-firmware-ap
+  SUPPORTED_DEVICES += pixlink,lv-24ac
+endef
+TARGET_DEVICES += pixlink_lv-ac24
+
 define Device/rakwireless_rak633
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Rakwireless
