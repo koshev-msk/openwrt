@@ -15,6 +15,7 @@ ipq40xx_setup_interfaces()
 	avm,fritzbox-4040|\
 	asus,rt-ac42u|\
 	asus,rt-ac58u|\
+	hooolink,hl-wr832v1|\
 	linksys,ea6350v3|\
 	linksys,ea8300|\
 	linksys,mr8300|\

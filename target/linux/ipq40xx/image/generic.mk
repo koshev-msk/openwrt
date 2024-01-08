@@ -628,6 +628,19 @@ endef
 # Missing DSA Setup
 #TARGET_DEVICES += glinet_gl-s1300
 
+define Device/hooolink_hl-wr832v1
+	$(call Device/FitImage)
+	$(call Device/UbiFit)
+	DEVICE_VENDOR := Hooolink
+	DEVICE_MODEL := HL-WR832
+	DEVICE_VARIANT := V1
+	SOC := qcom-ipq4019
+	KERNEL_INSTALL := 1
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+endef
+TARGET_DEVICES += hooolink_hl-wr832v1
+
 define Device/kernel-size-6350-8300
 	DEVICE_COMPAT_VERSION := 2.0
 	DEVICE_COMPAT_MESSAGE := Kernel partition size must be increased for \
