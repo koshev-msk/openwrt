@@ -2905,6 +2905,36 @@ define Device/zbtlink_zbt-wg1608-32m
 endef
 TARGET_DEVICES += zbtlink_zbt-wg1608-32m
 
+define Device/zbtlink_zbt-z2101ax-nand
+  $(Device/nand)
+  KERNEL_SIZE := 8192k
+  IMAGE_SIZE := 120832k
+  KERNEL_LOADADDR := 0x82000000
+  KERNEL_INITRAMFS := kernel-bin | relocate-kernel 0x80001000 | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
+  KERNEL := $$(KERNEL_INITRAMFS)
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z2101AX
+  DEVICE_VARIANT := 128MB NAND
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-z2101ax-nand
+
+define Device/zbtlink_zbt-z2101ax-nor
+  $(Device/dsa-migration)
+  KERNEL_SIZE := 8192k
+  IMAGE_SIZE := 32448k
+  KERNEL_LOADADDR := 0x82000000
+  KERNEL_INITRAMFS := kernel-bin | relocate-kernel 0x80001000 | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
+  KERNEL := $$(KERNEL_INITRAMFS)
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z2101AX
+  DEVICE_VARIANT := 32MB NOR
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-z2101ax-nor
+
 define Device/zbtlink_zbt-wg2107
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
