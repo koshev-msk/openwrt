@@ -51,7 +51,7 @@
 
 		partition@180000 {
 			label = "firmware";
-			reg = <0x180000 0x7800000>;
+			reg = <0x180000 0x7600000>;
 			
 			compatible = "fixed-partitions";
 			#address-cells = <1>;
