@@ -155,7 +155,7 @@
 
 		nvmem-cells = <&macaddr_factory_4>;
 		nvmem-cell-names = "mac-address";
-		mtd-mac-address-increment = <(-1)>;
+		mac-address-increment = <(-1)>;
 	};
 };
 
@@ -168,7 +168,7 @@
 
 		nvmem-cells = <&macaddr_factory_4>;
 		nvmem-cell-names = "mac-address";
-		mtd-mac-address-increment = <(-2)>;
+		mac-address-increment = <(-2)>;
 	};
 }; 
 
@@ -184,7 +184,7 @@
 
 	nvmem-cells = <&macaddr_factory_4>;
 	nvmem-cell-names = "mac-address";
-	mtd-mac-address-increment = <1>;
+	mac-address-increment = <1>;
 };
 
 &mdio {
@@ -220,7 +220,7 @@
 
 &state_default {
 	gpio {
-		groups = "wdt", "i2c", "jtag", "rgmii2";
+		groups = "wdt", "i2c", "jtag";
 		function = "gpio";
 	};
 };
