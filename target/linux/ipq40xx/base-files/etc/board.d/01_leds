@@ -59,6 +59,10 @@ glinet,gl-b1300 |\
 mikrotik,lhgg-60ad)
 	ucidef_set_led_wlan "wlan" "WLAN" "green:wlan" "phy0tpt"
 	;;
+hooolink,hl-wr832v1)
+	ucidef_set_led_wlan "wlan2g" "WLAN0" "blue:wlan0" "phy0tpt"
+	ucidef_set_led_wlan "wlan5g" "WLAN1" "blue:wlan1" "phy1tpt"
+	;;
 mikrotik,cap-ac)
 	ucidef_set_led_default "power" "POWER" "blue:power" "1"
 	ucidef_set_led_default "user" "USER" "green:user" "0"

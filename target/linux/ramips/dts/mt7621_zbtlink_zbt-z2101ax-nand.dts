@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7621_zbtlink_zbt-z2101ax.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-z2101ax-nand", "zbtlink,zbt-z2101ax", "mediatek,mt7621-soc";
+	model = "Zbtlink ZBT-Z2101AX (nAND 128M)";
+};
+
+&nand {
+	status = "okay";
+
+	mediatek,nmbm;
+	mediatek,bmt-max-ratio = <1>;
+	mediatek,bmt-max-reserved-blocks = <64>;
+	mediatek,bmt-remap-range = <0x0000000 0x0980000>;
+	
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		
+		partition@0 {
+			label = "u-boot";
+			reg = <0x00000 0x80000>;
+			read-only;
+		};
+		
+		partition@80000 {
+			label = "u-boot-env";
+			reg = <0x80000 0x80000>;
+		};
+
+		factory: partition@100000 {
+			label = "factory";
+			reg = <0x100000 0x80000>;
+			read-only;
+				
+			compatible = "nvmem-cells";
+			#address-cells = <1>;
+			#size-cells = <1>;
+				
+			macaddr_factory_4: macaddr@4 {
+				reg = <0x4 0x6>;
+			};
+				
+			macaddr_factory_8004: macaddr@8004 {
+				reg = <0x8004 0x6>;
+			};
+		};
+
+		partition@180000 {
+			label = "firmware";
+			reg = <0x180000 0x7600000>;
+			
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			
+			partition@0 {
+				label = "kernel";
+				reg = <0x0000000 0x0800000>;
+			};
+
+			partition@800000 {
+				label = "ubi";
+				reg = <0x0800000 0x6e00000>;
+			};
+		};
+	};
+	/* Last 8M are reserved for NMBM management (bad blocks) */
+};

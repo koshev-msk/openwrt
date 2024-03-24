@@ -27,6 +27,8 @@ ramips_setup_interfaces()
 	xiaomi,mi-router-cr6609|\
 	xiaomi,redmi-router-ac2100|\
 	z-router,zr-2660|\
+	zbtlink,zbt-z2101ax-nand|\
+	zbtlink,zbt-z2101ax-nor|\
 	zyxel,wsm20)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
 		;;
@@ -301,6 +303,12 @@ ramips_setup_macs()
 	netgear,wax202)
 		lan_mac=$(mtd_get_mac_ascii Config mac)
 		wan_mac=$(macaddr_add "$lan_mac" 1)
+		label_mac=$lan_mac
+		;;
+	perenio,pejir01-34-BA)
+		local config="$(dd if=/dev/mtd$(find_mtd_index idata) bs=1 skip=19 count=474)"
+		wan_mac="$(echo "$config" | awk '/option mac_wan/{gsub("'\''","");print $3}')"
+		lan_mac="$(echo "$config" | awk '/option mac_lan/{gsub("'\''","");print $3}')"
 		label_mac=$lan_mac
 		;;
 	yuncore,ax820)

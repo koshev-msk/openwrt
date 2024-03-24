@@ -70,6 +70,11 @@ else
 		-exec $(CP) -t $(IB_LDIR)/ {} +
 endif
 
+	# Always copy base-files package
+	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f \
+		\( -name 'base-files_*.ipk' \) \
+		-exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
+
 ifneq ($(CONFIG_SIGNATURE_CHECK),)
 	echo ''                                                        >> $(PKG_BUILD_DIR)/repositories.conf
 	echo 'option check_signature'                                  >> $(PKG_BUILD_DIR)/repositories.conf

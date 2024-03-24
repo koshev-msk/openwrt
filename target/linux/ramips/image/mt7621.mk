@@ -418,6 +418,29 @@ define Device/beeline_smartbox-giga
 endef
 TARGET_DEVICES += beeline_smartbox-giga
 
+define Device/beeline_smartbox-giga-breed
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  IMAGE_SIZE := 255488k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += beeline,smartbox-giga
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox GIGA
+  DEVICE_VARIANT := Breed
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-mt7663-firmware-ap kmod-usb3 \
+	kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-giga-breed
+
 define Device/beeline_smartbox-pro
   $(Device/sercomm_s1500)
   DEVICE_VENDOR := Beeline
@@ -434,6 +457,28 @@ define Device/beeline_smartbox-pro
   SERCOMM_SWVER := 2020
 endef
 TARGET_DEVICES += beeline_smartbox-pro
+
+define Device/beeline_smartbox-pro-breed
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 255488k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += beeline,smartbox-pro
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox PRO
+  DEVICE_VARIANT := Breed
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-pro-breed
 
 define Device/beeline_smartbox-turbo
   $(Device/sercomm_dxx)
@@ -458,6 +503,30 @@ define Device/beeline_smartbox-turbo-plus
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615-firmware kmod-usb3
 endef
 TARGET_DEVICES += beeline_smartbox-turbo-plus
+
+
+define Device/beeline_smartbox-turbo-plus-breed
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += beeline,smartbox-turbo-plus
+  DEVICE_VENDOR := Beeline
+  DEVICE_MODEL := SmartBox TURBO+
+  DEVICE_VARIANT := Breed
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-mt7615-firmware kmod-usb3 \
+	kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-turbo-plus-breed
 
 define Device/belkin_rt1800
   $(Device/nand)
@@ -1934,6 +2003,17 @@ define Device/netis_wf2881
 endef
 TARGET_DEVICES += netis_wf2881
 
+define Device/oem_cpe-sx-7621r40
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 65087k
+  DEVICE_VENDOR := OEM CPE
+  DEVICE_MODEL := SX-7621R40
+  DEVICE_PACKAGES := kmod-usb3 kmod-mt7603 kmod-mt76x2 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += R40 OEM,MT7621
+  DEVICE_VARIANT := 64M
+endef
+TARGET_DEVICES += oem_cpe-sx-7621r40
+
 define Device/oraybox_x3a
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
@@ -1943,6 +2023,24 @@ define Device/oraybox_x3a
   DEVICE_PACKAGES := kmod-mt7615-firmware -uboot-envtools
 endef
 TARGET_DEVICES += oraybox_x3a
+
+define Device/perenio_pejir01-34-BA
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+        pad-to $$(KERNEL_SIZE) | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_VENDOR := Perenio
+  DEVICE_MODEL := Elegance PEJIR01
+  DEVICE_PACKAGES := kmod-usb3
+endef
+TARGET_DEVICES += perenio_pejir01-34-BA
 
 define Device/phicomm_k2p
   $(Device/dsa-migration)
@@ -2916,6 +3014,49 @@ define Device/zbtlink_zbt-wg1608-32m
 	kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += zbtlink_zbt-wg1608-32m
+
+define Device/zbtlink_zbt-z2101ax-nand
+  $(Device/nand)
+  KERNEL_SIZE := 8192k
+  IMAGE_SIZE := 120832k
+  KERNEL_LOADADDR := 0x82000000
+  KERNEL_INITRAMFS := kernel-bin | relocate-kernel 0x80001000 | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
+  KERNEL := $$(KERNEL_INITRAMFS)
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z2101AX
+  DEVICE_VARIANT := 128MB NAND
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-z2101ax-nand
+
+define Device/zbtlink_zbt-z2101ax-nor
+  $(Device/dsa-migration)
+  KERNEL_SIZE := 8192k
+  IMAGE_SIZE := 32448k
+  KERNEL_LOADADDR := 0x82000000
+  KERNEL_INITRAMFS := kernel-bin | relocate-kernel 0x80001000 | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb
+  KERNEL := $$(KERNEL_INITRAMFS)
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z2101AX
+  DEVICE_VARIANT := 32MB NOR
+  DEVICE_PACKAGES := kmod-mt7915-firmware kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-z2101ax-nor
+
+define Device/zbtlink_zbt-wg2107
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WG2107
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-sdhci-mt7620 kmod-mt7603 kmod-mt7615e \
+        kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+  SUPPORTED_DEVICES += zbtlink,zbt-wg1602-v04-32m
+endef
+TARGET_DEVICES += zbtlink_zbt-wg2107
 
 define Device/zbtlink_zbt-wg2626
   $(Device/dsa-migration)

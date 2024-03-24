@@ -1,0 +1,10 @@
+#include "mt7621_zbtlink_zbt-wg2107.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-wg2107", "mediatek,mt7621-soc";
+	model = "Zbtlink ZBT-WG2107";
+};
+
+&firmware {
+	reg = <0x50000 0x1fb0000>;
+};
