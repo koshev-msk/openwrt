@@ -6,6 +6,7 @@ usage() {
 	cat <<EOF
 Usage: $0 <command> <arguments...>
 Commands:
+  list:				List keys
   add <file>:			Add keyfile <file> to opkg trusted keys
   remove <file>:		Remove keyfile matching <file> from opkg trusted keys
   verify <sigfile> <list>:	Check list file <list> against signature file <sigfile>
@@ -41,6 +42,10 @@ opkg_key_remove() {
 	rm -f "$OPKG_KEYS/$fingerprint"
 }
 
+opkg_key_list(){
+	ls -1 ${OPKG_KEYS}
+}
+
 case "$1" in
 	add)
 		shift
@@ -54,5 +59,6 @@ case "$1" in
 		shift
 		opkg_key_verify "$@"
 		;;
+	list) opkg_key_list ;;
 	*) usage ;;
 esac

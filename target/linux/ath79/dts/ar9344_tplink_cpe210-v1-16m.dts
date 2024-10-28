@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "ar9344_tplink_cpe_2port.dtsi"
+
+/ {
+	compatible = "tplink,cpe210-v1-16m", "qca,ar9344";
+	model = "TP-Link CPE210 v1 (16M)";
+};
+
+&led_link4 {
+	gpios = <&gpio 16 GPIO_ACTIVE_LOW>;
+};
+
+&firmware {
+	reg = <0x40000 0xf80000>;
+};
+
+&config {
+	reg = <0xfc0000 0x030000>;
+};
+
+&art {
+	reg = <0xff0000 0x010000>;
+};
