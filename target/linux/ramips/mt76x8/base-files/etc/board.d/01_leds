@@ -53,6 +53,11 @@ hiwifi,hc5661a|\
 hiwifi,hc5761a)
 	ucidef_set_led_switch "internet" "internet" "blue:internet" "switch0" "0x10"
 	;;
+hiwooya,neo-32m)
+	ucidef_set_led_wlan "wlan" "wlan" "blue:wlan" "phy0tpt"
+	ucidef_set_led_switch "wan" "WAN" "orange:wan" "switch0" "0x1"
+	ucidef_set_led_switch "lan" "LAN" "orange:lan" "switch0" "0x2"
+	;;
 keenetic,kn-1613)
 	ucidef_set_led_switch "internet" "internet" "green:internet" "switch0" "0x01"
 	;;

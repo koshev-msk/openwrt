@@ -289,6 +289,15 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya_neo-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := 32M
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-32m
+
 define Device/iptime_a3
   IMAGE_SIZE := 7936k
   UIMAGE_NAME := a3
