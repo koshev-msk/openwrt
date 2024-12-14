@@ -1572,6 +1572,18 @@ define Device/zbtlink_zbt-z8102ax
 endef
 TARGET_DEVICES += zbtlink_zbt-z8102ax
 
+define Device/zbtlink_zbt-z8102ax-emmc
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8102AX
+  DEVICE_VARIANT := (EMMC)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-emmc
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_DTS_LOADADDR := 0x47000000
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 e2fsprogs f2fsck mkf2fs
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8102ax-emmc
+
 define Device/zbtlink_zbt-z8103ax
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-Z8103AX
