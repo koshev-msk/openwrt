@@ -1,0 +1,26 @@
+--- a/drivers/pinctrl/mediatek/pinctrl-mt76x8.c
++++ b/drivers/pinctrl/mediatek/pinctrl-mt76x8.c
+@@ -26,6 +26,7 @@
+ #define MT76X8_GPIO_MODE_I2C		20
+ #define MT76X8_GPIO_MODE_REFCLK		18
+ #define MT76X8_GPIO_MODE_PERST		16
++#define MT76X8_GPIO_MODE_ESDMODE	15
+ #define MT76X8_GPIO_MODE_WDT		14
+ #define MT76X8_GPIO_MODE_SPI		12
+ #define MT76X8_GPIO_MODE_SDMODE		10
+@@ -74,6 +75,7 @@ static struct mtmips_pmx_func refclk_grp
+ static struct mtmips_pmx_func perst_grp[] = { FUNC("perst", 0, 36, 1) };
+ static struct mtmips_pmx_func wdt_grp[] = { FUNC("wdt", 0, 38, 1) };
+ static struct mtmips_pmx_func spi_grp[] = { FUNC("spi", 0, 7, 4) };
++static struct ralink_pmx_func esd_mode_grp[] = { FUNC("sdxc", 1, 0, 0) };
+ 
+ static struct mtmips_pmx_func sd_mode_grp[] = {
+ 	FUNC("jtag", 3, 22, 8),
+@@ -214,6 +216,7 @@ static struct mtmips_pmx_group mt76x8_pi
+ 				1, MT76X8_GPIO_MODE_I2C),
+ 	GRP("refclk", refclk_grp, 1, MT76X8_GPIO_MODE_REFCLK),
+ 	GRP("perst", perst_grp, 1, MT76X8_GPIO_MODE_PERST),
++	GRP_G("esdmode", esd_mode_grp, 1, 0, MT76X8_GPIO_MODE_ESDMODE),
+ 	GRP("wdt", wdt_grp, 1, MT76X8_GPIO_MODE_WDT),
+ 	GRP("spi", spi_grp, 1, MT76X8_GPIO_MODE_SPI),
+ 	GRP_G("sdmode", sd_mode_grp, MT76X8_GPIO_MODE_MASK,
