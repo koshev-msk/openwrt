@@ -53,7 +53,7 @@
 
 		led_status_red: red {
 			label = "red:status";
-			gpios = <&pio 9 GPIO_ACTIVE_HIGH>;
+			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_RED>;
 			function = LED_FUNCTION_STATUS;
 		};
