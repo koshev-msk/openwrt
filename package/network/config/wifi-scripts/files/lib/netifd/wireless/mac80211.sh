@@ -668,7 +668,7 @@ mac80211_set_ifname() {
 mac80211_prepare_vif() {
 	json_select config
 
-	json_get_vars ifname mode ssid wds powersave macaddr enable wpa_psk_file vlan_file
+	json_get_vars ifname mode ssid wds powersave macaddr enable wpa_psk_file sae_password_file vlan_file
 
 	[ -n "$ifname" ] || {
 		local prefix;
@@ -701,7 +701,12 @@ mac80211_prepare_vif() {
 
 
 	[ "$mode" == "ap" ] && {
+		json_select config
+		wireless_vif_parse_encryption
+		json_select ..
+
 		[ -z "$wpa_psk_file" ] && hostapd_set_psk "$ifname"
+		[ -z "$sae_password_file" ] && hostapd_set_sae "$ifname"
 		[ -z "$vlan_file" ] && hostapd_set_vlan "$ifname"
 	}
 
@@ -1197,6 +1202,14 @@ drv_mac80211_setup() {
 	json_set_namespace wdev_uc prev
 	wdev_tool "$phy$phy_suffix" set_config "$(json_dump)" $active_ifnames
 	json_set_namespace "$prev"
+
+	[ -z "$phy_suffix" ] && {
+		if [ -n "$txpower" ]; then
+			iw phy "$phy" set txpower fixed "${txpower%%.*}00"
+		else
+			iw phy "$phy" set txpower auto
+		fi
+	}
 
 	for_each_interface "ap sta adhoc mesh monitor" mac80211_set_vif_txpower
 	wireless_set_up
