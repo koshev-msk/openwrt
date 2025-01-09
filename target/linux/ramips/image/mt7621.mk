@@ -3405,6 +3405,18 @@ define Device/zbtlink_zbt-wg2626
 endef
 TARGET_DEVICES += zbtlink_zbt-wg2626
 
+define Device/zbtlink_zbt-wg2107
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WG2107
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-mmc-mtk kmod-mt7603 kmod-mt7615e \
+	kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-wg2107
+
 define Device/zbtlink_zbt-wg3526-16m
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
