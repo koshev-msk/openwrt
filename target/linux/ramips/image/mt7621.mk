@@ -1501,17 +1501,31 @@ define Device/humax_e10
 endef
 TARGET_DEVICES += humax_e10
 
-define Device/huasifei_ws1208v2
+define Device/huasifei_ws1208v2-16m
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Huasifei
   DEVICE_MODEL := WS1208V2
+  DEVICE_VARIANT := 16M
   DEVICE_PACKAGES := kmod-ata-ahci kmod-mt7603 kmod-mt76x2 kmod-mmc-mtk \
-	kmod-usb3 kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan \
-	kmod-usb-serial-option -uboot-envtools
+        kmod-usb3 -uboot-envtools
+  SUPPORTED_DEVICES += huasifei,ws1208v2
 endef
-TARGET_DEVICES += huasifei_ws1208v2
+TARGET_DEVICES += huasifei_ws1208v2-16m
+
+define Device/huasifei_ws1208v2-32m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Huasifei
+  DEVICE_MODEL := WS1208V2
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-ata-ahci kmod-mt7603 kmod-mt76x2 kmod-mmc-mtk \
+        kmod-usb3 -uboot-envtools
+  SUPPORTED_DEVICES += huasifei,ws1208v2
+endef
+TARGET_DEVICES += huasifei_ws1208v2-32m
 
 define Device/iodata_wn-ax1167gr
   $(Device/dsa-migration)
