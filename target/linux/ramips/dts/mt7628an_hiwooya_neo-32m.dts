@@ -1,0 +1,53 @@
+#include "mt7628an_hiwooya.dtsi"
+
+/ {
+        compatible = "hiwooya,neo-32m", "mediatek,mt7628an-soc";
+        model = "HIWOOYA NEO (32M)";
+};
+
+&pinctrl {
+	ephy-digital;
+
+	state_default: pinctrl0 {
+		gpio {
+			groups = "gpio", "p0led_an", "p1led_an", "wled_an", "wdt", "spis";
+		function = "gpio";
+		};
+
+		i2s {
+			groups = "i2s";
+			function = "i2s";
+		};
+
+		refclk {
+			groups = "refclk";
+			function = "refclk";
+		};
+	};
+
+	sdxc_iot_mode: sdxc_iot_mode {
+		esd {
+			groups = "esd";
+			function = "iot";
+		};
+
+		sdxc {
+			groups = "sdmode";
+			function = "sdxc";
+		};
+	};
+};
+
+&sdhci {
+	status = "okay";
+
+	pinctrl-0 = <&sdxc_iot_mode>;
+	pinctrl-1 = <&sdxc_iot_mode>;
+};
+
+
+
+&esw {
+        mediatek,portmap = <0x3>;
+        mediatek,portdisable = <0x3c>;
+};

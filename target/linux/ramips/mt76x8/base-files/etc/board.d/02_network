@@ -106,6 +106,7 @@ ramips_setup_interfaces()
 			"2:lan:2" "3:lan:1" "4:wan" "6@eth0"
 		;;
 	duzun,dm06|\
+	hiwooya,neo-32m|\
 	glinet,gl-mt300n-v2)
 		ucidef_add_switch "switch0" \
 			"1:lan" "0:wan" "6@eth0"

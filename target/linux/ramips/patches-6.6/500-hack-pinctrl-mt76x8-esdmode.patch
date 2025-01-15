@@ -12,7 +12,7 @@
  static struct mtmips_pmx_func perst_grp[] = { FUNC("perst", 0, 36, 1) };
  static struct mtmips_pmx_func wdt_grp[] = { FUNC("wdt", 0, 38, 1) };
  static struct mtmips_pmx_func spi_grp[] = { FUNC("spi", 0, 7, 4) };
-+static struct ralink_pmx_func esd_mode_grp[] = { FUNC("sdxc", 1, 0, 0) };
++static struct mtmips_pmx_func esd_mode_grp[] = { FUNC("sdxc", 1, 0, 0) };
  
  static struct mtmips_pmx_func sd_mode_grp[] = {
  	FUNC("jtag", 3, 22, 8),
