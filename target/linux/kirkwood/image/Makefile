@@ -269,6 +269,44 @@ define Device/iptime_nas1
 endef
 TARGET_DEVICES += iptime_nas1
 
+define Device/irz_ru41l
+  DEVICE_VENDOR := iRZ
+  DEVICE_MODEL := RU41l
+  DEVICE_DTS := kirkwood-irz_ru41l
+  DEVICE_PACKAGES := kmod-gpio-pca953x kmod-rtc-pcf8563 \
+	kmod-i2c-gpio kmod-button-hotplug kmod-gpio-button-hotplug
+  PAGESIZE := 512
+  SUBPAGESIZE := 256
+  BLOCKSIZE := 16k
+  KERNEL_SIZE := 4096k
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 31744k
+  IMAGE/factory.bin := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-ubi | \
+	check-size
+  SUPPORTED_DEVICES += irz,kw04 irz_kw04
+endef
+TARGET_DEVICES += irz_ru41l
+
+define Device/irz_ru41u
+  DEVICE_VENDOR := iRZ
+  DEVICE_MODEL := RU41u
+  DEVICE_DTS := kirkwood-irz_ru41u
+  DEVICE_PACKAGES := kmod-gpio-pca953x kmod-rtc-pcf8563 \
+	kmod-i2c-gpio kmod-button-hotplug kmod-gpio-button-hotplug
+  PAGESIZE := 512
+  SUBPAGESIZE := 256
+  BLOCKSIZE := 16k
+  KERNEL_SIZE := 4096k
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  IMAGE_SIZE := 31744k
+  IMAGE/factory.bin := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-ubi | \
+	check-size
+  SUPPORTED_DEVICES += irz,kw04 irz_kw04
+endef
+TARGET_DEVICES += irz_ru41u
+
 define Device/linksys
   $(Device/kernel-size-migration-linksys)
   DEVICE_VENDOR := Linksys
