@@ -13,6 +13,10 @@ zbtlink,zbt-z8102ax-emmc)
 	ucidef_add_gpio_switch "sim1" "SIM 1" "sim1" "1"
 	ucidef_add_gpio_switch "sim2" "SIM 2" "sim2" "1"
 	;;
+huastlink,hc-g60)
+	ucidef_add_gpio_switch "modem" "Modem pwr" "modem" "1"
+	ucidef_add_gpio_switch "sim" "SIM switch" "sim" "1"
+	;;
 esac
 
 board_config_flush
