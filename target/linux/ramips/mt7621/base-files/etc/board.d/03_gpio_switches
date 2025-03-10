@@ -19,6 +19,9 @@ tplink,eap235-wall-v1|\
 tplink,eap615-wall-v1)
 	ucidef_add_gpio_switch "poe_passthrough" "PoE Passthrough" "poe-passthrough"
 	;;
+vertell,m2-router)
+	ucidef_add_gpio_switch "modem power" "Modem Power" "modem" "1"
+	;;
 ubnt,edgerouter-x)
 	ucidef_add_gpio_switch "poe_passthrough" "PoE Passthrough" "512"
 	;;

@@ -61,6 +61,7 @@ ramips_setup_interfaces()
 	ubnt,unifi-flexhd|\
 	ubnt,unifi-nanohd|\
 	yuncore,fap690|\
+	vertell,m2-router|\
 	wavlink,wl-wn573hx1|\
 	wodesys,wd-r1802u|\
 	zyxel,nwa50ax|\
@@ -333,6 +334,10 @@ ramips_setup_macs()
 		;;
 	netgear,wax214v2)
 		lan_mac=$(mtd_get_mac_ascii Config ethaddr)
+		label_mac=$lan_mac
+		;;
+	vertell,m2-router)
+		lan_mac=$(macaddr_random)
 		label_mac=$lan_mac
 		;;
 	yuncore,ax820)

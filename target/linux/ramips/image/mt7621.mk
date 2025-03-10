@@ -2974,6 +2974,19 @@ define Device/unielec_u7621-06-64m
 endef
 TARGET_DEVICES += unielec_u7621-06-64m
 
+define Device/vertell_m2-router
+  $(Device/nand)
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 125440k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
+  DEVICE_VENDOR = Vertell
+  DEVICE_MODEL := M2 Router
+  DEVICE_PACKAGES := kmod-usb3 -uboot-envtools -wpad-basic-mbedtls
+endef
+TARGET_DEVICES += vertell_m2-router
+
 define Device/wavlink_wl-wn531a6
   $(Device/dsa-migration)
   DEVICE_VENDOR := Wavlink
