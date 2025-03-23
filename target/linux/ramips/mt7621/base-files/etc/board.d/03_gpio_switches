@@ -32,6 +32,13 @@ ubnt,edgerouter-x-sfp)
 	ucidef_add_gpio_switch "poe_power_port3" "PoE Power Port3" "611"
 	ucidef_add_gpio_switch "poe_power_port4" "PoE Power Port4" "612"
 	;;
+vertell,m2-router)
+	ucidef_add_gpio_switch "modempwr" "Modem Power" "modem" "1"
+	;;
+zbtlink,zbt-gw2107)
+	ucidef_add_gpio_switch "modem1pwr" "Modem 1 Power" "modem1pwr" "1"
+	ucidef_add_gpio_switch "modem2pwr" "Modem 2 Power" "modem2pwr" "1"
+	;;
 zyxel,lte3301-plus|\
 zyxel,lte5398-m904)
 	ucidef_add_gpio_switch "usb_power" "Power USB Port" "usb_power" "1"
