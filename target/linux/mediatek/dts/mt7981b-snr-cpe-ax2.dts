@@ -9,7 +9,7 @@
 
 / {
 	model = "SNR CPE-AX2";
-	ompatible = "snr,cpe-ax2", "mediatek,mt7981";
+	compatible = "snr,cpe-ax2", "mediatek,mt7981";
 
 	aliases {
 		label-mac-device = &gmac0;

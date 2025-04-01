@@ -1,12 +1,11 @@
 #include "mt7628an_hiwooya.dtsi"
 
 / {
-        compatible = "hiwooya,neo-32m", "mediatek,mt7628an-soc";
-        model = "HIWOOYA NEO (32M)";
+        compatible = "hiwooya,neo-32m", "hiwooya,neo-router", "mediatek,mt7628an-soc";
+        model = "HIWOOYA NEO (Router mode)";
 };
 
 &pinctrl {
-	ephy-digital;
 
 	state_default: pinctrl0 {
 		gpio {
@@ -24,28 +23,7 @@
 			function = "refclk";
 		};
 	};
-
-	sdxc_iot_mode: sdxc_iot_mode {
-		esd {
-			groups = "esd";
-			function = "iot";
-		};
-
-		sdxc {
-			groups = "sdmode";
-			function = "sdxc";
-		};
-	};
 };
-
-&sdhci {
-	status = "okay";
-
-	pinctrl-0 = <&sdxc_iot_mode>;
-	pinctrl-1 = <&sdxc_iot_mode>;
-};
-
-
 
 &esw {
         mediatek,portmap = <0x3>;

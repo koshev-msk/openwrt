@@ -310,14 +310,25 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
-define Device/hiwooya_neo-32m
+define Device/hiwooya_neo-router
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := HiWooya
   DEVICE_MODEL := NEO
-  DEVICE_VARIANT := (32M)
+  DEVICE_VARIANT := (Router mode)
+  DEVICE_PACKAGES := kmod-usb2
   SUPPORTED_DEVICES += hiwooya,neo
 endef
-TARGET_DEVICES += hiwooya_neo-32m
+TARGET_DEVICES += hiwooya_neo-router
+
+define Device/hiwooya_neo-iot
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (IoT mode)
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-iot
 
 define Device/iptime_a3
   IMAGE_SIZE := 7936k

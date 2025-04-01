@@ -17,6 +17,7 @@ ramips_setup_interfaces()
 	glinet,vixmini|\
 	hak5,wifi-pineapple-mk7|\
 	hiwifi,hc5611|\
+	hiwooya,neo-iot|\
 	mediatek,linkit-smart-7688|\
 	minew,g1-c|\
 	onion,omega2p|\
@@ -106,7 +107,7 @@ ramips_setup_interfaces()
 			"2:lan:2" "3:lan:1" "4:wan" "6@eth0"
 		;;
 	duzun,dm06|\
-	hiwooya,neo-32m|\
+	hiwooya,neo-router|\
 	glinet,gl-mt300n-v2)
 		ucidef_add_switch "switch0" \
 			"1:lan" "0:wan" "6@eth0"
