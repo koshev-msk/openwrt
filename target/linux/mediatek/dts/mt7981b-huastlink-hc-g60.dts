@@ -306,7 +306,9 @@
 
 &xhci {
 	status = "okay";
-	mediatek,u3p-dis-msk = <0x1>;
+	mediatek,u3p-dis-msk = <0x0>;
+	phys = <&u2port0 PHY_TYPE_USB2>,
+		<&u3port0 PHY_TYPE_USB3>;
 };
 
 &wifi {
