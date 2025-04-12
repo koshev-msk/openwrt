@@ -23,6 +23,8 @@
 	};
 	
 	gpio-keys {
+		compatible = "gpio-keys";
+
 		button-reset {
 			label = "reset";
 			linux,code = <KEY_RESTART>;
