@@ -10,6 +10,10 @@ checkpoint,l-50)
 	ucidef_add_gpio_switch "mpcie-rst" "mPCIE Card reset" "502" "1"
 	ucidef_add_gpio_switch "exp-card-rst" "Express Card reset" "497" "1"
 	;;
+irz,ru41l|\
+irz,ru41u)
+	ucidef_add_gpio_switch "2nd-modem" "Second modem" "16" "1"
+	;;
 esac
 
 board_config_flush

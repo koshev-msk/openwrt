@@ -5,8 +5,8 @@
 #include "mt7981.dtsi"
 
 / {
-	model = "Zbtlink ZBT-Z8102AX";
-	compatible = "zbtlink,zbt-z8102ax", "mediatek,mt7981";
+	model = "Zbtlink ZBT-Z8102AX (EMMC)";
+	compatible = "zbtlink,zbt-z8102ax-emmc", "mediatek,mt7981";
 
 	aliases {
 		serial0 = &uart0;
@@ -19,7 +19,7 @@
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "earlycon=uart8250,mmio32,0x11002000 console=ttyS0,115200n8 loglevel=8";
+		bootargs-append = " root=PARTLABEL=rootfs rootwait";
 	};
 
 	memory {
@@ -52,24 +52,28 @@
 		compatible = "gpio-leds";
 
 		led_status_red: red {
+			label = "red:status";
 			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_RED>;
 			function = LED_FUNCTION_STATUS;
 		};
 
 		led_status_green: green {
+			label = "green:status";
 			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_GREEN>;
 			function = LED_FUNCTION_STATUS;
 		};
 
 		blue {
+			label = "blue:status";
 			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_BLUE>;
 			function = LED_FUNCTION_STATUS;
 		};
 
 		4g {
+			label = "blue:4g";
 			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_BLUE>;
 			function = LED_FUNCTION_USB;
@@ -77,6 +81,7 @@
 		};
 
 		4g2 {
+			label = "blue:4g2";
 			gpios = <&pio 14 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_BLUE>;
 			function = LED_FUNCTION_USB;
@@ -161,7 +166,7 @@
 &mdio_bus {
 	switch: switch@1f {
 		compatible = "mediatek,mt7531";
-		reg = <31>;
+		reg = <0x1f>;
 		reset-gpios = <&pio 39 GPIO_ACTIVE_HIGH>;
 		interrupt-controller;
 		#interrupt-cells = <1>;
@@ -170,72 +175,56 @@
 	};
 };
 
-&spi0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&spi0_flash_pins>;
+&mmc0 {
+	pinctrl-names = "default" , "state_uhs";
+	pinctrl-0 = <&mmc0_pins_default>;
+	pinctrl-1 = <&mmc0_pins_uhs>;
+	bus-width = <8>;
+	max-frequency = <52000000>;
+	cap-mmc-highspeed;
+	vmmc-supply = <&reg_3p3v>;
+	non-removable;
 	status = "okay";
 
-	spi_nand@0 {
-		compatible = "spi-nand";
-		#address-cells = <1>;
-		#size-cells = <1>;
+	card@0 {
+		compatible = "mmc-card";
 		reg = <0>;
 
 		spi-max-frequency = <52000000>;
 		spi-tx-bus-width = <4>;
 		spi-rx-bus-width = <4>;
 
-		mediatek,nmbm;
-		mediatek,bmt-max-ratio = <1>;
-		mediatek,bmt-max-reserved-blocks = <64>;
+		block {
+			compatible = "block-device";
 
-		partitions {
-			compatible = "fixed-partitions";
-			#address-cells = <1>;
-			#size-cells = <1>;
+			partitions {
+				compatible = "fixed-partitions";
 
-			partition@0 {
-				label = "bl2";
-				reg = <0x0000000 0x0100000>;
-				read-only;
-			};
-
-			partition@100000 {
-				label = "u-boot-env";
-				reg = <0x100000 0x80000>;
-			};
-
-			partition@180000 {
-				label = "Factory";
-				reg = <0x180000 0x200000>;
-				read-only;
-
-				nvmem-layout {
-					compatible = "fixed-layout";
-					#address-cells = <1>;
-					#size-cells = <1>;
-
-					eeprom_factory: eeprom@0 {
-						reg = <0x0 0x1000>;
-					};
-
-					macaddr_factory_4: macaddr@4 {
-						compatible = "mac-base";
-						reg = <0x4 0x6>;
-						#nvmem-cell-cells = <1>;
+				block-partition-env  {
+					partname = "u-boot-env";
+					nvmem-layout {
+						compatible = "u-boot,env";
 					};
 				};
-			};
 
-			partition@380000 {
-				label = "FIP";
-				reg = <0x380000 0x200000>;
-				read-only;
-			};
+				block-partition-factory {
+					partname = "factory";
+					nvmem-layout {
+						compatible = "fixed-layout";
+						#address-cells = <1>;
+						#size-cells = <1>;
 
-			partition@580000 {
-				label = "ubi";
-				reg = <0x580000 0x4000000>;
+						eeprom_factory: eeprom@0 {
+							reg = <0x0 0x1000>;
+						};
+
+						macaddr_factory_4: macaddr@4 {
+							compatible = "mac-base";
+							reg = <0x4 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+					};
+				};
 			};
 		};
 	};
@@ -282,22 +271,17 @@
 };
 
 &pio {
-	spi0_flash_pins: spi0-pins {
+	mmc0_pins_default: mmc0-pins-default {
 		mux {
-			function = "spi";
-			groups = "spi0", "spi0_wp_hold";
+			function = "flash";
+			groups = "emmc_45";
 		};
+	};
 
-		conf-pu {
-			pins = "SPI0_CS", "SPI0_HOLD", "SPI0_WP";
-			drive-strength = <8>;
-			bias-pull-up = <103>;
-		};
-
-		conf-pd {
-			pins = "SPI0_CLK", "SPI0_MOSI", "SPI0_MISO";
-			drive-strength = <8>;
-			bias-pull-down = <103>;
+	mmc0_pins_uhs: mmc0-pins-uhs {
+		mux {
+			function = "flash";
+			groups = "emmc_45";
 		};
 	};
 };
