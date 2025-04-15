@@ -321,6 +321,26 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya_neo-router
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (Router mode)
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-router
+
+define Device/hiwooya_neo-iot
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (IoT mode)
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-iot
+
 define Device/iptime_a3
   IMAGE_SIZE := 7936k
   UIMAGE_NAME := a3
@@ -956,7 +976,8 @@ define Device/unielec_u7628-01-16m
   DEVICE_VENDOR := UniElec
   DEVICE_MODEL := U7628-01
   DEVICE_VARIANT := 16M
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport \
+		     kmod-mmc-mtk
   SUPPORTED_DEVICES += u7628-01-128M-16M unielec,u7628-01-128m-16m
 endef
 TARGET_DEVICES += unielec_u7628-01-16m
@@ -1177,6 +1198,26 @@ define Device/zbtlink_zbt-we2426-b
   DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci
 endef
 TARGET_DEVICES += zbtlink_zbt-we2426-b
+
+define Device/zbtlink_zbt-cpe2801-16m
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-16m
+
+define Device/zbtlink_zbt-cpe2801-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801 zbtlink,zbt-cpe2801-16m
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-32m
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k

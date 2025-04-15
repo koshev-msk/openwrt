@@ -58,6 +58,15 @@ hiwifi,hc5661a|\
 hiwifi,hc5761a)
 	ucidef_set_led_switch "internet" "internet" "blue:internet" "switch0" "0x10"
 	;;
+hiwooya,neo-iot)
+	ucidef_set_led_wlan "wlan" "wlan" "blue:wlan" "phy0tpt"
+	ucidef_set_led_netdev "lan" "lan" "orange:lan" "eth0"
+	;;
+hiwooya,neo-router)
+	ucidef_set_led_wlan "wlan" "wlan" "blue:wlan" "phy0tpt"
+	ucidef_set_led_switch "wan" "WAN" "orange:wan" "switch0" "0x1"
+	ucidef_set_led_switch "lan" "LAN" "orange:lan" "switch0" "0x2"
+	;;
 keenetic,kn-1613)
 	ucidef_set_led_switch "internet" "internet" "green:internet" "switch0" "0x01"
 	;;
@@ -192,6 +201,12 @@ zbtlink,zbt-we2426-b)
 	ucidef_set_led_switch "lan2" "lan2" "green:lan-2" "switch0" "0x02"
 	ucidef_set_led_switch "lan3" "lan3" "green:lan-3" "switch0" "0x04"
 	ucidef_set_led_switch "lan4" "lan4" "green:lan-4" "switch0" "0x08"
+	;;
+zbtlink,zbt-cpe2801-16m|\
+zbtlink,zbt-cpe2801-32m)
+	ucidef_set_led_switch "lan" "lan" "green:lan" "switch0" "0x10"
+	ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x8"
+	ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
 	;;
 zyxel,keenetic-extra-ii)
 	ucidef_set_led_netdev "wifi_led" "wifi" "green:wifi" "wlan0"

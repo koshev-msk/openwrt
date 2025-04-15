@@ -5,8 +5,7 @@
 #include <dt-bindings/leds/common.h>
 
 / {
-	compatible = "huasifei,ws1208v2", "mediatek,mt7621-soc";
-	model = "Huasifei WS1208V2";
+	compatible = "zbtlink,zbt-wg2107", "mediatek,mt7621-soc";
 
 	aliases {
 		led-boot = &led_status;
@@ -23,8 +22,8 @@
 	keys {
 		compatible = "gpio-keys";
 
-		button-reset {
-			label = "Reset";
+		reset {
+			label = "reset";
 			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_RESTART>;
 		};
@@ -33,37 +32,58 @@
 	leds {
 		compatible = "gpio-leds";
 
-		led_status: led-status {
-			function = LED_FUNCTION_STATUS;
-			color = <LED_COLOR_ID_GREEN>;
-			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+		led_status: status {
+			label = "green:sdcard";
+			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
 		};
-
-		led-cellular {
-			label = "green:cellular";
+		
+		led_wwan1 {
+			label = "green:wwan1";
 			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 		};
 
-		led-wlan5g {
-			label = "green:wlan5g";
-			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
-			linux,default-trigger = "phy1tpt";
+		led_wwan2 {
+			label = "green:wwan2";
+			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
 		};
 
-		led-wlan2g {
-			label = "green:wlan2g";
-			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
-			linux,default-trigger = "phy0tpt";
+	};
+
+	watchdog {
+		compatible = "linux,wdt-gpio";
+		gpios = <&gpio 3 GPIO_ACTIVE_HIGH>;
+		hw_algo = "toggle";
+		/* hw_margin_ms is actually ~120s but driver limits it to 60s */
+		hw_margin_ms = <60000>;
+		always-running;
+	};
+
+	gpio_export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		modem1pwr {
+			gpio-export,name = "modem1pwr";
+			gpio-export,output = <1>;
+			gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
 		};
 
-		led-usb {
-			function = LED_FUNCTION_USB;
-			color = <LED_COLOR_ID_GREEN>;
-			gpios = <&gpio 11 GPIO_ACTIVE_HIGH>;
-			trigger-sources = <&xhci_ehci_port1>;
-			linux,default-trigger = "usbport";
+		modem2pwr {
+			gpio-export,name = "modem2pwr";
+			gpio-export,output = <1>;
+			gpios = <&gpio 7 GPIO_ACTIVE_HIGH>;
+		};
+
+		usbsw {
+			gpio-export,name = "usbsw";
+			gpio-export,output = <1>;
+			gpios = <&gpio 6 GPIO_ACTIVE_LOW>;
 		};
 	};
+};
+
+&i2c {
+	status = "okay";
 };
 
 &sdhci {
@@ -95,7 +115,7 @@
 				read-only;
 			};
 
-			partition@40000 {
+			factory: partition@40000 {
 				label = "factory";
 				reg = <0x40000 0x10000>;
 				read-only;
@@ -110,18 +130,21 @@
 					};
 
 					eeprom_factory_8000: eeprom@8000 {
-						reg = <0x8000 0x200>;
+						reg = <0x8000 0x4da8>;
 					};
 
 					macaddr_factory_e000: macaddr@e000 {
 						reg = <0xe000 0x6>;
 					};
+
+					macaddr_factory_e006: macaddr@e006 {
+						reg = <0xe006 0x6>;
+					};
 				};
 			};
 
-			partition@50000 {
+			firmware: partition@50000 {
 				compatible = "denx,uimage";
-				reg = <0x50000 0xfb0000>;
 				label = "firmware";
 			};
 		};
@@ -133,7 +156,7 @@
 };
 
 &pcie0 {
-	wifi@0,0 {
+	wifi0: wifi@0,0 {
 		compatible = "pci14c3,7603";
 		reg = <0x0000 0 0 0 0>;
 		nvmem-cells = <&eeprom_factory_0>;
@@ -142,8 +165,8 @@
 };
 
 &pcie1 {
-	wifi@0,0 {
-		compatible = "pci14c3,7662";
+	wifi1: wifi@0,0 {
+		compatible = "pci14c3,7663";
 		reg = <0x0000 0 0 0 0>;
 		nvmem-cells = <&eeprom_factory_8000>;
 		nvmem-cell-names = "eeprom";
@@ -155,6 +178,11 @@
 	};
 };
 
+&pcie2 {
+	status = "okay";
+};
+
+
 &gmac0 {
 	nvmem-cells = <&macaddr_factory_e000>;
 	nvmem-cell-names = "mac-address";
@@ -165,13 +193,14 @@
 	label = "wan";
 	phy-handle = <&ethphy4>;
 
-	nvmem-cells = <&macaddr_factory_e000>;
+	nvmem-cells = <&macaddr_factory_e006>;
 	nvmem-cell-names = "mac-address";
 };
 
 &ethphy4 {
 	/delete-property/ interrupts;
 };
+
 
 &switch0 {
 	ports {
@@ -194,5 +223,12 @@
 			status = "okay";
 			label = "lan4";
 		};
+	};
+};
+
+&state_default {
+	gpio {
+		groups = "wdt", "i2c", "uart2", "uart3", "jtag";
+		function = "gpio";
 	};
 };

@@ -925,6 +925,7 @@ define Device/h3c_magic-nx30-pro
 endef
 TARGET_DEVICES += h3c_magic-nx30-pro
 
+
 define Device/huasifei_wh3000
   DEVICE_VENDOR := Huasifei
   DEVICE_MODEL := WH3000
@@ -939,6 +940,23 @@ define Device/huasifei_wh3000
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += huasifei_wh3000
+
+define Device/huastlink_hc-g60
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G60
+  DEVICE_DTS := mt7981b-huastlink-hc-g60
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g60
 
 define Device/jcg_q30-pro
   DEVICE_VENDOR := JCG
@@ -1462,6 +1480,24 @@ define Device/ruijie_rg-x60-pro
 endef
 TARGET_DEVICES += ruijie_rg-x60-pro
 
+define Device/snr_cpe-ax2
+  DEVICE_VENDOR := SNR
+  DEVICE_MODEL :=  CPE-AX2
+  DEVICE_DTS := mt7981b-snr-cpe-ax2
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += snr-cpe-ax2 snr-cpe-ax2-jcg
+endef
+TARGET_DEVICES += snr_cpe-ax2
+
 define Device/tplink_re6000xd
   DEVICE_VENDOR := TP-Link
   DEVICE_MODEL := RE6000XD
@@ -1742,6 +1778,18 @@ define Device/zbtlink_zbt-z8102ax
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += zbtlink_zbt-z8102ax
+
+define Device/zbtlink_zbt-z8102ax-emmc
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8102AX
+  DEVICE_VARIANT := (EMMC)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-emmc
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_DTS_LOADADDR := 0x47000000
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 e2fsprogs f2fsck mkf2fs
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8102ax-emmc
 
 define Device/zbtlink_zbt-z8103ax
   DEVICE_VENDOR := Zbtlink

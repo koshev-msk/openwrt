@@ -83,6 +83,11 @@ else
 		-exec $(CP) -t $(IB_LDIR)/ {} +
 endif
 
+	# Always copy base-files package to archive
+	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f \
+		\( -name 'base-files_*.$(PACKAGE_SUFFIX)' \) \
+		-exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
+
 ifneq ($(CONFIG_SIGNATURE_CHECK),)
 ifneq ($(CONFIG_USE_APK),y)
 	echo ''                                                        >> $(PKG_BUILD_DIR)/repositories.conf
