@@ -1762,22 +1762,24 @@ define Device/yuncore_ax835
 endef
 TARGET_DEVICES += yuncore_ax835
 
-define Device/zbtlink_zbt-z8102ax
+define Device/zbtlink_zbt-z8102ax-nand
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-Z8102AX
-  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax
+  DEVICE_VARIANT := (nAND)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-nand
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-usb-net-qmi-wwan kmod-usb-serial-option
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
   KERNEL_IN_UBI := 1
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
   IMAGE_SIZE := 65536k
   IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8102ax
   IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
-TARGET_DEVICES += zbtlink_zbt-z8102ax
+TARGET_DEVICES += zbtlink_zbt-z8102ax-nand
 
 define Device/zbtlink_zbt-z8102ax-emmc
   DEVICE_VENDOR := Zbtlink

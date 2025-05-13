@@ -1,135 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 
-/dts-v1/;
-
-#include "mt7981.dtsi"
+#include "mt7981b-zbtlink-zbt-z8102ax.dtsi"
 
 / {
 	model = "Zbtlink ZBT-Z8102AX (EMMC)";
-	compatible = "zbtlink,zbt-z8102ax-emmc", "mediatek,mt7981";
-
-	aliases {
-		serial0 = &uart0;
-		led-boot = &led_status_green;
-		led-failsafe = &led_status_red;
-		led-running = &led_status_green;
-		led-upgrade = &led_status_green;
-		label-mac-device = &gmac0;
-	};
+	compatible = "zbtlink,zbt-z8102ax", "zbtlink,zbt-z8102ax-emmc", "mediatek,mt7981";
 
 	chosen {
 		stdout-path = "serial0:115200n8";
 		bootargs-append = " root=PARTLABEL=rootfs rootwait";
 	};
 
-	memory {
-		reg = <0 0x40000000 0 0x40000000>;
-	};
-
-	gpio-keys {
-		compatible = "gpio-keys";
-
-		button-reset {
-			label = "reset";
-			linux,code = <KEY_RESTART>;
-			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
-		};
-
-		button-mesh {
-			label = "mesh";
-			linux,code = <BTN_0>;
-			gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
-		};
-
-		button-hub {
-			label = "hub";
-			linux,code = <BTN_1>;
-			gpios = <&pio 12 GPIO_ACTIVE_HIGH>;
-		};
-	};
-
-	leds {
-		compatible = "gpio-leds";
-
-		led_status_red: red {
-			label = "red:status";
-			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
-			color = <LED_COLOR_ID_RED>;
-			function = LED_FUNCTION_STATUS;
-		};
-
-		led_status_green: green {
-			label = "green:status";
-			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
-			color = <LED_COLOR_ID_GREEN>;
-			function = LED_FUNCTION_STATUS;
-		};
-
-		blue {
-			label = "blue:status";
-			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
-			color = <LED_COLOR_ID_BLUE>;
-			function = LED_FUNCTION_STATUS;
-		};
-
-		4g {
-			label = "blue:4g";
-			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
-			color = <LED_COLOR_ID_BLUE>;
-			function = LED_FUNCTION_USB;
-			function-enumerator = <0>;
-		};
-
-		4g2 {
-			label = "blue:4g2";
-			gpios = <&pio 14 GPIO_ACTIVE_LOW>;
-			color = <LED_COLOR_ID_BLUE>;
-			function = LED_FUNCTION_USB;
-			function-enumerator = <1>;
-		};
-	};
-
-	watchdog {
-		compatible = "linux,wdt-gpio";
-		gpios = <&pio 2 GPIO_ACTIVE_HIGH>;
-		hw_algo = "toggle";
-		hw_margin_ms = <1000>;
-	};
-
-	gpio-export {
-		compatible = "gpio-export";
-		#size-cells = <0>;
-
-		pcie {
-			gpio-export,name = "pcie_power";
-			gpio-export,output = <1>;
-			gpios = <&pio 3 GPIO_ACTIVE_HIGH>;
-		};
-
-		5g1 {
-			gpio-export,name = "5g1";
-			gpio-export,output = <1>;
-			gpios = <&pio 4 GPIO_ACTIVE_HIGH>;
-		};
-
-		5g2 {
-			gpio-export,name = "5g2";
-			gpio-export,output = <1>;
-			gpios = <&pio 5 GPIO_ACTIVE_HIGH>;
-		};
-
-		sim1 {
-			gpio-export,name = "sim1";
-			gpio-export,output = <1>;
-			gpios = <&pio 6 GPIO_ACTIVE_HIGH>;
-		};
-
-		sim2 {
-			gpio-export,name = "sim2";
-			gpio-export,output = <1>;
-			gpios = <&pio 7 GPIO_ACTIVE_HIGH>;
-		};
-	};
 };
 
 &eth {
@@ -160,18 +41,6 @@
 
 		nvmem-cell-names = "mac-address";
 		nvmem-cells = <&macaddr_factory_4 3>;
-	};
-};
-
-&mdio_bus {
-	switch: switch@1f {
-		compatible = "mediatek,mt7531";
-		reg = <0x1f>;
-		reset-gpios = <&pio 39 GPIO_ACTIVE_HIGH>;
-		interrupt-controller;
-		#interrupt-cells = <1>;
-		interrupt-parent = <&pio>;
-		interrupts = <38 IRQ_TYPE_LEVEL_HIGH>;
 	};
 };
 
@@ -230,45 +99,6 @@
 	};
 };
 
-&switch {
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		port@0 {
-			reg = <0>;
-			label = "lan1";
-		};
-
-		port@1 {
-			reg = <1>;
-			label = "lan2";
-		};
-
-		port@2 {
-			reg = <2>;
-			label = "lan3";
-		};
-
-		port@3 {
-			reg = <3>;
-			label = "lan4";
-		};
-
-		port@6 {
-			reg = <6>;
-			label = "cpu";
-			ethernet = <&gmac0>;
-			phy-mode = "2500base-x";
-
-			fixed-link {
-				speed = <2500>;
-				full-duplex;
-				pause;
-			};
-		};
-	};
-};
 
 &pio {
 	mmc0_pins_default: mmc0-pins-default {
@@ -284,27 +114,4 @@
 			groups = "emmc_45";
 		};
 	};
-};
-
-&uart0 {
-	status = "okay";
-};
-
-&watchdog {
-	status = "okay";
-};
-
-&usb_phy {
-	status = "okay";
-};
-
-&xhci {
-	status = "okay";
-};
-
-&wifi {
-	status = "okay";
-
-	nvmem-cells = <&eeprom_factory>;
-	nvmem-cell-names = "eeprom";
 };
