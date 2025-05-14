@@ -4,44 +4,13 @@
 
 / {
 	model = "Zbtlink ZBT-Z8102AX (EMMC)";
-	compatible = "zbtlink,zbt-z8102ax", "zbtlink,zbt-z8102ax-emmc", "mediatek,mt7981";
+	compatible = "zbtlink,zbt-z8102ax-emmc", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
 
 	chosen {
 		stdout-path = "serial0:115200n8";
 		bootargs-append = " root=PARTLABEL=rootfs rootwait";
 	};
 
-};
-
-&eth {
-	status = "okay";
-
-	gmac0: mac@0 {
-		/* LAN */
-		compatible = "mediatek,eth-mac";
-		reg = <0>;
-		phy-mode = "2500base-x";
-
-		nvmem-cell-names = "mac-address";
-		nvmem-cells = <&macaddr_factory_4 2>;
-
-		fixed-link {
-			speed = <2500>;
-			full-duplex;
-			pause;
-		};
-	};
-
-	gmac1: mac@1 {
-		/* WAN */
-		compatible = "mediatek,eth-mac";
-		reg = <1>;
-		phy-mode = "gmii";
-		phy-handle = <&int_gbe_phy>;
-
-		nvmem-cell-names = "mac-address";
-		nvmem-cells = <&macaddr_factory_4 3>;
-	};
 };
 
 &mmc0 {

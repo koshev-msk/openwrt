@@ -4,7 +4,7 @@
 
 / {
 	model = "Zbtlink ZBT-Z8102AX (nAND)";
-	compatible = "zbtlink,zbt-z8102ax", "zbtlink,zbt-z8102ax-nand", "mediatek,mt7981";
+	compatible = "zbtlink,zbt-z8102ax-nand", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
 
 	chosen {
 		stdout-path = "serial0:115200n8";
