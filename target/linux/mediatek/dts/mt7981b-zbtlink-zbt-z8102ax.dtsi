@@ -32,13 +32,7 @@
 		button-mesh {
 			label = "mesh";
 			linux,code = <BTN_0>;
-			gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
-		};
-
-		button-hub {
-			label = "hub";
-			linux,code = <BTN_1>;
-			gpios = <&pio 12 GPIO_ACTIVE_HIGH>;
+			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
 		};
 	};
 
@@ -71,7 +65,7 @@
 		};
 
 		4g2 {
-			gpios = <&pio 14 GPIO_ACTIVE_LOW>;
+			gpios = <&pio 13 GPIO_ACTIVE_LOW>;
 			color = <LED_COLOR_ID_BLUE>;
 			function = LED_FUNCTION_USB;
 			function-enumerator = <1>;
@@ -89,12 +83,6 @@
 		compatible = "gpio-export";
 		#size-cells = <0>;
 
-		pcie {
-			gpio-export,name = "pcie_power";
-			gpio-export,output = <1>;
-			gpios = <&pio 3 GPIO_ACTIVE_HIGH>;
-		};
-
 		5g1 {
 			gpio-export,name = "5g1";
 			gpio-export,output = <1>;
@@ -109,13 +97,13 @@
 
 		sim1 {
 			gpio-export,name = "sim1";
-			gpio-export,output = <1>;
+			gpio-export,output = <0>;
 			gpios = <&pio 6 GPIO_ACTIVE_HIGH>;
 		};
 
 		sim2 {
 			gpio-export,name = "sim2";
-			gpio-export,output = <1>;
+			gpio-export,output = <0>;
 			gpios = <&pio 7 GPIO_ACTIVE_HIGH>;
 		};
 	};
