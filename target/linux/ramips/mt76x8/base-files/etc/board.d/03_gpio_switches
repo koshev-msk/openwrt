@@ -1,0 +1,21 @@
+. /lib/functions/uci-defaults.sh
+
+board_config_update
+
+board=$(board_name)
+
+case "$board" in
+zbtlink,zbt-cpe2801-16m|\
+zbtlink,zbt-cpe2801-32m)
+	ucidef_add_gpio_switch "modem1pwr" "Modem 1 Power" "mpcie1" "1"
+	ucidef_add_gpio_switch "modem2pwr" "Modem 2 Power" "mpcie2" "1"
+	;;
+zbtlink,zbt-we826-t3-16m|\
+zbtlink,zbt-we826-t3-32m)
+	ucidef_add_gpio_switch "modempwr" "Modem power" "modem" "1"
+	;;
+esac
+
+board_config_flush
+
+exit 0
