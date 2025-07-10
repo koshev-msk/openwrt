@@ -142,7 +142,7 @@
 
 &state_default {
 	gpio {
-		groups = "i2c";
+		groups = "i2c", "uartf", "spi refclk", "wled";
 		function = "gpio";
 	};
 };
@@ -151,3 +151,13 @@
 	nvmem-cells = <&eeprom_factory_0>;
 	nvmem-cell-names = "eeprom";
 };
+
+&ehci {
+	status = "okay";
+};
+
+&ohci {
+	status = "okay";
+};
+
+

@@ -1598,6 +1598,7 @@ define Device/zyxel_keenetic-lite-iii-a
   DEVICE_VENDOR := Zyxel
   DEVICE_MODEL := Keenetic Lite III
   DEVICE_VARIANT := A
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-usb-ledtrig-usbport
   IMAGES += factory.bin
   IMAGE/factory.bin := $$(sysupgrade_bin) | pad-to 64k | check-size | \
 		zyimage -d 2102018 -v "ZyXEL Keenetic Lite III"
