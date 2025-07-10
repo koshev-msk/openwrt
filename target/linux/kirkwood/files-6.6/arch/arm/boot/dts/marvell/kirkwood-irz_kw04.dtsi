@@ -199,7 +199,7 @@
 		};
 		green_sim1 {
 			gpios = <&msp_ex 10 GPIO_ACTIVE_HIGH>;
-			label = "gren:sim1";
+			label = "green:sim1";
 		};
 		green_sim2 {
 			gpios = <&msp_ex 11 GPIO_ACTIVE_HIGH>;
