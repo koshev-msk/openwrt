@@ -14,6 +14,9 @@ irz,ru41l|\
 irz,ru41u)
 	ucidef_add_gpio_switch "2nd-modem" "Second modem" "16" "1"
 	;;
+irz,ru41l)
+	ucidef_add_gpio_switch "usb-pwr" "USB Port" "48" "1"
+	;;
 esac
 
 board_config_flush

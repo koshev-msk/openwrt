@@ -149,8 +149,9 @@
 		#size-cells = <0>;
 	};
 
-	gpio_export {
+	gpio-export {
 		compatible = "gpio-export";
+		#size-cells = <0>;
 		pinctrl-0 = < &pmx_usb_power &pmx_m0_reset &pmx_m1_reset
 						&pmx_sim_select &pmx_rede >;
 		pinctrl-names = "default";
