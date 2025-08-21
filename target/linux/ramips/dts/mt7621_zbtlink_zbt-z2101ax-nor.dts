@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7621_zbtlink_zbt-z2101ax.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-z2101ax-nor", "zbtlink,zbt-z2101ax", "mediatek,mt7621-soc";
+	model = "Zbtlink ZBT-Z2101AX (NOR 32M)";
+};
+
+&sdhci {
+	status = "okay";
+};
+
+&spi0 {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+				read-only;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x10000>;
+				read-only;
+			};
+
+			factory: partition@50000 {
+				label = "factory";
+				reg = <0x50000 0x10000>;
+				read-only;
+
+				compatible = "nvmem-cells";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				macaddr_factory_4: macaddr@4 {
+					reg = <0x4 0x6>;
+				};
+
+				macaddr_factory_8004: macaddr@8004 {
+					reg = <0x8004 0x6>;
+				};
+			};
+
+			firmware: partition@90000 {
+				compatible = "denx,uimage";
+				label = "firmware";
+				reg = <0x90000 0x1fb0000>;
+			};
+		};
+	};
+};

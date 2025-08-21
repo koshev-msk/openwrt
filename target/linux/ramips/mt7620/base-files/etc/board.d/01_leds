@@ -162,6 +162,10 @@ kingston,mlwg2|\
 sanlinking,d240)
 	ucidef_set_led_netdev "wifi_led" "wifi" "blue:wifi" "wlan0"
 	;;
+kroks,ap221m3)
+	ucidef_set_led_netdev "lan" "LAN" "green:lan" "eth0" "tx rx"
+	ucidef_set_led_netdev "wwan" "WWAN" "gren:wifi" "wwan0" "tx rx"
+	;;
 snr,cpe-w4n-mt)
 	ucidef_set_led_heartbeat "wps" "WPS" "green:wps"
 	ucidef_set_led_timer "sys" "System" "green:sys" "500" "500"

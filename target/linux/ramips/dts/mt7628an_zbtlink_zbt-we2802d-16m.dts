@@ -1,0 +1,10 @@
+#include "mt7628an_zbtlink_zbt-we2802d.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-we2802d-16m", "zbtlink,zbt-we2802d", "mediatek,mt7628an-soc";
+	model = "ZBT-WE2802D (16M)";
+};
+
+&firmware {
+	reg = <0x50000 0xfb0000>;
+};

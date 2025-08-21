@@ -45,6 +45,12 @@ kirkwood_setup_interfaces()
 	linksys,ea4500)
 		ucidef_set_interfaces_lan_wan "ethernet1 ethernet2 ethernet3 ethernet4" "internet"
 		;;
+	irz,ru41l)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
+		;;
+	irz,ru41u)
+		ucidef_set_interface_lan "lan1 lan2 lan3 lan4"
+		;;
 	*)
 		ucidef_set_interface_lan "eth0"
 		;;
@@ -62,6 +68,9 @@ kirkwood_setup_macs()
 	iptime,nas1)
 		lan_mac=$(mtd_get_mac_binary u-boot 0x3ffa8)
 		label_mac=$lan_mac
+		;;
+	irz,ru41l)
+		wan_mac=$(mtd_get_mac_ascii u-boot-env eth1addr)
 		;;
 	linksys,e4200-v2|\
 	linksys,ea3500|\

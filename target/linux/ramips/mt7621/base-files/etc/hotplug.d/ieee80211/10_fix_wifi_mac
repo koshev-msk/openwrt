@@ -203,6 +203,11 @@ case "$board" in
 		[ "$PHYNBR" = "0" ] && macaddr_setbit_la "$hw_mac_addr" > /sys${DEVPATH}/macaddress
 		[ "$PHYNBR" = "1" ] && echo -n "$hw_mac_addr" > /sys${DEVPATH}/macaddress
 		;;
+	zbtlink,zbt-z2101ax-nand|\
+	zbtlink,zbt-z2101ax-nor)
+		hw_mac_addr="$(mtd_get_mac_binary factory 0x8004)"
+		[ "$PHYNBR" = "1" ] &&  macaddr_add $hw_mac_addr 2 > /sys${DEVPATH}/macaddress
+		;;
 	zyxel,nwa50ax|\
 	zyxel,nwa55axe)
 		hw_mac_addr="$(mtd_get_mac_binary mrd 0x1fff8)"
