@@ -88,10 +88,6 @@
 				marvell,pins = "mpp17";
 				marvell,function = "gpio";
 			};
-			pmx_re_de: pmx-re-de {
-				marvell,pins = "mpp15";
-				marvell,function = "gpio";
-			};
 			pmx_swrst: pmx-swrst {
 				marvell,pins = "mpp16";
 				marvell,function = "gpio";
@@ -152,9 +148,7 @@
 	gpio-export {
 		compatible = "gpio-export";
 		#size-cells = <0>;
-		pinctrl-0 = < &pmx_usb_power &pmx_m0_reset &pmx_m1_reset
-						&pmx_sim_select &pmx_rede >;
-		pinctrl-names = "default";
+ 
 		usb_power {
 			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
 			gpio-export,name  = "usb_power";
