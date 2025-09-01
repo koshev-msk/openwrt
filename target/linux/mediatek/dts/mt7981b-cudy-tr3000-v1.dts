@@ -56,7 +56,8 @@
 			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
 		};
 	};
-
+	// Disable regularor for pwr
+	/* 
 	usb_vbus: regulator-usb {
 		compatible = "regulator-fixed";
 		regulator-name = "usb-vbus";
@@ -64,6 +65,17 @@
 		regulator-max-microvolt = <5000000>;
 		gpios = <&pio 9 GPIO_ACTIVE_LOW>;
 		regulator-boot-on;
+	};
+	*/
+	// enable gpio pwr control
+	gpio-export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+		usb {
+			gpio-export,name = "usb";
+			gpio-export,output = <1>;
+			gpios = <&pio 9 GPIO_ACTIVE_HIGH>;
+		};
 	};
 };
 
@@ -218,7 +230,7 @@
 
 &xhci {
 	status = "okay";
-	vbus-supply = <&usb_vbus>;
+	//vbus-supply = <&usb_vbus>;
 };
 
 &wifi {
