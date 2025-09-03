@@ -85,8 +85,6 @@
 			};
 
 			led_sys:led5 {
-				function = LED_FUNCTION_STATUS;
-				color = <LED_COLOR_ID_BLUE>;
 				label = "blue:sys";
 				gpios = <&tlmm 3 GPIO_ACTIVE_LOW>;
 			};
