@@ -1911,7 +1911,7 @@ define Device/zbtlink_zbt-z8102ax-nand-all
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-Z8102AX
   DEVICE_VARIANT := (ALL nAND)
-  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-nand
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-nand-all
   DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
   KERNEL_IN_UBI := 1
