@@ -16,6 +16,12 @@ zbtlink,zbt-z8102ax-emmc)
 	ucidef_add_gpio_switch "sim1" "SIM 1" "sim1" "0"
 	ucidef_add_gpio_switch "sim2" "SIM 2" "sim2" "0"
 	;;
+zbtlink,zbt-z8109ax-nand-all)
+	ucidef_add_gpio_switch "modem1" "Power 1st modem" "modem1" "1"
+	ucidef_add_gpio_switch "modem2" "Power 2nd modem" "modem2" "1"
+	ucidef_add_gpio_switch "modem3" "Power 3rd modem" "modem3" "1"
+	ucidef_add_gpio_switch "modem4" "Power 4th modem" "modem4" "1"
+	;;
 huastlink,hc-g60)
 	ucidef_add_gpio_switch "modem" "Modem pwr" "modem" "1"
 	ucidef_add_gpio_switch "sim" "SIM switch" "sim" "1"

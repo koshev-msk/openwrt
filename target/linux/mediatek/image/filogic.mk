@@ -1926,6 +1926,25 @@ define Device/zbtlink_zbt-z8102ax-nand-all
 endef
 TARGET_DEVICES += zbtlink_zbt-z8102ax-nand-all
 
+define Device/zbtlink_zbt-z8109ax-nand-all
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8109AX
+  DEVICE_VARIANT := (ALL nAND)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8109ax-nand-all
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8109ax
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8109ax-nand-all
+
 define Device/zbtlink_zbt-z8102ax-emmc
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-Z8102AX
