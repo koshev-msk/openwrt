@@ -86,6 +86,11 @@
 	};
 };
 
+&sdhci {
+	status = "okay";
+	pinctrl-0 = <&sdxc_router_pins>;
+};
+
 &pcie {
 	status = "okay";
 };
@@ -97,9 +102,22 @@
 	nvmem-cell-names = "eeprom";
 };
 
+
+&pinctrl {
+	
+	ephy-analog;
+
+	sdxc_router_pins: sdxc_router_mode {
+		gpio {
+			groups = "esd", "i2c", "i2s", "sdmode", "uart1", "gpio";
+			function = "gpio";
+		};
+	};
+};
+		
 &state_default {
 	gpio {
-		groups = "gpio", "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "refclk", "wdt", "wled_an";
+		groups = "p0led_an", "p1led_an", "p2led_an", "p3led_an", "p4led_an", "refclk", "wdt", "wled_an";
 		function = "gpio";
 	};
 };

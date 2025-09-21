@@ -1560,17 +1560,31 @@ define Device/humax_e10
 endef
 TARGET_DEVICES += humax_e10
 
-define Device/huasifei_ws1208v2
+define Device/huasifei_ws1208v2-16m
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Huasifei
   DEVICE_MODEL := WS1208V2
+  DEVICE_VARIANT := 16M
   DEVICE_PACKAGES := kmod-ata-ahci kmod-mt7603 kmod-mt76x2 kmod-mmc-mtk \
-	kmod-usb3 kmod-usb-net-cdc-mbim kmod-usb-net-qmi-wwan \
-	kmod-usb-serial-option -uboot-envtools
+        kmod-usb3 -uboot-envtools
+  SUPPORTED_DEVICES += huasifei,ws1208v2
 endef
-TARGET_DEVICES += huasifei_ws1208v2
+TARGET_DEVICES += huasifei_ws1208v2-16m
+
+define Device/huasifei_ws1208v2-32m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Huasifei
+  DEVICE_MODEL := WS1208V2
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-ata-ahci kmod-mt7603 kmod-mt76x2 kmod-mmc-mtk \
+        kmod-usb3 -uboot-envtools
+  SUPPORTED_DEVICES += huasifei,ws1208v2
+endef
+TARGET_DEVICES += huasifei_ws1208v2-32m
 
 define Device/iodata_wn-ax1167gr
   $(Device/dsa-migration)
@@ -3009,6 +3023,19 @@ define Device/unielec_u7621-06-64m
 endef
 TARGET_DEVICES += unielec_u7621-06-64m
 
+define Device/vertell_m2-router
+  $(Device/nand)
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 125440k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
+	check-size
+  DEVICE_VENDOR = Vertell
+  DEVICE_MODEL := M2 Router
+  DEVICE_PACKAGES := kmod-usb3 -uboot-envtools -wpad-basic-mbedtls
+endef
+TARGET_DEVICES += vertell_m2-router
+
 define Device/wavlink_wl-wn531a6
   $(Device/dsa-migration)
   DEVICE_VENDOR := Wavlink
@@ -3450,6 +3477,18 @@ define Device/zbtlink_zbt-wg2626
   SUPPORTED_DEVICES += zbt-wg2626
 endef
 TARGET_DEVICES += zbtlink_zbt-wg2626
+
+define Device/zbtlink_zbt-wg2107
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WG2107
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-mmc-mtk kmod-mt7603 kmod-mt7615e \
+	kmod-mt7663-firmware-ap kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += zbtlink_zbt-wg2107
 
 define Device/zbtlink_zbt-wg3526-16m
   $(Device/dsa-migration)
