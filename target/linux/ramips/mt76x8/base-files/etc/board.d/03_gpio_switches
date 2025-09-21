@@ -1,3 +1,6 @@
+#
+# Copyright (C) 2025 OpenWrt.org
+#
 . /lib/functions/uci-defaults.sh
 
 board_config_update
@@ -5,6 +8,11 @@ board_config_update
 board=$(board_name)
 
 case "$board" in
+
+hongdian,h7920-v40)
+	ucidef_add_gpio_switch "modem_enable" "Modem power" "modem_power" "1"
+	ucidef_add_gpio_switch "switch_serial_mode" "Switch RS232 to RS485" "serial_rs485_mode" "0"
+  ;;
 zbtlink,zbt-cpe2801-16m|\
 zbtlink,zbt-cpe2801-32m)
 	ucidef_add_gpio_switch "modem1pwr" "Modem 1 Power" "mpcie1" "1"

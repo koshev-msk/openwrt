@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: (GPL-2.0 OR MIT)
 
 /dts-v1/;
-
-#include <dt-bindings/leds/common.h>
-
-#include "mt7981.dtsi"
+#include "mt7981b-cudy-tr3000-v1.dtsi"
 
 / {
 	model = "Cudy TR3000 v1";
@@ -215,26 +212,12 @@
 	};
 };
 
-&pio {
-	spi0_flash_pins: spi0-pins {
-		mux {
-			function = "spi";
-			groups = "spi0", "spi0_wp_hold";
-		};
-	};
-};
-
-&usb_phy {
-	status = "okay";
-};
 
 &xhci {
 	status = "okay";
 	//vbus-supply = <&usb_vbus>;
 };
 
-&wifi {
-	status = "okay";
-	nvmem-cells = <&eeprom_factory_0>;
-	nvmem-cell-names = "eeprom";
+&ubi {
+	reg = <0x5c0000 0x4000000>;
 };

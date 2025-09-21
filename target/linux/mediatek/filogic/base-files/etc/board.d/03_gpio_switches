@@ -5,9 +5,13 @@ board_config_update
 board=$(board_name)
 
 case "$board" in
+huasifei,wh3000-pro)
+	ucidef_add_gpio_switch "modem_power" "Modem power" "modem_power" "0"
+	;;
 cudy,tr3000-v1)
 	ucidef_add_gpio_switch "usb" "Usb Power" "usb" "0"
 	;;
+zbtlink,zbt-z8102ax-v2|\
 zbtlink,zbt-z8102ax-nand|\
 zbtlink,zbt-z8102ax-nand-all|\
 zbtlink,zbt-z8102ax-emmc)
