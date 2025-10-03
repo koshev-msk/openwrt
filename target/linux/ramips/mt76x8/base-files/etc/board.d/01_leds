@@ -217,6 +217,12 @@ zbtlink,zbt-cpe2801-32m)
 	ucidef_set_led_switch "wan" "wan" "green:wan" "switch0" "0x8"
 	ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
 	;;
+zbtlink,zbt-we2802d-8m|\
+zbtlink,zbt-we2802d-16m)
+	ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
+	ucidef_set_led_switch "lan" "LAN" "green:lan" "switch0" "0x01"
+	ucidef_set_led_switch "wan" "WAN" "green:wan" "switch0" "0x10"
+	;;
 zyxel,keenetic-extra-ii)
 	ucidef_set_led_netdev "wifi_led" "wifi" "green:wifi" "wlan0"
 	ucidef_set_led_switch "internet" "internet" "green:internet" "switch0" "0x01"

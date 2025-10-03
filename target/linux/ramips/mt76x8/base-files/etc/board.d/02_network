@@ -109,7 +109,7 @@ ramips_setup_interfaces()
 		;;
 	duzun,dm06|\
 	glinet,gl-mt300n-v2|\
-	hongdian,h7920-v40)
+	hongdian,h7920-v40|\
 	hiwooya,neo-router|\
 	glinet,gl-mt300n-v2)
 		ucidef_add_switch "switch0" \
@@ -216,7 +216,9 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"0:lan:2" "2:lan:1" "4:wan" "6@eth0"
 		;;
-	yuncore,cpe200)
+	yuncore,cpe200|\
+	zbtlink,zbt-we2802d-8m|\
+	zbtlink,zbt-we2802d-16m)
 		ucidef_add_switch "switch0" \
 			"0:lan" "4:wan" "6@eth0"
 		;;
