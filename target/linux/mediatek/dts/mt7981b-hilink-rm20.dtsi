@@ -32,7 +32,7 @@
 			linux,code = <KEY_RESTART>;
 			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
 		};
-	};	
+	};
 };
 
 &uart0 {
@@ -134,6 +134,6 @@
 &xhci {
 	mediatek,u3p-dis-msk = <0x0>;
 	phys = <&u2port0 PHY_TYPE_USB2>,
-	       <&u3port0 PHY_TYPE_USB3>;
+		<&u3port0 PHY_TYPE_USB3>;
 	status = "okay";
 };

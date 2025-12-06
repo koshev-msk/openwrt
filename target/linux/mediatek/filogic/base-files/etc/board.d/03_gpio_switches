@@ -24,6 +24,7 @@ zbtlink,zbt-z8105ax-nand)
 	ucidef_add_gpio_switch "modem" "Power modem" "modem" "1"
 	ucidef_add_gpio_switch "sim" "SIM switch" "sim" "0"
 	;;
+huastlink,hc-g90|\
 zbtlink,zbt-z8109ax-nand-all)
 	ucidef_add_gpio_switch "modem1" "Power 1st modem" "modem1" "1"
 	ucidef_add_gpio_switch "modem2" "Power 2nd modem" "modem2" "1"

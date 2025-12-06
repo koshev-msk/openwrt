@@ -1054,7 +1054,7 @@ define Device/hilink_rm20-nand
   DEVICE_DTS := mt7981b-hilink-rm20-nand
   DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-usb3 -wpad-basic-mbedtls
-  SUPPORTED_DEVICES := mediatek,mt7981-spim-snand-gsw-rfb mediatek,mt7981-rfb,ubi
+  SUPPORTED_DEVICES += mediatek,mt7981-spim-snand-gsw-rfb mediatek,mt7981-rfb,ubi
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
@@ -1148,6 +1148,23 @@ define Device/huastlink_hc-g60
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += huastlink_hc-g60
+
+define Device/huastlink_hc-g90
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G90
+  DEVICE_DTS := mt7981b-huastlink-hc-g90
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g90
 
 define Device/jcg_q30-pro
   DEVICE_VENDOR := JCG
