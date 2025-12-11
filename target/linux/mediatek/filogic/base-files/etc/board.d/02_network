@@ -49,6 +49,7 @@ mediatek_setup_interfaces()
 	asus,tuf-ax4200|\
 	iptime,ax3000sm|\
 	huastlink,hc-g60|\
+	huastlink,hc-g90|\
 	jdcloud,re-cp-03|\
 	mediatek,mt7981-rfb|\
 	netcore,n60|\
