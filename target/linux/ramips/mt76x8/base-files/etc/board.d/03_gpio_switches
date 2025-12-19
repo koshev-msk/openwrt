@@ -22,6 +22,9 @@ zbtlink,zbt-we826-t3-16m|\
 zbtlink,zbt-we826-t3-32m)
 	ucidef_add_gpio_switch "modempwr" "Modem power" "modem" "1"
 	;;
+hongdian,h8850-v20)
+	ucidef_add_gpio_switch "modem_enable" "Modem power" "modem_power" "1"
+	;;
 esac
 
 board_config_flush
