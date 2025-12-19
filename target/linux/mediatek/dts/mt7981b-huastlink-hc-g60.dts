@@ -1,0 +1,368 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+/dts-v1/;
+
+#include "mt7981.dtsi"
+
+/ {
+	model = "HuastLink HC-G60";
+	compatible = "huastlink,hc-g60", "mediatek,mt7981";
+	
+	aliases {
+		serial0 = &uart0;
+		led-boot = &led_status_green;
+		led-running = &led_status_green;
+		led-failsafe = &led_status_blue;
+		led-upgrade = &led_status_blue;
+		label-mac-device = &gmac0;
+	};
+	
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon=uart8250,mmio32,0x11002000 console=ttyS0,115200n8 loglevel=8";
+	};
+	
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		button-reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+		};
+	};
+	/* NOT COMPLETE */	
+	leds {
+		compatible = "gpio-leds";		
+
+		led_status_blue: blue {
+			label = "blue:status";
+			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
+		};
+
+		led_status_green: green {
+                        label = "green:status";
+                        gpios = <&pio 34 GPIO_ACTIVE_HIGH>;
+                };
+		
+		uart {
+			label = "green:uart";
+			gpios = <&pio 27 GPIO_ACTIVE_HIGH>;
+		};
+		
+		wan {
+			label = "green:wan";
+			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
+		};
+	};
+	watchdog {
+		compatible = "linux,wdt-gpio";
+		gpios = <&pio 2 GPIO_ACTIVE_HIGH>;
+		hw_algo = "toggle";
+		hw_margin_ms = <1000>;
+	};
+	
+	gpio-export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+		
+		modem {
+			gpio-export,name = "modem";
+			gpio-export,output = <1>;
+			gpios = <&pio 4 GPIO_ACTIVE_HIGH>;
+		};
+		
+		sim {
+			gpio-export,name = "sim";
+			gpio-export,output = <1>;
+			gpios = <&pio 6 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	gpio_fan: gpio-fan {
+		compatible = "gpio-fan";
+		gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
+		gpio-fan,speed-map = <0 0 7500 1>; /* 0 RPM level 0, 7500 RPM for level 1 */
+		#cooling-cells = <2>;
+		status = "okay";
+	};
+
+};
+
+&cpu_thermal {
+	polling-delay-passive = <1000>;
+	polling-delay = <5000>;
+	thermal-sensors = <&thermal 0>;
+
+	/delete-node/ trips;
+       
+	trips {
+		cpu_fan_trip: cpu-fan-trip {
+			temperature = <72000>; /* 72°C */
+			hysteresis = <5000>;
+			type = "active";
+		};
+	};
+
+	/delete-node/ cooling-maps;
+       
+	cooling-maps {
+		map0 {
+			trip = <&cpu_fan_trip>;
+			cooling-device = <&gpio_fan 1 1>;
+		};
+	};
+};
+
+&eth {
+	status = "okay";
+	
+	gmac0: mac@0 {
+		/* LAN  connect to MT7531 */
+		compatible = "mediatek,eth-mac";
+		reg = <0>;
+		phy-mode = "2500base-x";
+		
+		nvmem-cell-names = "mac-address";
+		nvmem-cells = <&mac_address_factory_4>;
+		
+		fixed-link {
+			speed = <2500>;
+			full-duplex;
+			pause;
+		};
+	};
+	
+	gmac1: mac@1 {
+		/* WAN */
+		compatible = "mediatek,eth-mac";
+		reg = <1>;
+		phy-mode = "gmii";
+		phy-handle = <&int_gbe_phy>;
+		
+		nvmem-cell-names = "mac-address";
+		nvmem-cells = <&mac_address_factory_a>;
+	};
+};
+
+&mdio_bus {
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	switch: switch@1f {
+		compatible = "mediatek,mt7531";
+		reg = <31>;
+		reset-gpios = <&pio 39 GPIO_ACTIVE_HIGH>;
+		interrupt-controller;
+		interrupt-cells = <1>;
+		interrupt-parent = <&pio>;
+		interrupts = <38 IRQ_TYPE_LEVEL_HIGH>;
+	};
+};
+
+&spi0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi0_flash_pins>;
+	status = "okay";
+	
+	spi_nand: flash@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-nand";
+		reg = <0>;
+
+		spi-max-frequency = <52000000>;
+
+		spi-cal-enable;
+		spi-cal-mode = "read-data";
+		spi-cal-datalen = <7>;
+		spi-cal-data = /bits/ 8 <0x53 0x50 0x49 0x4E 0x41 0x4E 0x44>;
+		spi-cal-addrlen = <5>;
+		spi-cal-addr = /bits/ 32 <0x0 0x0 0x0 0x0 0x0>;
+
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+		
+		mediatek,nmbm;
+		mediatek,bmt-max-ratio = <1>;
+		mediatek,bmt-max-reserved-blocks = <64>;
+		
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			
+			partition@0 {
+				label = "BL2";
+				reg = <0x0000000 0x0100000>;
+				read-only;
+			};
+			
+			partition@100000 {
+				label = "u-boot-env";
+				reg = <0x100000 0x80000>;
+			};
+			
+			partition@180000 {
+				label = "Factory";
+				reg = <0x180000 0x200000>;
+				read-only;
+				
+				nvmem-layout {
+					compatible = "fixed-layout";
+					#address-cells = <1>;
+					#size-cells = <1>;
+					
+					eeprom_factory: eeprom@0 {
+						reg = <0x0 0x1000>;
+					};
+					
+					mac_address_factory_4: macaddr@4 {
+						compatible = "mac-base";
+						reg = <0x4 0x6>;
+					};
+					
+					mac_address_factory_a: macaddr@a {
+						compatible = "mac-base";
+						reg = <0xa 0x6>;
+					};
+					
+					mac_address_factory_24: maccaddr@24 {
+						compatible = "mac-base";
+						reg = <0x24 0x6>;
+					};
+					
+					mac_address_factory_2a: maccaddr@2a {
+						compatible = "mac-base";
+						reg = <0x2a 0x6>;
+					};
+				};
+			};
+			
+			partition@380000 {
+				label = "FIP";
+				reg = <0x380000 0x200000>;
+				read-only;
+			};
+		
+			/*
+				ubi partition has size 0x7280000, but uboot
+				default nmbm partitions by:
+				nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),524288k(ubi)
+			*/
+			partition@580000 {
+				label = "ubi";
+				reg = <0x580000 0x20000000>;
+			};
+		};
+	};
+};
+
+&switch {
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		
+		port@0 {
+			reg = <0>;
+			label = "lan1";
+		};
+		
+		port@1 {
+			reg = <1>;
+			label = "lan2";
+		};
+		
+		port@2 {
+			reg = <2>;
+			label = "lan3";
+		};
+		
+		port@3 {
+			reg = <3>;
+			label = "lan4";
+		};
+		
+		/* port connect to rtl8125bg NIC ? */
+		port@4 {
+			reg = <4>;
+			label = "wwan";
+			/* connect to 2.5GBps NIC RTL8125BG for m.2 modem slot */
+		};
+		
+		/* connect to gmac0 cpu */	
+		port@6 {
+			reg = <6>;
+			label = "cpu";
+			ethernet = <&gmac0>;
+			phy-mode = "2500base-x";
+			
+			fixed-link {
+				speed = <2500>;
+				full-duplex;
+				pause;
+			};
+		};
+	};
+};
+
+&pio {
+	spi0_flash_pins: spi0-pins {
+		mux {
+			function = "spi";
+			groups = "spi0", "spi0_wp_hold";
+		};
+
+		conf-pu {
+			pins = "SPI0_CS", "SPI0_HOLD", "SPI0_WP";
+			drive-strength = <8>;
+			bias-pull-up = <103>;
+		};
+
+		conf-pd {
+			pins = "SPI0_CLK", "SPI0_MOSI", "SPI0_MISO";
+			drive-strength = <8>;
+			bias-pull-down = <103>;
+		};
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&usb_phy {
+	status = "okay";
+};
+
+&xhci {
+	status = "okay";
+	mediatek,u3p-dis-msk = <0x0>;
+	phys = <&u2port0 PHY_TYPE_USB2>,
+		<&u3port0 PHY_TYPE_USB3>;
+};
+
+&wifi {
+	status = "okay";
+	
+	nvmem-cells = <&eeprom_factory>;
+	nvmem-cell-names = "eeprom";
+	
+	band@0 {
+		reg = <0>;
+		nvmem-cells = <&mac_address_factory_24>;
+		nvmem-cell-names = "mac-address";
+	};
+	
+	band@1 {
+		reg = <1>;
+		nvmem-cells = <&mac_address_factory_2a>;
+		nvmem-cell-names = "mac-address";
+	};
+};
+	

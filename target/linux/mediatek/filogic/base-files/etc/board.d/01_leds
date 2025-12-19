@@ -155,6 +155,9 @@ smartrg,sdg-8733a)
 	;;
 totolink,x6000r)
 	ucidef_set_led_netdev "wan" "wan" "green:wan" "wan" "link tx rx"
+  ;;
+snr,cpe-ax2)
+	ucidef_set_led_netdev "wan-blue" "WAN" "blue:wan" "eth1" "link tx rx"
 	;;
 tplink,re6000xd)
 	ucidef_set_led_netdev "lan-1" "lan-1" "blue:lan-0" "lan1" "link tx rx"
@@ -178,7 +181,11 @@ xiaomi,redmi-router-ax6000-stock|\
 xiaomi,redmi-router-ax6000-ubootmod)
 	ucidef_set_led_netdev "wan" "wan" "rgb:network" "wan"
 	;;
-zbtlink,zbt-z8103ax)
+huastlink,hc-g60|\
+huastlink,hc-g90|\
+zbtlink,zbt-z8103ax|\
+zntlink,zbt-z8105ax-nand|\
+zbtlink,zbt-z8109ax-nand-all)
 	ucidef_set_led_netdev "wan" "wan" "green:wan" "eth1" "link tx rx"
 	;;
 zyxel,ex5601-t0-stock|\

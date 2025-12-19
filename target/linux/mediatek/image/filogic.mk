@@ -1087,6 +1087,24 @@ define Device/h3c_magic-nx30-pro
 endef
 TARGET_DEVICES += h3c_magic-nx30-pro
 
+define Device/hilink_rm20-nand
+  DEVICE_VENDOR := HiLink
+  DEVICE_MODEL := RM20 RFB (nAND)
+  DEVICE_DTS := mt7981b-hilink-rm20-nand
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-usb3 -wpad-basic-mbedtls
+  SUPPORTED_DEVICES += mediatek,mt7981-spim-snand-gsw-rfb mediatek,mt7981-rfb,ubi
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  KERNEL_IN_UBI := 1
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += hilink_rm20-nand
+
 define Device/huasifei_wh3000
   DEVICE_VENDOR := Huasifei
   DEVICE_MODEL := WH3000
@@ -1171,6 +1189,40 @@ define Device/iptime_ax7800m-6e
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += iptime_ax7800m-6e
+
+define Device/huastlink_hc-g60
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G60
+  DEVICE_DTS := mt7981b-huastlink-hc-g60
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g60
+
+define Device/huastlink_hc-g90
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G90
+  DEVICE_DTS := mt7981b-huastlink-hc-g90
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g90
 
 define Device/jcg_q30-pro
   DEVICE_VENDOR := JCG
@@ -1786,6 +1838,24 @@ define Device/tplink_archer-ax80-v1
 endef
 TARGET_DEVICES += tplink_archer-ax80-v1
 
+define Device/snr_cpe-ax2
+  DEVICE_VENDOR := SNR
+  DEVICE_MODEL :=  CPE-AX2
+  DEVICE_DTS := mt7981b-snr-cpe-ax2
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += snr-cpe-ax2 snr-cpe-ax2-jcg
+endef
+TARGET_DEVICES += snr_cpe-ax2
+
 define Device/tplink_re6000xd
   DEVICE_VENDOR := TP-Link
   DEVICE_MODEL := RE6000XD
@@ -2098,22 +2168,93 @@ define Device/yuncore_ax835
 endef
 TARGET_DEVICES += yuncore_ax835
 
-define Device/zbtlink_zbt-z8102ax
+define Device/zbtlink_zbt-z8102ax-nand
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-Z8102AX
-  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax
+  DEVICE_VARIANT := (nAND 64Mb)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-nand
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-usb-net-qmi-wwan kmod-usb-serial-option
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
   KERNEL_IN_UBI := 1
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
   IMAGE_SIZE := 65536k
   IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8102ax
   IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
-TARGET_DEVICES += zbtlink_zbt-z8102ax
+TARGET_DEVICES += zbtlink_zbt-z8102ax-nand
+
+define Device/zbtlink_zbt-z8102ax-nand-all
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8102AX
+  DEVICE_VARIANT := (ALL nAND)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-nand-all
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8102ax
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8102ax-nand-all
+
+define Device/zbtlink_zbt-z8105ax-nand
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8105AX
+  DEVICE_VARIANT := (ALL nAND)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8105ax-nand
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8102ax
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8105ax-nand
+
+define Device/zbtlink_zbt-z8109ax-nand-all
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8109AX
+  DEVICE_VARIANT := (ALL nAND)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8109ax-nand-all
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  SUPPORTED_DEVICES += zbtlink,zbt-z8109ax
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8109ax-nand-all
+
+define Device/zbtlink_zbt-z8102ax-emmc
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-Z8102AX
+  DEVICE_VARIANT := (EMMC)
+  DEVICE_DTS := mt7981b-zbtlink-zbt-z8102ax-emmc
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_DTS_LOADADDR := 0x47000000
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 e2fsprogs f2fsck mkf2fs
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += zbtlink_zbt-z8102ax-emmc
 
 define Device/zbtlink_zbt-z8102ax-v2
   DEVICE_VENDOR := Zbtlink

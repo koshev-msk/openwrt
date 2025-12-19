@@ -16,7 +16,8 @@ mediatek_setup_interfaces()
 	nokia,ea0326gmp|\
 	mercusys,mr80x-v3|\
 	routerich,ax3000-v1|\
-	zbtlink,zbt-z8103ax)
+	zbtlink,zbt-z8103ax|\
+	zbtlink,zbt-z8109ax-nand-all)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" eth1
 		;;
 	acelink,ew-7886cax)
@@ -49,6 +50,8 @@ mediatek_setup_interfaces()
 	asus,tuf-ax4200|\
 	iptime,ax3000sm|\
 	iptime,ax7800m-6e|\
+	huastlink,hc-g60|\
+	huastlink,hc-g90|\
 	jdcloud,re-cp-03|\
 	mediatek,mt7981-rfb|\
 	netcore,n60|\
@@ -57,6 +60,10 @@ mediatek_setup_interfaces()
 	wavlink,wl-wn536ax6-a|\
 	zbtlink,zbt-z8102ax|\
 	zbtlink,zbt-z8102ax-v2|\
+	zbtlink,zbt-z8102ax-nand|\
+	zbtlink,zbt-z8102ax-nand-all|\
+	zbtlink,zbt-z8102ax-emmc|\
+	zbtlink,zbt-z8105-nand|\
 	zyxel,ex5601-t0-stock|\
 	zyxel,ex5601-t0-ubootmod)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" eth1
@@ -110,6 +117,9 @@ mediatek_setup_interfaces()
 	dlink,aquila-pro-ai-m30-a1|\
 	dlink,aquila-pro-ai-m60-a1)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" internet
+		;;
+	hilink,rm20-nand)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4 lan5" eth1
 		;;
 	keenetic,kn-3911|\
 	smartrg,sdg-8622|\
@@ -216,6 +226,12 @@ mediatek_setup_macs()
 		;;
 	yuncore,ax835)
 		label_mac=$(mtd_get_mac_binary "Factory" 0x4)
+		;;
+	zbtlink,zbt-z8109ax-nand-all)
+		label_mac=$(mtd_get_mac_binary "Factory" 0x4)
+		for c in 0 1; do
+			ucidef_set_network_device_mac "cel${c}" $(macaddr_add "$label_mac" $((5+$c)))
+		done
 		;;
 	esac
 

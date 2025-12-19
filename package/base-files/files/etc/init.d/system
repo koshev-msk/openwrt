@@ -10,7 +10,8 @@ validate_system_section() {
 		'conloglevel:uinteger' \
 		'buffersize:uinteger' \
 		'timezone:string:UTC' \
-		'zonename:string'
+		'zonename:string' \
+		'description:string'
 }
 
 system_config() {
@@ -18,7 +19,8 @@ system_config() {
 		echo "validation failed"
 		return 1
 	}
-
+	
+	[ -n "$description" ] && echo "$description" > /tmp/sysinfo/model
 	echo "$hostname" > /proc/sys/kernel/hostname
 	[ -z "$conloglevel" -a -z "$buffersize" ] || dmesg ${conloglevel:+-n $conloglevel} ${buffersize:+-s $buffersize}
 	echo "$timezone" > /tmp/TZ

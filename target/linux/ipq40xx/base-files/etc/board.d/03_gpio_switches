@@ -21,6 +21,9 @@ cilab,meshpoint-one)
 compex,wpj428)
 	ucidef_add_gpio_switch "sim_card_select" "SIM card select" "3" "0"
 	;;
+hooolink,hl-wr832v1)
+	ucidef_add_gpio_switch "modem_pwr" "Modem Power" "512" "1"
+	;;
 mikrotik,cap-ac)
 	ucidef_add_gpio_switch "poe_passtrough" "POE passtrough enable" "514" "0"
 	;;
