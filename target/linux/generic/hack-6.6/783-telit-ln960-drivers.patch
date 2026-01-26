@@ -1,0 +1,33 @@
+--- a/drivers/net/usb/qmi_wwan.c
++++ b/drivers/net/usb/qmi_wwan.c
+@@ -1402,6 +1402,7 @@ static const struct usb_device_id produc
+ 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x1260, 2)},	/* Telit LE910Cx */
+ 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x1261, 2)},	/* Telit LE910Cx */
+ 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x1900, 1)},	/* Telit LN940 series */
++	{QMI_QUIRK_SET_DTR(0x1bc7, 0x1910, 0)}, /* Telit LN960 series */
+ 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x3000, 0)},	/* Telit FN912 series */
+ 	{QMI_QUIRK_SET_DTR(0x1bc7, 0x3001, 0)},	/* Telit FN912 series */
+ 	{QMI_FIXED_INTF(0x1c9e, 0x9801, 3)},	/* Telewell TW-3G HSPA+ */
+
+--- a/drivers/usb/serial/option.c
++++ b/drivers/usb/serial/option.c
+@@ -342,6 +342,8 @@ static void option_instat_callback(struc
+ #define TELIT_PRODUCT_LE920A4_1212		0x1212
+ #define TELIT_PRODUCT_LE920A4_1213		0x1213
+ #define TELIT_PRODUCT_LE920A4_1214		0x1214
++#define TELIT_PRODUCT_LN960_1910		0x1910
++#define TELIT_PRODUCT_LN960_1911		0x1911
+ 
+ /* ZTE PRODUCTS */
+ #define ZTE_VENDOR_ID				0x19d2
+@@ -1534,6 +1536,10 @@ static const struct usb_device_id option
+ 	  .driver_info = NCTRL(0) | ZLP },
+ 	{ USB_DEVICE(TELIT_VENDOR_ID, 0x9201),				/* Telit LE910R1 flashing device */
+ 	  .driver_info = NCTRL(0) | ZLP },
++	{ USB_DEVICE(TELIT_VENDOR_ID, TELIT_PRODUCT_LN960_1910),	/* Telit LN960 QMI */
++	  .driver_info = NCTRL(2) | RSVD(0) | RSVD(1) },
++	{ USB_DEVICE(TELIT_VENDOR_ID, TELIT_PRODUCT_LN960_1911),	/* Telit LN960 MBIM */
++	  .driver_info = NCTRL(2) | RSVD(4) | RSVD(5) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, ZTE_PRODUCT_MF622, 0xff, 0xff, 0xff) }, /* ZTE WCDMA products */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x0002, 0xff, 0xff, 0xff),
+ 	  .driver_info = RSVD(1) },
