@@ -16,10 +16,6 @@
 		label-mac-device = &gmac0;
 	};
 
-	memory {
-		reg = <0 0x40000000 0 0x40000000>;
-	};
-
 	gpio-keys {
 		compatible = "gpio-keys";
 
