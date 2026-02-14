@@ -17,6 +17,7 @@ mediatek_setup_interfaces()
 	mercusys,mr80x-v3|\
 	routerich,ax3000-v1|\
 	zbtlink,zbt-z8103ax|\
+	zbtlink,zbt-z8109ax-nand-64|\
 	zbtlink,zbt-z8109ax-nand-all)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" eth1
 		;;
