@@ -1,0 +1,17 @@
+
+. /lib/functions/uci-defaults.sh
+
+board_config_update
+
+board=$(board_name)
+
+case "$board" in
+b4com,mcr100)
+	ucidef_add_gpio_switch "modem1" "Modem 1 Power" "10" "1"
+	ucidef_add_gpio_switch "modem2" "Modem 2 Power" "13" "0"
+	;;
+esac
+
+board_config_flush
+
+exit 0

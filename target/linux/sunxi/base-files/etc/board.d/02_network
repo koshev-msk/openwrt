@@ -10,6 +10,9 @@ sunxi_setup_interfaces()
 	local board="$1"
 
 	case "$board" in
+	b4com,mcr100)
+		ucidef_set_interfaces_lan_wan "eth2 eth1" "eth0"
+		;;
 	friendlyarm,nanopi-r1|\
 	friendlyarm,nanopi-r1s-h5)
 		ucidef_set_interfaces_lan_wan "eth1" "eth0"
@@ -58,6 +61,10 @@ sunxi_setup_macs()
 	local label_mac=""
 
 	case "$board" in
+	b4com,mcr100)
+		label_mac=$(cat /sys/class/net/eth0/address)
+		lan_mac=$(macaddr_add "$label_mac" 1)
+		;;
 	friendlyarm,nanopi-r1)
 		wan_mac=$(nanopi_r1_get_mac wan)
 		lan_mac=$(nanopi_r1_get_mac lan)

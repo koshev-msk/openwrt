@@ -5,6 +5,15 @@
 
 KERNEL_LOADADDR:=0x40008000
 
+define Device/b4com_mcr100
+  DEVICE_VENDOR := B4COM
+  DEVICE_MODEL := MCR-100
+  DEVICE_PACKAGES := kmod-usb-net-smsc95xx
+  SOC := sun8i-h3
+  
+endef
+TARGET_DEVICES += b4com_mcr100
+
 define Device/cubietech_cubieboard2
   DEVICE_VENDOR := Cubietech
   DEVICE_MODEL := Cubieboard2
