@@ -10,6 +10,10 @@ b4com,mcr100)
 	ucidef_add_gpio_switch "modem1" "Modem 1 Power" "10" "1"
 	ucidef_add_gpio_switch "modem2" "Modem 2 Power" "13" "0"
 	;;
+b4com,mcr200)
+	ucidef_add_gpio_switch "modem1" "Modem 1 Power" "140" "1"
+	ucidef_add_gpio_switch "modem2" "Modem 2 Power" "141" "0"
+	;;
 esac
 
 board_config_flush

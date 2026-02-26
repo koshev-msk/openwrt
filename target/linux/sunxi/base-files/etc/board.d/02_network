@@ -13,6 +13,9 @@ sunxi_setup_interfaces()
 	b4com,mcr100)
 		ucidef_set_interfaces_lan_wan "eth2 eth1" "eth0"
 		;;
+	b4com,mcr200)
+		ucidef_set_interfaces_lan_wan "eth3 eth2 eth1" "eth0"
+		;;
 	friendlyarm,nanopi-r1|\
 	friendlyarm,nanopi-r1s-h5)
 		ucidef_set_interfaces_lan_wan "eth1" "eth0"
@@ -61,7 +64,8 @@ sunxi_setup_macs()
 	local label_mac=""
 
 	case "$board" in
-	b4com,mcr100)
+	b4com,mcr100|\
+	b4com,mcr200)
 		label_mac=$(cat /sys/class/net/eth0/address)
 		lan_mac=$(macaddr_add "$label_mac" 1)
 		;;
