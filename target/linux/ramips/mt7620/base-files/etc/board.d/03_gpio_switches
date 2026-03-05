@@ -25,6 +25,9 @@ head-weblink,hdrm200)
 	ucidef_add_gpio_switch "io4" "I/O 4" "526"
 	ucidef_add_gpio_switch "power_mpcie" "mPCIe power" "533" "1"
 	;;
+kroks,ap221m3)
+	ucidef_add_gpio_switch "modem" "Modem Power" "modempower" "1"
+	;;
 lb-link,bl-w1200)
 	ucidef_add_gpio_switch "eth_leds_enable" "ETH LEDs enable" "522" "1"
 	;;
