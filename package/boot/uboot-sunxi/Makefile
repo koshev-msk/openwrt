@@ -189,6 +189,18 @@ define U-Boot/zeropi
   BUILD_DEVICES:=friendlyarm_zeropi
 endef
 
+define U-Boot/mcr100
+  BUILD_SUBTARGET:=cortexa7
+  NAME:=B4COM MCR-100
+  BUILD_DEVICES:=b4com_mcr100
+endef
+
+define U-Boot/mcr200
+  BUILD_SUBTARGET:=cortexa7
+  NAME:=B4COM MCR-200
+  BUILD_DEVICES:=b4com_mcr200
+endef
+
 define U-Boot/nanopi_neo_air
   BUILD_SUBTARGET:=cortexa7
   NAME:=U-Boot for NanoPi NEO Air (H3)
@@ -432,6 +444,8 @@ UBOOT_TARGETS := \
 	Lamobo_R1 \
 	nanopi_m1_plus \
 	zeropi \
+	mcr100 \
+	mcr200 \
 	nanopi_neo \
 	nanopi_neo_air \
 	nanopi_neo_plus2 \

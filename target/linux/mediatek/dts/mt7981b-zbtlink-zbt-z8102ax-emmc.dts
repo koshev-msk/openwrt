@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7981b-zbtlink-zbt-z8102ax.dtsi"
+
+/ {
+	model = "Zbtlink ZBT-Z8102AX (EMMC)";
+	compatible = "zbtlink,zbt-z8102ax-emmc", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs-append = " root=PARTLABEL=rootfs rootwait";
+	};
+
+};
+
+&mmc0 {
+	pinctrl-names = "default" , "state_uhs";
+	pinctrl-0 = <&mmc0_pins_default>;
+	pinctrl-1 = <&mmc0_pins_uhs>;
+	bus-width = <8>;
+	max-frequency = <52000000>;
+	cap-mmc-highspeed;
+	vmmc-supply = <&reg_3p3v>;
+	non-removable;
+	status = "okay";
+
+	card@0 {
+		compatible = "mmc-card";
+		reg = <0>;
+
+		spi-max-frequency = <52000000>;
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+
+		block {
+			compatible = "block-device";
+
+			partitions {
+				compatible = "fixed-partitions";
+
+				block-partition-env  {
+					partname = "u-boot-env";
+					nvmem-layout {
+						compatible = "u-boot,env";
+					};
+				};
+
+				block-partition-factory {
+					partname = "factory";
+					nvmem-layout {
+						compatible = "fixed-layout";
+						#address-cells = <1>;
+						#size-cells = <1>;
+
+						eeprom_factory: eeprom@0 {
+							reg = <0x0 0x1000>;
+						};
+
+						macaddr_factory_4: macaddr@4 {
+							compatible = "mac-base";
+							reg = <0x4 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+					};
+				};
+			};
+		};
+	};
+};
+
+
+&pio {
+	mmc0_pins_default: mmc0-pins-default {
+		mux {
+			function = "flash";
+			groups = "emmc_45";
+		};
+	};
+
+	mmc0_pins_uhs: mmc0-pins-uhs {
+		mux {
+			function = "flash";
+			groups = "emmc_45";
+		};
+	};
+};
