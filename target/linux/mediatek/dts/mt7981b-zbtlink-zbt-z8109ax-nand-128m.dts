@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7981b-zbtlink-zbt-z8109ax-nand.dtsi"
+
+/ {
+	model = "Zbtlink ZBT-Z8109AX (nAND 128M)";
+	compatible = "zbtlink,zbt-z8109ax-nand-128m", "zbtlink,zbt-z8109ax-nand", "zbtlink,zbt-z8109ax", "mediatek,mt7981";
+
+};
+
+// use 64BM ubi size
+// mtdparts=nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),131072k(ubi)
+
+&firmware {
+	reg = <0x580000 0x8000000>;
+};
+
