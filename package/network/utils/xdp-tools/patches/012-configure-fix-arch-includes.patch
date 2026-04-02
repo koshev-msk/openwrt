@@ -1,0 +1,57 @@
+From 6ce30637951949212344f1968c3fd5e5adf1ffc3 Mon Sep 17 00:00:00 2001
+From: Sachin Tiptur <coolsachints at gmail.com>
+Date: Wed, 13 Sep 2023 12:47:31 +0000
+Subject: [PATCH] Fix build on arm64
+
+Fix the arm64 build by adding arch specific header files to
+CFLAGS and BPF_CFLAGS. Also, use `gcc -print-multiarch` to get
+arch name instead of `uname -m` which is not the right way.
+
+Signed-off-by: Sachin Tiptur <coolsachints at gmail.com>
+---
+ configure      | 7 +++++--
+ lib/defines.mk | 4 ++--
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+--- a/configure
++++ b/configure
+@@ -65,6 +65,7 @@ check_toolchain()
+     : ${M4=m4}
+     : ${EMACS=emacs}
+     : ${ARCH_INCLUDES=}
++    : ${ARCH_NAME=}
+ 
+     CLANG=$(find_tool clang "$CLANG")
+     LLC=$(find_tool llc "$LLC")
+@@ -76,6 +77,8 @@ check_toolchain()
+         fi;
+     done
+ 
++    ARCH_NAME=$($CC -print-multiarch 2>/dev/null)
++
+     clang_version=$($CLANG --version | grep -Po '(?<=clang version )[[:digit:]]+')
+     if [ "$?" -ne "0" ]; then
+         echo "*** ERROR: Couldn't execute '$CLANG --version'"
+@@ -109,7 +112,7 @@ check_toolchain()
+     if [ -z "$ARCH_INCLUDES" ]; then
+         for dir in $(echo | $CC -Wp,-v -E - 2>&1 | grep '^ '); do
+             local idir
+-            idir="${dir}/$(uname -m)-linux-gnu/"
++            idir="${dir}/${ARCH_NAME}/"
+             [ -d "$idir" ] && ARCH_INCLUDES="-I${idir} $ARCH_INCLUDES"
+         done
+     fi
+--- a/lib/defines.mk
++++ b/lib/defines.mk
+@@ -40,8 +40,8 @@ endif
+ 
+ DEFINES += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+ 
+-CFLAGS += -std=gnu11 -Wextra -Werror $(DEFINES)
+-BPF_CFLAGS += $(DEFINES) $(filter -ffile-prefix-map=%,$(CFLAGS))
++CFLAGS += -std=gnu11 -Wextra -Werror $(DEFINES) $(ARCH_INCLUDES)
++BPF_CFLAGS += $(DEFINES) $(filter -ffile-prefix-map=%,$(CFLAGS)) $(ARCH_INCLUDES)
+ 
+ CONFIGMK := $(LIB_DIR)/../config.mk
+ LIBMK := Makefile $(CONFIGMK) $(LIB_DIR)/defines.mk $(LIB_DIR)/common.mk $(LIB_DIR)/../version.mk
+

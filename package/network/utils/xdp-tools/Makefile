@@ -95,6 +95,9 @@ MAKE_VARS += \
 define Build/Configure
 	$(call Build/Configure/Default)
 	echo "BPF_CFLAGS += -I$(BPF_HEADERS_DIR)/tools/lib" >> $(PKG_BUILD_DIR)/config.mk
+ifeq ($(ARCH),mipsel)
+	echo "BPF_CFLAGS += -D__MIPSEL__" >> $(PKG_BUILD_DIR)/config.mk
+endif
 endef
 
 define Build/InstallDev

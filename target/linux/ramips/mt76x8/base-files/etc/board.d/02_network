@@ -141,7 +141,9 @@ ramips_setup_interfaces()
 	netgear,r6020|\
 	netgear,r6080|\
 	netgear,r6120|\
-	wavlink,wl-wn531a3)
+	wavlink,wl-wn531a3|\
+	zbtlink,zbt-we826-t3-16m|\
+	zbtlink,zbt-we826-t3-32m)
 		ucidef_add_switch "switch0" \
 			"0:lan:4" "1:lan:3" "2:lan:2" "3:lan:1" "4:wan" "6@eth0"
 		;;
@@ -194,6 +196,11 @@ ramips_setup_interfaces()
 	zbtlink,zbt-we1226)
 		ucidef_add_switch "switch0" \
 			"0:lan:2" "1:lan:1" "4:wan" "6@eth0"
+		;;
+	zbtlink,zbt-cpe2801-16m|\
+	zbtlink,zbt-cpe2801-32m)
+		ucidef_add_switch "switch0" \
+			"3:wan" "4:lan" "6@eth0"
 		;;
 	esac
 }

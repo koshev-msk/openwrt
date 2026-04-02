@@ -1041,12 +1041,53 @@ define Device/xiaomi_mi-ra75
 endef
 TARGET_DEVICES += xiaomi_mi-ra75
 
+define Device/zbtlink_zbt-we826-t3-16m
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE826-T3
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += zbtlink,zbt-we2126 zbt-we826-t3
+endef
+TARGET_DEVICES += zbtlink_zbt-we826-t3-16m
+
+define Device/zbtlink_zbt-we826-t3-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE826-T3
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += zbtlink,zbt-we826-t3-16m zbtlink,zbt-we2126 zbt-we826-t3
+endef
+TARGET_DEVICES += zbtlink_zbt-we826-t3-32m
+
+
 define Device/zbtlink_zbt-we1226
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE1226
 endef
 TARGET_DEVICES += zbtlink_zbt-we1226
+
+define Device/zbtlink_zbt-cpe2801-16m
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-16m
+
+define Device/zbtlink_zbt-cpe2801-32m
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += zbt-cpe2801 zbtlink,zbt-cpe2801-16m
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-32m
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k

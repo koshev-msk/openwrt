@@ -1,0 +1,26 @@
+From 70422c175abc240b0050f39fe57fab5277d3612a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20K=C3=A4stner?= <git at oliver-kaestner.de>
+Date: Sun, 29 Sep 2024 21:02:03 +0200
+Subject: [PATCH] xdp-filter: fix offsetof redefinition error with gcc 12.3.0
+
+This is fixed in gcc 13.2.0
+---
+ xdp-filter/xdpfilt_prog.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/xdp-filter/xdpfilt_prog.h
++++ b/xdp-filter/xdpfilt_prog.h
+@@ -18,6 +18,10 @@
+ 
+ /* Defines xdp_stats_map */
+ #include "xdp/xdp_stats_kern.h"
++/* offsetof is already defined in bpf/bpf_helpers.h,
++ * and including stddef.h of gcc 12.3.0 would fail.
++ */
++#undef offsetof
+ #include "xdp/parsing_helpers.h"
+ 
+ #ifdef FILT_MODE_DENY
+-- 
+2.43.0
+

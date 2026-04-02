@@ -1,0 +1,23 @@
+From 11356006dff4f902de0a493455ec94461bdd8dbc Mon Sep 17 00:00:00 2001
+From: ami-GS <1991.daiki at gmail.com>
+Date: Fri, 22 Mar 2024 16:58:42 -0700
+Subject: [PATCH] Fix include path of libxdp for each arch
+
+Signed-off-by: ami-GS <1991.daiki at gmail.com>
+---
+ lib/libxdp/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/libxdp/Makefile b/lib/libxdp/Makefile
+index cf0afa49..403d5a6e 100644
+--- a/lib/libxdp/Makefile
++++ b/lib/libxdp/Makefile
+@@ -28,7 +28,7 @@ PC_FILE := $(OBJDIR)/libxdp.pc
+ TEMPLATED_SOURCES := xdp-dispatcher.c
+ 
+ CFLAGS += -I$(HEADER_DIR)
+-BPF_CFLAGS += -I$(HEADER_DIR)
++BPF_CFLAGS += -I$(HEADER_DIR) $(ARCH_INCLUDES)
+ 
+ ifndef BUILD_STATIC_ONLY
+
