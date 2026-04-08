@@ -20,6 +20,12 @@ config KERNEL_BUILD_DOMAIN
 	  returned by 'uname -a' on running systems.
 	  If not set, uses system hostname at build time.
 
+config KERNEL_VERMAGIC
+	string "Specify vermagic for the build"
+	default ""
+	help
+	  Specify kernel vermagic. Leave it empty if you don't know what it is.
+
 config KERNEL_PRINTK
 	bool "Enable support for printk"
 	default y
