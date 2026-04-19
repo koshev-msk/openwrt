@@ -1,0 +1,14 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+	sleep 2
+	if [ -f /sys/class/thermal/thermal_zone0/policy ]; then
+		echo bang_bang > /sys/class/thermal/thermal_zone0/policy
+		logger -t "thermal" "Governor set to 'bang_bang'"
+	fi
+}
+
+
+

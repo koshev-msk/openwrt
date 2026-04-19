@@ -1195,7 +1195,7 @@ define Device/huastlink_hc-g60
   DEVICE_MODEL :=  HC-G60
   DEVICE_DTS := mt7981b-huastlink-hc-g60
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-hwmon-gpiofan
   KERNEL_IN_UBI := 1
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
@@ -1207,12 +1207,47 @@ define Device/huastlink_hc-g60
 endef
 TARGET_DEVICES += huastlink_hc-g60
 
+define Device/huastlink_hc-g60-v1
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G60
+  DEVICE_VARIANT := V01
+  DEVICE_DTS := mt7981b-huastlink-hc-g60-v1
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-hwmon-gpiofan
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g60-v1
+
+define Device/huastlink_hc-g80
+  DEVICE_VENDOR := HuastLink
+  DEVICE_MODEL :=  HC-G80
+  DEVICE_DTS := mt7981b-huastlink-hc-g80
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-hwmon-gpiofan
+  KERNEL_IN_UBI := 1
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 65536k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += huastlink_hc-g80
+
 define Device/huastlink_hc-g90
   DEVICE_VENDOR := HuastLink
   DEVICE_MODEL :=  HC-G90
   DEVICE_DTS := mt7981b-huastlink-hc-g90
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 kmod-hwmon-gpiofan
   KERNEL_IN_UBI := 1
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k

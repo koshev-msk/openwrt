@@ -5,15 +5,15 @@
 #include "mt7981.dtsi"
 
 / {
-	model = "HuastLink HC-G60";
-	compatible = "huastlink,hc-g60", "mediatek,mt7981";
+	model = "HuastLink HC-G80";
+	compatible = "huastlink,hc-g80", "mediatek,mt7981";
 	
 	aliases {
 		serial0 = &uart0;
 		led-boot = &led_status_green;
 		led-running = &led_status_green;
-		led-failsafe = &led_status_blue;
-		led-upgrade = &led_status_blue;
+		led-failsafe = &led_status_green;
+		led-upgrade = &led_status_green;
 		label-mac-device = &gmac0;
 	};
 	
@@ -33,26 +33,38 @@
 	};
 	/* NOT COMPLETE */	
 	leds {
-		compatible = "gpio-leds";		
+		compatible = "gpio-leds";
 
-		led_status_blue: blue {
-			label = "blue:status";
-			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
+		led_status_green: sys {
+			label = "green:sys";
+			gpios = <&pio 25 GPIO_ACTIVE_LOW>;
 		};
 
-		led_status_green: green {
-                        label = "green:status";
-                        gpios = <&pio 34 GPIO_ACTIVE_HIGH>;
+		5g {
+			label = "green:5g";
+			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy1tpt";
+		};
+
+		2g {
+                        label = "green:2g";
+                        gpios = <&pio 34 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy0tpt";
                 };
 		
-		uart {
-			label = "green:uart";
-			gpios = <&pio 27 GPIO_ACTIVE_HIGH>;
+		wwan {
+			label = "green:wwan";
+			gpios = <&pio 24 GPIO_ACTIVE_LOW>;
 		};
 		
 		wan {
 			label = "green:wan";
 			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
+		};
+
+		net {
+			label = "green:net";
+			gpios = <&pio 23 GPIO_ACTIVE_LOW>;
 		};
 	};
 	watchdog {
@@ -82,7 +94,7 @@
 	gpio_fan: gpio-fan {
 		compatible = "gpio-fan";
 		gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
-		gpio-fan,speed-map = <0 0 1 1>; /* 0 RPM level 0, 7500 RPM for level 1 */
+		gpio-fan,speed-map = <0 0 1 1>; /* OFF level 0, ON for level 1 */
 		#cooling-cells = <2>;
 		status = "okay";
 	};
@@ -124,7 +136,7 @@
 		phy-mode = "2500base-x";
 		
 		nvmem-cell-names = "mac-address";
-		nvmem-cells = <&mac_address_factory_4>;
+		nvmem-cells = <&mac_address_factory_a>;
 		
 		fixed-link {
 			speed = <2500>;
@@ -141,7 +153,7 @@
 		phy-handle = <&int_gbe_phy>;
 		
 		nvmem-cell-names = "mac-address";
-		nvmem-cells = <&mac_address_factory_a>;
+		nvmem-cells = <&mac_address_factory_2a>;
 	};
 };
 
@@ -247,8 +259,7 @@
 			};
 		
 			/*
-				ubi partition has size 0x7280000, but uboot
-				default nmbm partitions by:
+				ubi uboot default nmbm partitions by:
 				nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),524288k(ubi)
 			*/
 			partition@580000 {
@@ -265,12 +276,12 @@
 		#size-cells = <0>;
 		
 		port@0 {
-			reg = <0>;
+			reg = <1>;
 			label = "lan1";
 		};
 		
 		port@1 {
-			reg = <1>;
+			reg = <0>;
 			label = "lan2";
 		};
 		
@@ -279,9 +290,14 @@
 			label = "lan3";
 		};
 		
+		/* connect to RTL8370N switch */
 		port@3 {
 			reg = <3>;
-			label = "lan4";
+			label = "lan4-8";
+			fixed-link {
+				speed = <1000>;
+				full-duplex;
+			};
 		};
 		
 		/* port connect to rtl8125bg NIC ? */
@@ -361,8 +377,8 @@
 	
 	band@1 {
 		reg = <1>;
-		nvmem-cells = <&mac_address_factory_2a>;
+		nvmem-cells = <&mac_address_factory_4>;
 		nvmem-cell-names = "mac-address";
 	};
 };
-	
+

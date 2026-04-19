@@ -32,7 +32,9 @@ zbtlink,zbt-z8109ax-nand-all)
 	ucidef_add_gpio_switch "modem3" "Power 3rd modem" "modem3" "1"
 	ucidef_add_gpio_switch "modem4" "Power 4th modem" "modem4" "1"
 	;;
-huastlink,hc-g60)
+huastlink,hc-g60|\
+huastlink,hc-g60-v1|\
+huastlink,hc-g80)
 	ucidef_add_gpio_switch "modem" "Modem pwr" "modem" "1"
 	ucidef_add_gpio_switch "sim" "SIM switch" "sim" "1"
 	;;
