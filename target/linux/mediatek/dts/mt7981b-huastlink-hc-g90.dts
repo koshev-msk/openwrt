@@ -90,7 +90,7 @@
 	gpio_fan: gpio-fan {
 		compatible = "gpio-fan";
 		gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
-		gpio-fan,speed-map = <0 0 7500 1>; /* 0 RPM level 0, 7500 RPM for level 1 */
+		gpio-fan,speed-map = <0 0 1 1>; /* OFF level 0, ON for level 1 */
 		#cooling-cells = <2>;
 		status = "okay";
 	};
@@ -118,7 +118,7 @@
 	cooling-maps {
 		map0 {
 			trip = <&cpu_fan_trip>;
-			cooling-device = <&gpio_fan 1 1>;
+			cooling-device = <&gpio_fan 0 1>;
 		};
 	};
 };
