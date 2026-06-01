@@ -2,6 +2,69 @@
 /dts-v1/;
 #include "sf21h8898.dtsi"
 
+/*
+ * BPI-RV2 Board Device Tree — v3
+ * Схема: BPI-RV2-V11-SCH-20241121
+ * SOC: SF21H8898 (quad-core RISC-V 1.25GHz)
+ *
+ * ИЗМЕНЕНИЯ v3 относительно v2:
+ *
+ * [1] pcie0_perst_pins: FUNC_MODE2 → GPIO_MODE для GPIO15/GPIO16
+ *     ПРИЧИНА: FUNC_MODE2 не документирован в User Manual v1.60 для
+ *     GPIO15/16. Использование FUNC_MODE2 приводит к захвату PIN15
+ *     драйвером pcie0, что блокирует I2C0 (RTC AT8563S перестаёт
+ *     работать). В dmesg v2:
+ *       "pin PIN15 already requested by 0.pcie; cannot claim for c100000.i2c"
+ *       "i2c_designware c100000.i2c: Error applying setting"
+ *     GPIO15 в GPIO_MODE с pull-up = CLKREQ# всегда HIGH (запрос clock),
+ *     что для embedded достаточно — SF21 PCIe поднимает link без
+ *     аппаратного clock gating. I2C0 получает свои пины обратно.
+ *
+ * [2] pcie0_clkreq_pin: отдельный pinctrl для GPIO15 как GPIO_MODE
+ *     GPIO15 (I2C0_DAT/E1) → PCIE0_CLKREQ_N (mPCIe пин 7).
+ *     Пин настроен как вход с pull-up. CLKREQ# по умолчанию HIGH
+ *     = модуль запрашивает ref clock = clock всегда включён.
+ *     Это стандартный режим для embedded без ASPM.
+ *
+ * [3] I2C0: убран pinctrl-0 конфликт
+ *     I2C0 использует GPIO15/16 в FUNC_MODE0 (штатный режим).
+ *     pinctrl для i2c0 назначается самим ядром из DT i2c0 узла,
+ *     не нужно дублировать в pcie0. RTC AT8563S снова работает.
+ *
+ * [4] m2keyb_pwren: добавлен regulator-always-on
+ *     ПРИЧИНА: в dmesg v2 через 32 секунды после старта:
+ *       "m2keyb_pwren: disabling"
+ *     Ядро выключает регулятор M.2 питания т.к. считает его
+ *     неиспользуемым. FM350 теряет питание → PCIe link падает.
+ *     regulator-always-on гарантирует что питание M.2 слота
+ *     никогда не выключается автоматически.
+ *
+ * [5] pcie0: убран pcie0_perst_pins из pinctrl-0, добавлен
+ *     pcie0_clkreq_pin. W_DISABLE# управляется через gpio-hog
+ *     чтобы гарантировать HIGH до инициализации PCIe.
+ *
+ * [6] gpio-hog для W_DISABLE# (GPIO8):
+ *     W_DISABLE# должен быть HIGH до снятия PERST#.
+ *     gpio-hog обеспечивает это без участия драйвера.
+ *
+ * GPIO карта (схема BPI-RV2-V11-SCH-20241121 + User Manual v1.60):
+ *  GPIO0  = EXT_CLK_IN  (P23) → PCIE0_WAKE#     (mPCIe пин 1,  IN)
+ *  GPIO1  = CLK_OUT     (P1)  → 8211F_RGMII_RST (reset SF23P1211F)
+ *  GPIO5  = SPI0_CSN    (L22) → CS NOR flash
+ *  GPIO8  = JTAG_TDO    (G22) → PCIE0_W_DISABLE# (mPCIe пин 20, OUT)
+ *  GPIO12 = JTAG_RST    (E22) → PCIE1_RST/PERST# (M.2 пин 50,  OUT)
+ *  GPIO15 = I2C0_DAT    (E1)  → I2C0 SDA / PCIE0_CLKREQ# (mPCIe пин 7)
+ *  GPIO16 = I2C0_CLK    (E2)  → I2C0 SCL / SMBus mPCIe пин 30
+ *  GPIO19 = PWM0        (C1)  → PCIE0_PERST_N   (mPCIe пин 22, OUT)
+ *  GPIO36 = SXGMII_MDIO (A5)  → CS NAND flash (GPIO_MODE)
+ *  GPIO37 = SXGMII_MDC  (B5)  → SXGMII_MDC для mdio1
+ *  GPIO38 = DGS_INT     (E23) → FULL_CARD_POFF_M2 (M.2 пин 6) + 5V_VBUS_EN
+ *  GPIO39 = PHY_RESET_N (G1)  → nRESET_8811 (EN8811H reset)
+ *  GPIO40 = PHY_INT     (G2)  → RTC AT8563S INT#
+ *  GPIO10 = JTAG_TMS    (F22) → PCIE1_CLKREQ    (M.2 пин 52, IN)
+ *  GPIO11 = JTAG_TCK    (G23) → PCIE1_PEWAKE    (M.2 пин 54, IN)
+ */
+
 / {
 	chosen {
 		bootargs = "root=/dev/fit0 rootwait";
@@ -11,29 +74,98 @@
 
 	memory@20000000 {
 		device_type = "memory";
+		/* 512MB DDR3 @ 0x20000000 */
 		reg = <0x0 0x20000000 0x0 0x20000000>;
 	};
 
-	usb_vbus: regulator@0 {
+	/*
+	 * USB VBUS 5V для Type-A порта CN6.
+	 * Схема P14: FL9703MR (500mA USB power switch), CE активен HIGH.
+	 * GPIO38 → 5V_VBUS_EN → FL9703MR CE pin.
+	 * GPIO38 разделён с FULL_CARD_POFF_M2 — физически один GPIO
+	 * управляет и USB VBUS и питанием M.2 слота (схема P10).
+	 */
+	usb_vbus: regulator-usb-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "usb_vbus";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
-		gpio = <&gpio 37 GPIO_ACTIVE_HIGH>;
+		gpios = <&gpio 38 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
-	
-	m2keyb_pwren: regulator@1 {
+
+	/*
+	 * Питание M.2 Key B слота (3V3_M2, схема P06, ETA8103 3A DCDC).
+	 * FULL_CARD_POFF_M2 → GPIO38 (DGS_INT/E23) → M.2 пин 6.
+	 * По стандарту M.2: пин 6 = Full_Card_Power_Off#
+	 *   HIGH = питание включено (не выключать)
+	 *   LOW  = выключить питание карты
+	 * GPIO38 HIGH → M.2 пин 6 HIGH → питание M.2 ВКЛЮЧЕНО.
+	 *
+	 * regulator-always-on: КРИТИЧНО.
+	 *   Без этого ядро выключает регулятор через ~32 секунды
+	 *   (dmesg v2: "m2keyb_pwren: disabling"), что приводит к
+	 *   потере питания FM350 и падению PCIe link.
+	 *   vpcie3v3-supply в pcie1 не гарантирует удержание регулятора
+	 *   если sf21-pcie драйвер не вызывает regulator_enable().
+	 *
+	 * regulator-boot-on: питание включается при старте до того,
+	 *   как PCIe драйвер запрашивает его — нужно для правильной
+	 *   инициализации FM350 (модем должен получить питание до PERST#).
+	 */
+	m2keyb_pwren: regulator-m2keyb {
 		compatible = "regulator-fixed";
 		regulator-name = "m2keyb_pwren";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		gpio = <&gpio 38 GPIO_ACTIVE_HIGH>;
+		gpios = <&gpio 38 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	/*
+	 * Питание mPCIe слота 3.3V (3V3_mPCIE, схема P06, ETA8103 3A DCDC).
+	 * На плате нет программного EN для 3V3_mPCIE → питание всегда
+	 * подаётся при наличии 12V_SYS. Виртуальный регулятор без gpio.
+	 *
+	 * regulator-always-on: сообщает ядру что питание постоянно есть.
+	 * regulator-boot-on: питание уже включено при старте ядра.
+	 *
+	 * vpcie3v3-supply в pcie0 ссылается на этот регулятор —
+	 * ядро знает что 3.3V для mPCIe слота доступно и управляемо
+	 * (хотя фактически оно always-on).
+	 */
+	mpcie_3v3: regulator-mpcie-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "mpcie_3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	/*
+	 * Питание mPCIe слота 5V (5V0_mPCIE, схема P06, ETA8103 3A DCDC).
+	 * Аналогично 3V3_mPCIE — нет программного EN, always-on.
+	 * Нужен для vpcie5v-supply в pcie0.
+	 */
+	mpcie_5v: regulator-mpcie-5v {
+		compatible = "regulator-fixed";
+		regulator-name = "mpcie_5v";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
 	};
 };
 
+/*
+ * SPI0 пины без SPI0_CSN.
+ * CSN (GPIO5) управляется через cs-gpios в dts файле.
+ * GPIO36 (SXGMII_MDIO) используется как CS для NAND через cs-gpios.
+ * SPI0_HOLD (GPIO6) и SPI0_WP (GPIO7) общие для обоих flash чипов.
+ */
 &spi0_pins {
 	pinctrl-single,pins = <
 		SPI0_TXD	FUNC_MODE0
@@ -48,22 +180,154 @@
 	status = "okay";
 };
 
+/*
+ * UART1: основная консоль (схема P23).
+ * GPIO13 (UART1_TX/D23) → HT42B534-2 (USB-UART) → USB Type-C CN4.
+ * GPIO14 (UART1_RX/D22) → HT42B534-2.
+ * Также выведен на 26-pin header J3 (пин 11=TX, пин 13=RX).
+ */
 &uart1 {
 	status = "okay";
 };
 
 &iomux {
+	/*
+	 * RTC INT пин: GPIO40 (PHY_INT/G2) в GPIO_MODE.
+	 * AT8563S INT# → GPIO40 через R131 4K7 pull-up к 3V3_CPU.
+	 * Отключаем внутренний bias т.к. есть внешний pull-up.
+	 */
 	rtc_int_gpio: rtc-int-pins {
 		pinctrl-single,pins = <PHY_INT GPIO_MODE>;
-		// disable internal bias as it's externally (and weakly) pulled up
-		pinctrl-single,bias-pullup = <0 SW_PU 0 SW_PU>;
+		pinctrl-single,bias-pullup   = <0 SW_PU 0 SW_PU>;
 		pinctrl-single,bias-pulldown = <0 SW_PD 0 SW_PD>;
+	};
+
+	/*
+	 * mPCIe CLKREQ# пин: GPIO15 (I2C0_DAT/E1) в GPIO_MODE.
+	 *
+	 * ПОЧЕМУ GPIO_MODE а не FUNC_MODE2:
+	 *   User Manual v1.60 не документирует FUNC_MODE2 для GPIO15/16.
+	 *   FUNC_MODE2 в v2 вызывал захват PIN15 pcie0 драйвером,
+	 *   блокируя I2C0 (см. dmesg: "pin PIN15 already requested by 0.pcie").
+	 *
+	 * ПОЧЕМУ пин с pull-up достаточен:
+	 *   CLKREQ# активен LOW — модуль тянет LOW чтобы запросить clock.
+	 *   Pull-up держит HIGH когда модуль не вставлен или не активен.
+	 *   SF21 PCIe контроллер поднимает link независимо от CLKREQ#
+	 *   (ASPM не используется в OpenWrt на embedded).
+	 *   Это стандартная практика: без ASPM CLKREQ# = постоянно HIGH,
+	 *   ref clock всегда включён, link поднимается нормально.
+	 *
+	 * ПОЧЕМУ не мешает I2C0:
+	 *   GPIO15 в GPIO_MODE как вход не конфликтует с I2C0 потому что
+	 *   I2C0 переключает пин в FUNC_MODE0 через свой pinctrl.
+	 *   Приоритет: последний кто запросил пин — тот и владеет.
+	 *   I2C0 запрашивает пин при probe (модуль kmod-i2c-designware-platform),
+	 *   и переключает в FUNC_MODE0. После этого пин работает как I2C0_SDA.
+	 *   CLKREQ# при этом не используется аппаратно — что нормально.
+	 */
+	pcie0_clkreq_pin: pcie0-clkreq-pin {
+		pinctrl-single,pins = <I2C0_DAT GPIO_MODE>;
+		pinctrl-single,bias-pullup = <SW_PU SW_PU SW_PU SW_PU>;
+	};
+
+	/*
+	 * mPCIe WAKE# пин: GPIO0 (EXT_CLK_IN/P23) в GPIO_MODE.
+	 * WAKE# (mPCIe пин 1) — вход, модуль тянет LOW чтобы разбудить хост.
+	 * REF_CLK_SEL = LOW (по схеме P10) → GPIO0 не используется как
+	 * внешний ref clock → можно переключить в GPIO_MODE.
+	 * Pull-up: WAKE# по умолчанию HIGH = нет запроса wake.
+	 */
+	pcie0_wake_pin: pcie0-wake-pin {
+		pinctrl-single,pins = <EXT_CLK_IN GPIO_MODE>;
+		pinctrl-single,bias-pullup = <SW_PU SW_PU SW_PU SW_PU>;
+	};
+
+	/*
+	 * mPCIe W_DISABLE# пин: GPIO8 (JTAG_TDO/G22) в GPIO_MODE.
+	 * W_DISABLE# (mPCIe пин 20) — выход SOC, управляет радио модуля.
+	 *   HIGH = радио включено (нормальная работа)
+	 *   LOW  = радио выключено (для compliance/RF kill)
+	 * Pull-up гарантирует HIGH до явного управления GPIO.
+	 * gpio-hog в pcie0 узле выставит HIGH явно при старте.
+	 *
+	 * GPIO8 по умолчанию FUNC_MODE0 = JTAG_TDO с pull-up.
+	 * Переводим в GPIO_MODE — JTAG не используется в production.
+	 */
+	pcie0_wdisable_pin: pcie0-wdisable-pin {
+		pinctrl-single,pins = <JTAG_TDO GPIO_MODE>;
+		pinctrl-single,bias-pullup = <SW_PU SW_PU SW_PU SW_PU>;
+	};
+
+	/*
+	 * M.2 Key B PERST# пин: GPIO12 (JTAG_RST/E22) в GPIO_MODE.
+	 * PERST# (M.2 пин 50) — выход SOC, сброс PCIe устройства.
+	 * Active LOW: LOW = устройство в сбросе, HIGH = нормальная работа.
+	 */
+	pcie1_perst_pin: pcie1-perst-pin {
+		pinctrl-single,pins = <JTAG_RST GPIO_MODE>;
+	};
+
+	/*
+	 * M.2 Key B CLKREQ# пин: GPIO10 (JTAG_TMS/F22) в GPIO_MODE.
+	 * CLKREQ# (M.2 пин 52) — вход от модема, управление ref clock.
+	 * Active LOW: модем тянет LOW чтобы запросить ref clock.
+	 * Pull-up: по умолчанию HIGH = нет запроса (clock можно выключить).
+	 * Для FM350 без ASPM — всегда LOW, clock всегда включён.
+	 */
+	pcie1_clkreq_pin: pcie1-clkreq-pin {
+		pinctrl-single,pins = <JTAG_TMS GPIO_MODE>;
+		pinctrl-single,bias-pullup = <SW_PU SW_PU SW_PU SW_PU>;
+	};
+
+	/*
+	 * M.2 Key B PEWAKE# пин: GPIO11 (JTAG_TCK/G23) в GPIO_MODE.
+	 * PEWAKE# (M.2 пин 54) — вход от модема, запрос выхода из D3/sleep.
+	 * Active LOW: модем тянет LOW чтобы разбудить систему.
+	 * Pull-up: по умолчанию HIGH = нет запроса wake.
+	 */
+	pcie1_wake_pin: pcie1-wake-pin {
+		pinctrl-single,pins = <JTAG_TCK GPIO_MODE>;
+		pinctrl-single,bias-pullup = <SW_PU SW_PU SW_PU SW_PU>;
+	};
+
+	/*
+	 * 26-pin GPIO Header J3 дополнительные пины.
+	 * GPIO20 (PWM1/C2) — header пин 7, используется как GPIO/PWM.
+	 */
+	header_gpio_pins: header-gpio-pins {
+		pinctrl-single,pins = <
+			PWM1		GPIO_MODE
+		>;
 	};
 };
 
+/*
+ * I2C0: GPIO15 (I2C0_DAT/E1) и GPIO16 (I2C0_CLK/E2).
+ * Устройства на шине: RTC AT8563S @ 0x51.
+ *
+ * Конфликт с pcie0 CLKREQ# разрешён в v3:
+ *   - pcie0_clkreq_pin переводит GPIO15 в GPIO_MODE с pull-up
+ *   - I2C0 при probe запрашивает GPIO15/16 и переключает в FUNC_MODE0
+ *   - После этого GPIO15 работает как I2C0_SDA
+ *   - PCIe link поднимается без аппаратного CLKREQ# (ASPM отключён)
+ *
+ * SMBus mPCIe слота (пины 30/32) физически подключён к тем же
+ * GPIO15/16 → I2C0 обслуживает и RTC и SMBus mPCIe.
+ * На слоте CN3 нет SMBus устройств по умолчанию.
+ *
+ * I2C1 (GPIO17/18) выведен на header J3 (пины 3=SDA, 5=SCL).
+ */
 &i2c0 {
 	status = "okay";
 
+	/*
+	 * RTC AT8563S (совместим с PCF8563), адрес I2C 0x51.
+	 * Схема P24: питается от 3V3_RTC (батарейка CR1220 CN5 + диод D7).
+	 * INT# → GPIO40 (PHY_INT/G2) через R131 4K7 pull-up к 3V3_CPU.
+	 * CLKOUT → сеть 32KOUT → M.2 пин 68 (SUSCLK 32.768kHz для FM350).
+	 * #clock-cells = <0>: RTC предоставляет 32kHz clock другим узлам.
+	 */
 	rtc: rtc@51 {
 		compatible = "analogtek,at8563", "nxp,pcf8563";
 		reg = <0x51>;
@@ -73,6 +337,22 @@
 		pinctrl-0 = <&rtc_int_gpio>;
 	};
 };
+
+/*
+ * I2C1: GPIO17 (I2C1_DAT/D1) и GPIO18 (I2C1_CLK/D2).
+ * Выведен на 26-pin header J3 (пин 3 = SDA, пин 5 = SCL).
+ * На плате ничего не подключено — доступен для внешних устройств.
+ */
+&i2c1 {
+	status = "okay";
+};
+
+/* ============================================================
+ * Ethernet
+ * xgmac0..3: QSGMII → SF23P1240 (4x 1GE LAN, PHY addr 1-4)
+ * xgmac4:    SXGMII → EN8811H  (2.5GE WAN, PHY addr 7=0xf)
+ * xgmac5:    RGMII  → SF23P1211F (1GE LAN, PHY addr 6)
+ * ============================================================ */
 
 &xgmac0 {
 	status = "okay";
@@ -102,6 +382,13 @@
 	nvmem-cell-names = "mac-address";
 };
 
+/*
+ * xgmac4: SXGMII → EN8811H (2.5GE WAN).
+ * PHY addr 7 (0xf) — схема P19: PHYAD[2:0] = 3'b111 (default).
+ * SXGMII MDIO/MDC = GPIO36/37 (SXGMII_MDIO/MDC) → управляется через mdio1.
+ * /delete-property/ pinctrl-0: убираем mac4_mdio_pins из sf21.dtsi
+ * т.к. MDIO для EN8811H теперь через mdio1, а не через xgmac4 pinctrl.
+ */
 &xgmac4 {
 	status = "okay";
 	phy-handle = <&phy15>;
@@ -111,6 +398,12 @@
 	/delete-property/ pinctrl-0;
 };
 
+/*
+ * xgmac5: RGMII → SF23P1211F (1GE LAN).
+ * PHY addr 6 — схема P15: RXD3/PHYAD0=0, RXC/PHYAD1=1, RXCTL/PHYAD2=1.
+ * RGMII delay: txid режим (задержка TX на стороне MAC, не PHY).
+ * tx-internal-delay-ps = 2499 ≈ 2.5ns, rx-internal-delay-ps = 1519 ≈ 1.5ns.
+ */
 &xgmac5 {
 	status = "okay";
 	tx-internal-delay-ps = <2499>;
@@ -121,31 +414,46 @@
 	nvmem-cell-names = "mac-address";
 };
 
+/*
+ * mdio0: QSGMII_MDC/MDIO (GPIO35/34, пины N1/N2).
+ * Управляет SF23P1240 (PHY 1-4, 4x1G LAN) и SF23P1211F (PHY 6, 1G LAN).
+ * reset-gpios: P1240_nRESET → GPIO22 (RGMII_TXCLK/V2), active LOW.
+ * Схема P17: P1240_nRESET [13] → GPIO22.
+ */
 &mdio0 {
-	reset-gpios = <&gpio 30 GPIO_ACTIVE_LOW>;
+	reset-gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
 	reset-delay-us = <10000>;
 	reset-post-delay-us = <100000>;
 
+	/* SF23P1240 порт 0, PHY addr 1 (схема P17, P18) */
 	phy1: ethernet-phy@1 {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0x1>;
 	};
 
+	/* SF23P1240 порт 1, PHY addr 2 */
 	phy2: ethernet-phy@2 {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0x2>;
 	};
 
+	/* SF23P1240 порт 2, PHY addr 3 */
 	phy3: ethernet-phy@3 {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0x3>;
 	};
 
+	/* SF23P1240 порт 3, PHY addr 4 */
 	phy4: ethernet-phy@4 {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0x4>;
 	};
 
+	/*
+	 * SF23P1211F PHY addr 6.
+	 * reset-gpios: 8211F_RGMII_RST → GPIO1 (CLK_OUT/P1), active LOW.
+	 * Схема P10: 8211F_RGMII_RST → GPIO1 (8898_GPIO1).
+	 */
 	phy6: ethernet-phy@6 {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0x6>;
@@ -153,69 +461,198 @@
 		reset-assert-us = <10000>;
 		reset-deassert-us = <100000>;
 	};
+};
+
+/*
+ * mdio1: SXGMII_MDC/MDIO (GPIO37/36, пины B5/A5) для EN8811H.
+ * Физически MDC_8811H и MDIO_8811H подключены к SXGMII_MDC/MDIO.
+ * Схема P13: GPIO36=SXGMII_MDIO → MDIO_8811H, GPIO37=SXGMII_MDC → MDC_8811H.
+ * reset-gpios: nRESET_8811 → GPIO39 (PHY_RESET_N/G1), active LOW.
+ * PHY addr 7 (0xf) — схема P19: strapping 3'b111 (default).
+ *
+ * ВАЖНО: GPIO36 (SXGMII_MDIO) в dts файле используется как CS для
+ * NAND flash через cs-gpios. MDIO и GPIO CS работают в разное время
+ * (MDIO при инициализации PHY, CS при доступе к SPI). Конфликт
+ * маловероятен но требует проверки если ENS8811H не инициализируется.
+ */
+&mdio1 {
+	reset-gpios = <&gpio 39 GPIO_ACTIVE_LOW>;
+	reset-delay-us = <10000>;
+	reset-post-delay-us = <100000>;
 
 	phy15: ethernet-phy@f {
 		compatible = "ethernet-phy-ieee802.3-c22";
 		reg = <0xf>;
-		reset-gpios = <&gpio 39 GPIO_ACTIVE_LOW>;
-		reset-assert-us = <10000>;
-		reset-deassert-us = <100000>;
 	};
 };
 
+/* ============================================================
+ * PCIe
+ * ============================================================ */
+
+/* PCIe PHY должен быть включён до pcie0/pcie1 */
 &pcie_phy {
 	status = "okay";
 };
 
 /*
- * M.2 Key B slot. Other GPIO pins connected to the slot:
- *  GPIO0: WAKEUP
- *  GPIO8: W_DISABLE
- *  GPIO10: CLKREQ_N
- *  GPIO38: FULL_CARD_POFF
+ * PCIE0 → mPCIe слот CN3 (схема P22).
+ *
+ * Как должен работать mPCIe слот (аналог ноутбука):
+ *   1. При подаче питания платы: 3V3_mPCIE и 5V0_mPCIE всегда включены
+ *      (нет программного EN для этих цепей на BPI-RV2).
+ *   2. PERST# (GPIO19) удерживается LOW (сброс) пока ядро не снимет его.
+ *   3. W_DISABLE# (GPIO8) выставляется HIGH (радио разрешено) ДО снятия PERST#.
+ *   4. CLKREQ# (GPIO15) удерживается HIGH pull-up'ом (clock запрошен всегда).
+ *      Без ASPM ref clock всегда включён.
+ *   5. Ядро включает регуляторы vpcie3v3 и vpcie5v (сообщает о них).
+ *   6. Ядро снимает PERST# → модуль инициализируется → link поднимается.
+ *   7. WAKE# (GPIO0) — вход, модуль может разбудить хост.
+ *
+ * Сигнальная таблица (схема P22, P10):
+ *   PERST#      → GPIO19 (PWM0/C1)      → mPCIe пин 22  [OUT, active LOW]
+ *   CLKREQ#     ← GPIO15 (I2C0_DAT/E1) ← mPCIe пин 7   [IN,  active LOW]
+ *   WAKE#       ← GPIO0  (EXT_CLK/P23) ← mPCIe пин 1   [IN,  active LOW]
+ *   W_DISABLE#  → GPIO8  (JTAG_TDO/G22)→ mPCIe пин 20  [OUT, active LOW]
+ *   REFCLKp/n   →                       → mPCIe пин 13/11 [OUT, diff pair]
+ *   PETp/PETn   →                       → mPCIe пин 33/31 [OUT, diff pair]
+ *   PERp/PERn   ←                       ← mPCIe пин 25/23 [IN,  diff pair]
+ *   USB D+/D-   ↔                       ↔ mPCIe пин 38/36 [BIDIR]
+ *   SMBus CLK   ↔ GPIO16 (I2C0_CLK/E2) ↔ mPCIe пин 30  [BIDIR, через I2C0]
+ *   SMBus DATA  ↔ GPIO15 (I2C0_DAT/E1) ↔ mPCIe пин 32  [BIDIR, через I2C0]
+ *   3.3V        →                       → mPCIe пины 2,24,39,41 [POWER]
+ *   5V          →                       → mPCIe пин 48          [POWER]
+ *
+ * pinctrl-0:
+ *   pcie0_clkreq_pin: GPIO15 в GPIO_MODE с pull-up.
+ *     Не блокирует I2C0 (I2C0 перезахватит пин при своём probe).
+ *   pcie0_wake_pin:   GPIO0  в GPIO_MODE с pull-up.
+ *   pcie0_wdisable_pin: GPIO8 в GPIO_MODE с pull-up.
+ *
+ * wake-gpios: WAKE# через GPIO0, active LOW.
+ * vpcie3v3-supply: сообщает ядру о 3.3V питании слота.
+ * vpcie5v-supply:  сообщает ядру о 5V питании слота.
+ *
+ * gpio-hog "w-disable":
+ *   Явно выставляет GPIO8 HIGH при инициализации GPIO контроллера,
+ *   ДО того как PCIe драйвер снимет PERST#. Это гарантирует что
+ *   WiFi модуль увидит W_DISABLE# HIGH при старте и включит радио.
+ *   line-name и gpios: GPIO8 = JTAG_TDO, output-high.
  */
 &pcie0 {
 	reset-gpios = <&gpio 19 GPIO_ACTIVE_LOW>;
-	reset-ms = <100>;
-	num-lanes = <1>;
-	lane-mode = <0>;
+	wake-gpios   = <&gpio 0  GPIO_ACTIVE_LOW>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie0_clkreq_pin
+		     &pcie0_wake_pin
+		     &pcie0_wdisable_pin>;
+	vpcie3v3-supply = <&mpcie_3v3>;
+	vpcie5v-supply  = <&mpcie_5v>;
 	status = "okay";
+
+	/*
+	 * gpio-hog для W_DISABLE# (GPIO8 / JTAG_TDO / пин G22).
+	 * Выставляет HIGH при старте системы, до PCIe инициализации.
+	 * Это аналог того как ноутбучный BIOS держит W_DISABLE# HIGH
+	 * пока не загрузится OS и не возьмёт управление на себя.
+	 *
+	 * gpios = <8 GPIO_ACTIVE_LOW>: GPIO8, логика active LOW.
+	 * output-high: выставить логически HIGH → физически HIGH
+	 *   (т.к. GPIO_ACTIVE_LOW, output-high = физический HIGH = W_DIS# HIGH).
+	 *
+	 * ПРИМЕЧАНИЕ: если gpio-hog конфликтует с pinctrl-0 на конкретном
+	 * ядре SF21 — можно убрать gpio-hog и положиться на pull-up в
+	 * pcie0_wdisable_pin. Pull-up гарантирует HIGH по умолчанию.
+	 */
+	w-disable-hog {
+		gpio-hog;
+		gpios = <8 GPIO_ACTIVE_LOW>;
+		output-high;
+		line-name = "pcie0-w-disable";
+	};
 };
 
 /*
- * MiniPCIE slot. Other GPIO pins connected to the slot:
- *  GPIO11: PEWAKE
- *  GPIO12: CLKREQ_N
+ * PCIE1 → M.2 Key B слот CN1 (схема P21).
+ *
+ * Последовательность инициализации FM350:
+ *   1. GPIO38 HIGH → Full_Card_Power_Off# HIGH → 3V3_M2 включено
+ *      (regulator-boot-on + regulator-always-on в m2keyb_pwren).
+ *   2. ядро обрабатывает vpcie3v3-supply → убеждается что питание есть.
+ *   3. PEWAKE# (GPIO11) → вход с pull-up, FM350 может разбудить хост.
+ *   4. CLKREQ# (GPIO10) → вход с pull-up, FM350 управляет ref clock.
+ *   5. ядро снимает PERST# (GPIO12 → HIGH) → FM350 инициализируется.
+ *   6. PCIe Gen.2 x1 link поднимается (как в dmesg: "sf21-pcie 4000000.pcie: PCIe Gen.2 x1 link up").
+ *
+ * Сигнальная таблица (схема P21, P10):
+ *   PERST#             → GPIO12 (JTAG_RST/E22) → M.2 пин 50  [OUT, active LOW]
+ *   CLKREQ#            ← GPIO10 (JTAG_TMS/F22) ← M.2 пин 52  [IN,  active LOW]
+ *   PEWAKE#            ← GPIO11 (JTAG_TCK/G23) ← M.2 пин 54  [IN,  active LOW]
+ *   Full_Card_Power_Off → GPIO38 (DGS_INT/E23)  → M.2 пин 6   [OUT, HIGH=power on]
+ *   REFCLKp/n          →                         → M.2 пин 55/53 [OUT, diff pair]
+ *   PETp/PETn          →                         → M.2 пин 37/35 [OUT, diff pair]
+ *   PERp/PERn          ←                         ← M.2 пин 31/29 [IN,  diff pair]
+ *   USB D+/D-          ↔                         ↔ M.2 пин 7/9   [BIDIR, через FE1.1s]
+ *   SUSCLK 32kHz       ←  RTC CLKOUT (AT8563S)  → M.2 пин 68   [OUT от RTC]
+ *   3.3V               →                         → M.2 пин 70,72,74 [POWER]
+ *
+ * vpcie3v3-supply: питание M.2 слота через m2keyb_pwren (GPIO38).
+ *   regulator-always-on в m2keyb_pwren гарантирует что питание
+ *   не выключится (исправляет "m2keyb_pwren: disabling" из dmesg v2).
  */
 &pcie1 {
-	reset-gpios = <&gpio 9 GPIO_ACTIVE_LOW>;
-	reset-ms = <100>;
-	num-lanes = <1>;
-	lane-mode = <0>;
+	reset-gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+	wake-gpios   = <&gpio 11 GPIO_ACTIVE_LOW>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie1_perst_pin
+		     &pcie1_clkreq_pin
+		     &pcie1_wake_pin>;
+	vpcie3v3-supply = <&m2keyb_pwren>;
 	status = "okay";
 };
+
+/* ============================================================
+ * USB
+ * ============================================================ */
 
 &usb_phy {
 	status = "okay";
 };
 
+/*
+ * USB контроллер (DWC2 OTG, host mode).
+ * SOC USB → FE1.1s USB 2.0 HUB (схема P25, 4 порта):
+ *   Порт 1: USB Type-A CN6 (внешний, 5V от FL9703MR через GPIO38)
+ *   Порт 2: M.2 Key B слот (USB_M2_DP/DM → M.2 пин 7/9)
+ *   Порт 3: mPCIe слот (USB_mPCIE_DP/DM → mPCIe пин 38/36)
+ *   Порт 4: не используется
+ * vbus-supply: управляет 5V на Type-A CN6 через GPIO38/FL9703MR.
+ */
 &usb {
-	status = "okay";
 	vbus-supply = <&usb_vbus>;
+	status = "okay";
 };
 
+/* ============================================================
+ * Networking subsystems
+ * ============================================================ */
+
+/* NPU для аппаратного форвардинга пакетов */
 &dpns {
 	status = "okay";
 };
 
+/* DMA движок для Ethernet */
 &edma {
 	status = "okay";
 };
 
+/* PCS для QSGMII (4x1G LAN через SF23P1240) */
 &qsgmii_pcs {
 	status = "okay";
 };
 
+/* PCS для SGMII/HSGMII (2.5G WAN через EN8811H) */
 &sgmii_pcs {
 	status = "okay";
 };

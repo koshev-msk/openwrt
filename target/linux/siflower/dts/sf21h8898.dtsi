@@ -1,39 +1,98 @@
 #include "sf21.dtsi"
+
 / {
 	compatible = "siflower,sf21h8898";
+
 	soc {
+		/*
+		 * xgmac5: RGMII MAC → SF23P1211F (1GbE LAN).
+		 * Схема P13/P15/P16: RGMII интерфейс.
+		 * Пины GPIO21-33 через rgmii_pins (FUNC_MODE0).
+		 * CLK_GMAC_BYP_REF: bypass reference clock для RGMII.
+		 * phy-mode = "rgmii": базовый режим (переопределяется
+		 *   в bpi-rv2.dtsi на "rgmii-txid" с задержками).
+		 */
 		xgmac5: ethernet@8014000 {
 			compatible = "siflower,sf21-xgmac";
 			reg = <0x0 0x8014000 0x0 0x4000>;
 			dmas = <&edma>;
 			ethsys = <&ethsys>;
-			clocks = <&topcrm CLK_SERDES_CSR>, <&topcrm CLK_GMAC_BYP_REF>;
+			clocks = <&topcrm CLK_SERDES_CSR>,
+				 <&topcrm CLK_GMAC_BYP_REF>;
 			clock-names = "csr", "rgmii";
 			phy-mode = "rgmii";
 			pinctrl-names = "default";
 			pinctrl-0 = <&rgmii_pins>;
-			interrupts = <5 IRQ_TYPE_LEVEL_HIGH>, <25 IRQ_TYPE_LEVEL_HIGH>, <31 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <5 IRQ_TYPE_LEVEL_HIGH>,
+				     <25 IRQ_TYPE_LEVEL_HIGH>,
+				     <31 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "sbd", "lpi", "pmt";
 			status = "disabled";
 		};
 	};
 };
 
+/*
+ * CPU timebase: равен частоте CPU = 1.25 GHz.
+ * User Manual v1.60: "Quad core 64bit RISC-V, main frequency 1.25GHz"
+ */
 &cpus {
 	timebase-frequency = <1250000000>;
 };
 
+/*
+ * Тактовые частоты SF21H8898.
+ *
+ * CLK_CMNPLL_VCO:   2500.000 MHz — общий PLL VCO
+ * CLK_PIC:           416.667 MHz — Processor Interface Clock
+ * CLK_AXI:           416.667 MHz — AXI системная шина
+ * CLK_AHB:           250.000 MHz — AHB шина
+ * CLK_APB:           178.571 MHz — APB шина (UART/I2C/SPI/GPIO/WDT)
+ * CLK_UART:           89.286 MHz — UART источник (делится для baud)
+ * CLK_IRAM:          416.667 MHz — внутренняя SRAM
+ * CLK_NPU:           416.667 MHz — сетевой процессор NPU
+ * CLK_ETHTSU:         89.286 MHz — Ethernet timestamp unit
+ * CLK_GMAC_BYP_REF:  250.000 MHz — RGMII reference clock
+ * CLK_USB:           250.000 MHz — USB контроллер
+ * CLK_USBPHY:         50.000 MHz — USB PHY (48/50 MHz стандарт)
+ * CLK_SERDES_CSR:     89.286 MHz — SerDes конфигурация
+ * CLK_CRYPT_CSR:      73.529 MHz — крипто CSR
+ * CLK_CRYPT_APP:     312.500 MHz — крипто ускоритель
+ * CLK_IROM:          312.500 MHz — Boot ROM
+ */
 &topcrm {
-	assigned-clocks = <&topcrm CLK_CMNPLL_VCO>, <&topcrm CLK_PIC>, <&topcrm CLK_AXI>,
-		<&topcrm CLK_AHB>, <&topcrm CLK_APB>, <&topcrm CLK_UART>,
-		<&topcrm CLK_IRAM>, <&topcrm CLK_NPU>, <&topcrm CLK_ETHTSU>,
-		<&topcrm CLK_GMAC_BYP_REF>, <&topcrm CLK_USB>, <&topcrm CLK_USBPHY>,
-		<&topcrm CLK_SERDES_CSR>, <&topcrm CLK_CRYPT_CSR>, <&topcrm CLK_CRYPT_APP>,
+	assigned-clocks =
+		<&topcrm CLK_CMNPLL_VCO>,
+		<&topcrm CLK_PIC>,
+		<&topcrm CLK_AXI>,
+		<&topcrm CLK_AHB>,
+		<&topcrm CLK_APB>,
+		<&topcrm CLK_UART>,
+		<&topcrm CLK_IRAM>,
+		<&topcrm CLK_NPU>,
+		<&topcrm CLK_ETHTSU>,
+		<&topcrm CLK_GMAC_BYP_REF>,
+		<&topcrm CLK_USB>,
+		<&topcrm CLK_USBPHY>,
+		<&topcrm CLK_SERDES_CSR>,
+		<&topcrm CLK_CRYPT_CSR>,
+		<&topcrm CLK_CRYPT_APP>,
 		<&topcrm CLK_IROM>;
-	assigned-clock-rates = <2500000000>, <416666666>, <416666666>,
-		<250000000>, <178571428>, <89285714>,
-		<416666666>, <416666666>, <89285714>,
-		<250000000>, <250000000>, <50000000>,
-		<89285714>, <73529411>, <312500000>,
-		<312500000>;
+	assigned-clock-rates =
+		<2500000000>,	/* CLK_CMNPLL_VCO   */
+		<416666666>,	/* CLK_PIC          */
+		<416666666>,	/* CLK_AXI          */
+		<250000000>,	/* CLK_AHB          */
+		<178571428>,	/* CLK_APB          */
+		<89285714>,	/* CLK_UART         */
+		<416666666>,	/* CLK_IRAM         */
+		<416666666>,	/* CLK_NPU          */
+		<89285714>,	/* CLK_ETHTSU       */
+		<250000000>,	/* CLK_GMAC_BYP_REF */
+		<250000000>,	/* CLK_USB          */
+		<50000000>,	/* CLK_USBPHY       */
+		<89285714>,	/* CLK_SERDES_CSR   */
+		<73529411>,	/* CLK_CRYPT_CSR    */
+		<312500000>,	/* CLK_CRYPT_APP    */
+		<312500000>;	/* CLK_IROM         */
 };
