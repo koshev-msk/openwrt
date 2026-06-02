@@ -10,7 +10,7 @@
  	sun8i-h3-beelink-x2.dtb \
 --- /dev/null
 +++ b/arch/arm/boot/dts/allwinner/sun8i-h3-mcr200.dts
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,198 @@
 +/dts-v1/;
 +#include "sun8i-h3.dtsi"
 +#include "sunxi-common-regulators.dtsi"

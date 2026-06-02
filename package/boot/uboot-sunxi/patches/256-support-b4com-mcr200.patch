@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/arch/arm/dts/sun8i-h3-b4com-mcr200.dts
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,195 @@
 +/dts-v1/;
 +#include "sun8i-h3.dtsi"
 +#include "sunxi-common-regulators.dtsi"
