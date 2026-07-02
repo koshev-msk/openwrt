@@ -111,6 +111,12 @@ glinet,gl-xe3000)
 huasifei,wh3000)
 	ucidef_set_led_netdev "wan" "WAN" "red:wan" "eth1" "link tx rx"
 	;;
+huastlink,hc-g60|\
+huastlink,hc-g60-v1|\
+huastlink,hc-g80|\
+huastlink,hc-g90)
+	ucidef_set_led_netdev "wan" "wan" "green:wan" "eth1" "link tx rx"
+	;;
 iptime,ax3000q)
 	ucidef_set_led_netdev "wan" "WAN" "amber:wan" "wan" "link tx rx"
 	;;
@@ -325,6 +331,11 @@ xiaomi,redmi-router-ax6000-ubootmod)
 	;;
 zbtlink,zbt-z8103ax|\
 zbtlink,zbt-z8103ax-c)
+	ucidef_set_led_netdev "wan" "wan" "green:wan" "eth1" "link tx rx"
+	;;
+zbtlink,zbt-z8109ax-nand-64m|\
+zbtlink,zbt-z8109ax-nand-128m|\
+zbtlink,zbt-z8109ax-nand-all)
 	ucidef_set_led_netdev "wan" "wan" "green:wan" "eth1" "link tx rx"
 	;;
 zbtlink,zbt-z8106ax-t)

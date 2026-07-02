@@ -14,6 +14,8 @@ teltonika,rutc50)
 	ucidef_add_gpio_switch "modem_reset" "Modem reset" "modem_reset" "0"
 	;;
 zbtlink,zbt-z8102ax|\
+zbtlink,zbt-z8102ax-nand-all|\
+zbtlink,zbt-z8102ax-emmc|\
 zbtlink,zbt-z8102ax-v2)
 	ucidef_add_gpio_switch "5g1" "Power 1st modem" "5g1" "1"
 	ucidef_add_gpio_switch "5g2" "Power 2nd modem" "5g2" "1"
@@ -24,6 +26,24 @@ zbtlink,zbt-z8102ax-v2)
 zbtlink,zbt-z8106ax-t)
 	ucidef_add_gpio_switch "4g" "Power modem" "4g" "1"
 	ucidef_add_gpio_switch "sim" "SIM" "sim" "1"
+	;;
+zbtlink,zbt-z8109ax-nand-all)
+	ucidef_add_gpio_switch "modem1" "Power 1st modem" "modem1" "1"
+	ucidef_add_gpio_switch "modem2" "Power 2nd modem" "modem2" "1"
+	ucidef_add_gpio_switch "modem3" "Power 3rd modem" "modem3" "1"
+	ucidef_add_gpio_switch "modem4" "Power 4th modem" "modem4" "1"
+	;;
+huastlink,hc-g90)
+	ucidef_add_gpio_switch "modem1" "Power 1st modem" "modem1" "1"
+	ucidef_add_gpio_switch "modem2" "Power 2nd modem" "modem2" "1"
+	ucidef_add_gpio_switch "modem3" "Power 3rd modem" "modem3" "1"
+	ucidef_add_gpio_switch "modem4" "Power 4th modem" "modem4" "1"
+	;;
+huastlink,hc-g60|\
+huastlink,hc-g60-v1|\
+huastlink,hc-g80)
+	ucidef_add_gpio_switch "modem" "Modem pwr" "modem" "1"
+	ucidef_add_gpio_switch "sim" "SIM switch" "sim" "1"
 	;;
 esac
 

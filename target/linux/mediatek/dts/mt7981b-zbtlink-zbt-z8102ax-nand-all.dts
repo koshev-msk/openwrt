@@ -5,15 +5,15 @@
 #include "mt7981b-zbtlink-zbt-z8102ax-nand.dtsi"
 
 / {
-	model = "ZBT Z8102AX V2";
-	compatible = "zbtlink,zbt-z8102ax-v2", "zbtlink,zbt-z8102ax-nand", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
+	model = "ZBT Z8102AX (ALL nAND)";
+	compatible = "zbtlink,zbt-z8102ax-nand-all", "zbtlink,zbt-z8102ax-nand", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
 };
 
 &spi0 {
 	spi_nand@0 {
 		partitions {
 			partition@580000 {
-				reg = <0x580000 0x8000000>;
+				reg = <0x580000 0x20000000>;
 			};
 		};
 	};
