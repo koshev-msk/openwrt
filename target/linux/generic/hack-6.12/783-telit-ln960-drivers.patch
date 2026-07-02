@@ -10,7 +10,16 @@
  	{QMI_FIXED_INTF(0x1c9e, 0x9801, 3)},	/* Telewell TW-3G HSPA+ */
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
-@@ -1544,6 +1544,10 @@ static const struct usb_device_id option
+@@ -343,6 +343,8 @@ static void option_instat_callback(struc
+ #define TELIT_PRODUCT_LE920A4_1212		0x1212
+ #define TELIT_PRODUCT_LE920A4_1213		0x1213
+ #define TELIT_PRODUCT_LE920A4_1214		0x1214
++#define TELIT_PRODUCT_LN960_1910		0x1910
++#define TELIT_PRODUCT_LN960_1911		0x1911
+ 
+ /* ZTE PRODUCTS */
+ #define ZTE_VENDOR_ID				0x19d2
+@@ -1544,6 +1546,10 @@ static const struct usb_device_id option
  	  .driver_info = NCTRL(0) | RSVD(1) },
  	{ USB_DEVICE_INTERFACE_CLASS(TELIT_VENDOR_ID, 0x1901, 0xff),	/* Telit LN940 (MBIM) */
  	  .driver_info = NCTRL(0) },
