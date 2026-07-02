@@ -40,7 +40,7 @@ Subject: [PATCH] net/usb/qmi_wwan: add MeigLink modem support
 +#define MEIGLINK_PRODUCT_SLM750			0xf601
 +
 +#define MEIGLINK_VENDOR_ID			0x2dee
-+#define MEIGLINK_PRODUCT_SLM828			0x4d49
++#define MEIGLINK_PRODUCT_SLM828			0x4d22
  
  #define QUECTEL_VENDOR_ID			0x2c7c
  /* These Quectel products use Quectel's vendor ID */
