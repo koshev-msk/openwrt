@@ -34,6 +34,11 @@ platform_do_upgrade() {
 		MTD_ARGS="-t romfile"
 		default_do_upgrade "$1"
 		;;
+	# hack to upgrade without save config
+	zbtlink,zbt-we2802d-8m|\
+	zbtlink,zbt-we2802d-16m)
+		mtd -r write "$1" firmware
+		;;
 	*)
 		default_do_upgrade "$1"
 		;;
