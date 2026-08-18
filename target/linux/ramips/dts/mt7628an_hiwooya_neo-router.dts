@@ -1,0 +1,31 @@
+#include "mt7628an_hiwooya.dtsi"
+
+/ {
+        compatible = "hiwooya,neo-32m", "hiwooya,neo-router", "mediatek,mt7628an-soc";
+        model = "HIWOOYA NEO (Router mode)";
+};
+
+&pinctrl {
+
+	state_default: pinctrl0 {
+		gpio {
+			groups = "gpio", "p0led_an", "p1led_an", "wled_an", "wdt", "spis";
+		function = "gpio";
+		};
+
+		i2s {
+			groups = "i2s";
+			function = "i2s";
+		};
+
+		refclk {
+			groups = "refclk";
+			function = "refclk";
+		};
+	};
+};
+
+&esw {
+        mediatek,portmap = <0x3>;
+        mediatek,portdisable = <0x3c>;
+};

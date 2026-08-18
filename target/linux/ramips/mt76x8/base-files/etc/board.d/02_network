@@ -18,6 +18,7 @@ ramips_setup_interfaces()
 	glinet,vixmini|\
 	hak5,wifi-pineapple-mk7|\
 	hiwifi,hc5611|\
+	hiwooya,neo-iot|\
 	mediatek,linkit-smart-7688|\
 	minew,g1-c|\
 	onion,omega2p|\
@@ -117,6 +118,7 @@ ramips_setup_interfaces()
 		;;
 	duzun,dm06|\
 	glinet,gl-mt300n-v2|\
+	hiwooya,neo-router|\
 	hongdian,h7920-v40|\
 	teltonika,rut200|\
 	teltonika,rut241)

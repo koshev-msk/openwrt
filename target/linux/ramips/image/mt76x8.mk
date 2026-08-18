@@ -384,6 +384,26 @@ define Device/hiwifi_hc5861b
 endef
 TARGET_DEVICES += hiwifi_hc5861b
 
+define Device/hiwooya_neo-router
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (Router mode)
+  DEVICE_PACKAGES := kmod-usb2
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-router
+
+define Device/hiwooya_neo-iot
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (IoT mode)
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-iot
+
 define Device/hongdian_h7920-v40
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Hongdian
