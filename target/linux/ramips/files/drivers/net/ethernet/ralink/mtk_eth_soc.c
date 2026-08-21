@@ -1353,7 +1353,9 @@ static int __init fe_init(struct net_device *dev)
 
 	if (priv->soc->switch_init) {
 		err = priv->soc->switch_init(priv);
-		if (err)
+		if (err == -EINVAL)
+			dev_info(&dev->dev, "switch_np not legacy-compatible, skipping legacy switch init (DSA?)\n");
+		else if (err)
 			return dev_err_probe(&dev->dev, err, "failed to initialize switch core");
 	}
 
@@ -1575,6 +1577,8 @@ static int fe_probe(struct platform_device *pdev)
 
 	if (IS_ENABLED(CONFIG_SOC_MT7621))
 		netdev->max_mtu = 2048;
+	else if (ralink_soc == MT762X_SOC_MT7628AN || ralink_soc == MT762X_SOC_MT7688)
+		netdev->max_mtu = 1518;
 
 	/* fake rx vlan filter func. to support tx vlan offload func */
 	if (fe_reg_table[FE_REG_FE_DMA_VID_BASE])
