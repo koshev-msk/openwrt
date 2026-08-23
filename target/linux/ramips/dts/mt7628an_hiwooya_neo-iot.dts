@@ -1,9 +1,16 @@
 #include "mt7628an_hiwooya.dtsi"
 
 / {
-        compatible = "hiwooya,neo", "hiwooya,neo-iot", "mediatek,mt7628an-soc";
+        compatible = "hiwooya,neo-iot", "hiwooya,neo-32m", "mediatek,mt7628an-soc";
         model = "HIWOOYA NEO (IoT mode)";
 };
+
+&ethernet {
+	nvmem-cells = <&macaddr_factory_28>;
+	nvmem-cell-names = "mac-address";
+};
+
+
 
 &pinctrl {
 	ephy-digital;

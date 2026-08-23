@@ -62,6 +62,7 @@
 			"LINPUT2", "Line In",
 			"RINPUT2", "Line In";
 	};
+
 };
 
 &spi0 {
@@ -126,11 +127,6 @@
 		reg = <1>;
 		spi-max-frequency = <40000000>;
 	};
-};
-
-&ethernet {
-	nvmem-cells = <&macaddr_factory_28>;
-	nvmem-cell-names = "mac-address";
 };
 
 &wmac {

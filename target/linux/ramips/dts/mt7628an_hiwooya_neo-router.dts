@@ -1,8 +1,44 @@
 #include "mt7628an_hiwooya.dtsi"
 
 / {
-        compatible = "hiwooya,neo-32m", "hiwooya,neo-router", "mediatek,mt7628an-soc";
-        model = "HIWOOYA NEO (Router mode)";
+	compatible = "hiwooya,neo-router", "hiwooya,neo-32m", "mediatek,mt7628an-soc";
+	model = "HIWOOYA NEO (Router mode)";
+
+	switch0: switch@10110000 {
+		compatible = "mediatek,mt7628-esw";
+		reg = <0x10110000 0x8000>;
+
+		resets = <&sysc 23>, <&sysc 24>;
+		reset-names = "esw", "ephy";
+
+		ethernet-ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ethernet-port@0 {
+				reg = <0>;
+				label = "wan";
+				phy-mode = "internal";
+			};
+
+			ethernet-port@1 {
+				reg = <1>;
+				label = "lan";
+				phy-mode = "internal";
+			};
+
+			ethernet-port@6 {
+				reg = <6>;
+				phy-mode = "internal";
+				ethernet = <&ethernet>;
+
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+		};
+	};
 };
 
 &pinctrl {
@@ -25,7 +61,13 @@
 	};
 };
 
-&esw {
-        mediatek,portmap = <0x3>;
-        mediatek,portdisable = <0x3c>;
+/delete-node/ &esw;
+
+&ethernet {
+	nvmem-cells = <&macaddr_factory_28>;
+	nvmem-cell-names = "mac-address";
+	mediatek,switch = <&switch0>;
+	resets = <&sysc 21>;
+	reset-names = "fe";
 };
+

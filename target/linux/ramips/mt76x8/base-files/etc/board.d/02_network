@@ -118,7 +118,6 @@ ramips_setup_interfaces()
 		;;
 	duzun,dm06|\
 	glinet,gl-mt300n-v2|\
-	hiwooya,neo-router|\
 	hongdian,h7920-v40|\
 	teltonika,rut200|\
 	teltonika,rut241)
@@ -128,6 +127,9 @@ ramips_setup_interfaces()
 	hiwifi,hc5761a)
 		ucidef_add_switch "switch0" \
 			"0:lan" "1:lan" "4:wan" "6@eth0"
+		;;
+	hiwooya,neo-router)
+		ucidef_set_interfaces_lan_wan "lan" "wan"
 		;;
 	cudy,wr300-v1|\
 	hongdian,h8850-v20|\

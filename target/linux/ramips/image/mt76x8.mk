@@ -50,6 +50,11 @@ define Build/ravpower-wd009-factory
 	@mv $@.new $@
 endef
 
+define Device/dsa-migration
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Config cannot be migrated from swconfig to DSA
+endef
+
 define Device/7links_wlr-12xx
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := 7Links
@@ -385,11 +390,12 @@ endef
 TARGET_DEVICES += hiwifi_hc5861b
 
 define Device/hiwooya_neo-router
+  $(Device/dsa-migration)
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := HiWooya
   DEVICE_MODEL := NEO
   DEVICE_VARIANT := (Router mode)
-  DEVICE_PACKAGES := kmod-usb2
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
   SUPPORTED_DEVICES += hiwooya,neo
 endef
 TARGET_DEVICES += hiwooya_neo-router
