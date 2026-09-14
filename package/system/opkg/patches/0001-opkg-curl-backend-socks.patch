@@ -1,0 +1,124 @@
+From 0d15d717b804b6bbe40e6759bfd219b6cd345a67 Mon Sep 17 00:00:00 2001
+From: Konstantine <k@example.com>
+Date: Mon, 14 Sep 2026 14:24:29 +0000
+Subject: [PATCH] libopkg: replace wget/uclient-fetch with curl, add
+ socks_proxy
+
+opkg only ever shelled out to a binary literally named 'wget' (usually
+the uclient-fetch alias on stock OpenWrt, or wget-ssl if installed).
+Neither has SOCKS support, and http(s)/ftp proxy auth (proxy_user/
+proxy_passwd) was configurable but never actually wired up anywhere.
+
+Switch the download backend to curl unconditionally:
+ - http_proxy/https_proxy/ftp_proxy/no_proxy keep working as before,
+   curl honours the same env vars.
+ - proxy_user/proxy_passwd are now actually used (curl -U).
+ - new socks_proxy option (host:port) enables SOCKS5 with
+   remote (proxy-side) DNS resolution via --socks5-hostname.
+
+Needs the curl package on the target; wget/uclient-fetch/wget-ssl are
+no longer invoked by opkg. This should be reflected as a DEPENDS
+change (+curl instead of +PACKAGE_wget-ssl:wget-ssl ...) in the
+opkg Makefile in openwrt/packages.
+
+Config example:
+  option socks_proxy 'proxy_ip:1080'
+---
+ libopkg/opkg_conf.c     |  1 +
+ libopkg/opkg_conf.h     |  1 +
+ libopkg/opkg_download.c | 38 +++++++++++++++++++++++++-------------
+ 3 files changed, 27 insertions(+), 13 deletions(-)
+
+diff --git a/libopkg/opkg_conf.c b/libopkg/opkg_conf.c
+index 0cbd1cc..d5ca008 100644
+--- a/libopkg/opkg_conf.c
++++ b/libopkg/opkg_conf.c
+@@ -71,6 +71,7 @@ opkg_option_t options[] = {
+ 	{"proxy_user", OPKG_OPT_TYPE_STRING, &_conf.proxy_user},
+ 	{"query-all", OPKG_OPT_TYPE_BOOL, &_conf.query_all},
+ 	{"size", OPKG_OPT_TYPE_BOOL, &_conf.size},
++	{"socks_proxy", OPKG_OPT_TYPE_STRING, &_conf.socks_proxy},
+ 	{"strip_abi", OPKG_OPT_TYPE_BOOL, &_conf.strip_abi},
+ 	{"tmp_dir", OPKG_OPT_TYPE_STRING, &_conf.tmp_dir},
+ 	{"verbosity", OPKG_OPT_TYPE_INT, &_conf.verbosity},
+diff --git a/libopkg/opkg_conf.h b/libopkg/opkg_conf.h
+index 781c8f4..c186fcd 100644
+--- a/libopkg/opkg_conf.h
++++ b/libopkg/opkg_conf.h
+@@ -101,6 +101,7 @@ struct opkg_conf {
+ 	char *no_proxy;
+ 	char *proxy_user;
+ 	char *proxy_passwd;
++	char *socks_proxy;
+ 
+ 	char *signature_ca_file;
+ 	char *signature_ca_path;
+diff --git a/libopkg/opkg_download.c b/libopkg/opkg_download.c
+index fd4ef3e..a02e933 100644
+--- a/libopkg/opkg_download.c
++++ b/libopkg/opkg_download.c
+@@ -153,36 +153,48 @@ opkg_download(const char *src, const char *dest_file_name,
+ 	}
+ 
+ 	{
++		/* uclient-fetch/wget have no SOCKS support, curl covers
++		 * http(s)/ftp proxies (via the env vars above) and SOCKS
++		 * in one binary. */
+ 		int res;
+-		const char *argv[11];
++		const char *argv[16];
++		char *userpwd = NULL;
+ 		int i = 0;
+ 
+-		argv[i++] = "wget";
+-		argv[i++] = "-q";
++		argv[i++] = "curl";
++		argv[i++] = "-s";
++		argv[i++] = "-f";
++		argv[i++] = "-L";
+ 		if (conf->no_check_certificate) {
+-			argv[i++] = "--no-check-certificate";
++			argv[i++] = "-k";
+ 		}
+ 		if (conf->http_timeout) {
+-			argv[i++] = "--timeout";
++			argv[i++] = "--connect-timeout";
+ 			argv[i++] = conf->http_timeout;
+ 		}
+-		if (conf->http_proxy || conf->https_proxy || conf->ftp_proxy) {
+-			argv[i++] = "-Y";
+-			argv[i++] = "on";
++		if (conf->socks_proxy) {
++			argv[i++] = "--socks5-hostname";
++			argv[i++] = conf->socks_proxy;
+ 		}
+-		argv[i++] = "-O";
++		if (conf->proxy_user) {
++			sprintf_alloc(&userpwd, "%s:%s", conf->proxy_user,
++				      conf->proxy_passwd ? conf->proxy_passwd : "");
++			argv[i++] = "-U";
++			argv[i++] = userpwd;
++		}
++		argv[i++] = "-o";
+ 		argv[i++] = tmp_file_location;
+ 		argv[i++] = src;
+ 		argv[i++] = NULL;
+ 		res = xsystem(argv);
+ 
++		if (userpwd)
++			free(userpwd);
++
+ 		if (res) {
+ 			opkg_msg(ERROR,
+-				 "Failed to download %s, wget returned %d.\n",
++				 "Failed to download %s, curl returned %d.\n",
+ 				 src, res);
+-			if (res == 4)
+-				opkg_msg(ERROR,
+-					 "Check your network settings and connectivity.\n\n");
+ 			free(tmp_file_location);
+ 			return -1;
+ 		}
+-- 
+2.43.0
+
