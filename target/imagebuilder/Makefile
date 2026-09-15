@@ -83,9 +83,9 @@ else
 		-exec $(CP) -t $(IB_LDIR)/ {} +
 endif
 
-	# Always copy base-files package to archive
+	# Always copy base-files and opkg package to archive
 	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f \
-		\( -name 'base-files_*.$(PACKAGE_SUFFIX)' \) \
+		\( -name 'base-files_*.$(PACKAGE_SUFFIX)' -or -name 'opkg_*.$(PACKAGE_SUFFIX)' \) \
 		-exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
 
 ifneq ($(CONFIG_SIGNATURE_CHECK),)
