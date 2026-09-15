@@ -34,7 +34,7 @@
 #include <net/netfilter/nf_flow_table.h>
 #include <linux/gpio.h>
 #include <linux/gpio/consumer.h>
-
+#include <net/dsa.h>
 #include <asm/mach-ralink/ralink_regs.h>
 
 #include "mtk_eth_soc.h"
@@ -43,6 +43,7 @@
 
 #define	MAX_RX_LENGTH		1536
 #define FE_RX_ETH_HLEN		(VLAN_ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN)
+#include <net/dst_metadata.h>
 #define FE_RX_HLEN		(NET_SKB_PAD + FE_RX_ETH_HLEN + NET_IP_ALIGN)
 #define DMA_DUMMY_DESC		0xffffffff
 #define FE_DEFAULT_MSG_ENABLE \
@@ -82,6 +83,52 @@ static const u16 fe_reg_table_default[FE_REG_COUNT] = {
 	[FE_REG_FE_COUNTER_BASE] = FE_GDMA1_TX_GBCNT,
 	[FE_REG_FE_RST_GL] = FE_FE_RST_GL,
 };
+
+#if IS_ENABLED(CONFIG_NET_DSA)
+static void fe_dsa_metadata_free(void *data)
+{
+	struct fe_priv *priv = data;
+	int port;
+
+	for (port = 0; port < ARRAY_SIZE(priv->dsa_meta); port++) {
+		if (!priv->dsa_meta[port])
+			continue;
+
+		dst_release(&priv->dsa_meta[port]->dst);
+		priv->dsa_meta[port] = NULL;
+	}
+}
+
+static int fe_dsa_metadata_init(struct fe_priv *priv)
+{
+	struct metadata_dst *md_dst;
+	int err;
+	int port;
+
+	for (port = 0; port < ARRAY_SIZE(priv->dsa_meta); port++) {
+		md_dst = metadata_dst_alloc(0, METADATA_HW_PORT_MUX,
+					    GFP_KERNEL);
+		if (!md_dst) {
+			fe_dsa_metadata_free(priv);
+			return -ENOMEM;
+		}
+
+		md_dst->u.port_info.port_id = port;
+		priv->dsa_meta[port] = md_dst;
+	}
+
+	err = devm_add_action_or_reset(priv->dev, fe_dsa_metadata_free, priv);
+	if (err)
+		return err;
+
+	return 0;
+}
+#endif
+
+static void fe_of_node_put(void *data)
+{
+	of_node_put(data);
+}
 
 static const u16 *fe_reg_table = fe_reg_table_default;
 
@@ -126,13 +173,27 @@ void fe_m32(struct fe_priv *eth, u32 clear, u32 set, unsigned reg)
 
 static void fe_reset_fe(struct fe_priv *priv)
 {
-	if (!priv->resets)
+	if (!priv->rst_fe && !priv->rst_esw)
 		return;
 
-	reset_control_assert(priv->resets);
+	reset_control_assert(priv->rst_fe);
+	reset_control_assert(priv->rst_esw);
 	usleep_range(60, 120);
-	reset_control_deassert(priv->resets);
+	reset_control_deassert(priv->rst_fe);
+	reset_control_deassert(priv->rst_esw);
 	usleep_range(1000, 1200);
+}
+
+static void fe_reset_dma(struct fe_priv *priv)
+{
+	if (!priv->rst_fe)
+		return;
+
+	reset_control_assert(priv->rst_fe);
+	usleep_range(60, 120);
+	reset_control_deassert(priv->rst_fe);
+	usleep_range(1000, 1200);
+	priv->fe_needs_reinit = true;
 }
 
 static inline void fe_int_disable(u32 mask)
@@ -670,6 +731,21 @@ static int fe_tx_map_dma(struct sk_buff *skb, struct net_device *dev,
 		priv->soc->tx_dma(&st.txd);
 	else
 		st.txd.txd4 = TX_DMA_DESP4_DEF;
+
+#if IS_ENABLED(CONFIG_NET_DSA)
+	if (dev->dsa_ptr && dev->dsa_ptr->rcv &&
+	    dev->dsa_ptr->tag_ops->proto == DSA_TAG_PROTO_RALINK) {
+		struct metadata_dst *md_dst = skb_metadata_dst(skb);
+
+		if (md_dst && md_dst->type == METADATA_HW_PORT_MUX &&
+		    md_dst->u.port_info.port_id <= MT7620_TX_DMA_LAST_PORT) {
+			st.txd.txd4 &= ~MT7620_TX_DMA_FP_BMAP;
+			st.txd.txd4 |= FIELD_PREP(MT7620_TX_DMA_FP_BMAP,
+				BIT(md_dst->u.port_info.port_id));
+		}
+	}
+#endif
+
 	st.def_txd4 = st.txd.txd4;
 
 	/* TX Checksum offload */
@@ -923,11 +999,24 @@ static int fe_poll_rx(struct napi_struct *napi, int budget,
 		pktlen = RX_DMA_GET_PLEN0(trxd.rxd2);
 		skb->dev = netdev;
 		skb_put(skb, pktlen);
+
 		if (trxd.rxd4 & checksum_bit)
 			skb->ip_summed = CHECKSUM_UNNECESSARY;
 		else
 			skb_checksum_none_assert(skb);
 		skb->protocol = eth_type_trans(skb, netdev);
+
+#if IS_ENABLED(CONFIG_NET_DSA)
+		if (netdev->dsa_ptr && netdev->dsa_ptr->rcv &&
+		    netdev->dsa_ptr->tag_ops->proto == DSA_TAG_PROTO_RALINK) {
+			unsigned int port;
+
+			port = FIELD_GET(MT7620_RX_DMA_SP, trxd.rxd4);
+			if (port < ARRAY_SIZE(priv->dsa_meta) &&
+			    priv->dsa_meta[port])
+				skb_dst_set_noref(skb, &priv->dsa_meta[port]->dst);
+		}
+#endif
 
 		if (netdev->features & NETIF_F_HW_VLAN_CTAG_RX &&
 		    RX_DMA_VID(trxd.rxd3))
@@ -1205,15 +1294,10 @@ void fe_csum_config(struct fe_priv *priv)
 	fe_rxcsum_config((dev->features & NETIF_F_RXCSUM));
 }
 
-static int fe_hw_init(struct net_device *dev)
+static void fe_hw_config(struct net_device *dev)
 {
 	struct fe_priv *priv = netdev_priv(dev);
-	int i, err;
-
-	err = devm_request_irq(priv->dev, dev->irq, fe_handle_irq, 0,
-			       dev_name(priv->dev), dev);
-	if (err)
-		return err;
+	int i;
 
 	if (priv->soc->set_mac)
 		priv->soc->set_mac(priv, dev->dev_addr);
@@ -1239,7 +1323,19 @@ static int fe_hw_init(struct net_device *dev)
 		fe_reg_w32(1, FE_REG_FE_RST_GL);
 		fe_reg_w32(0, FE_REG_FE_RST_GL);
 	}
+}
 
+static int fe_hw_init(struct net_device *dev)
+{
+	struct fe_priv *priv = netdev_priv(dev);
+	int err;
+
+	err = devm_request_irq(priv->dev, dev->irq, fe_handle_irq, 0,
+			       dev_name(priv->dev), dev);
+	if (err)
+		return err;
+
+	fe_hw_config(dev);
 	return 0;
 }
 
@@ -1249,6 +1345,11 @@ static int fe_open(struct net_device *dev)
 	unsigned long flags;
 	u32 val;
 	int err;
+
+	if (priv->fe_needs_reinit) {
+		fe_hw_config(dev);
+		priv->fe_needs_reinit = false;
+	}
 
 	err = fe_init_dma(priv);
 	if (err) {
@@ -1266,10 +1367,11 @@ static int fe_open(struct net_device *dev)
 
 	spin_unlock_irqrestore(&priv->page_lock, flags);
 
-	if (priv->phy)
+	if (priv->phy && !priv->dsa_switch)
 		priv->phy->start(priv);
 
-	if (priv->soc->has_carrier && priv->soc->has_carrier(priv))
+	if (priv->dsa_switch ||
+	    (priv->soc->has_carrier && priv->soc->has_carrier(priv)))
 		netif_carrier_on(dev);
 
 	napi_enable(&priv->rx_napi);
@@ -1284,12 +1386,13 @@ static int fe_stop(struct net_device *dev)
 	struct fe_priv *priv = netdev_priv(dev);
 	unsigned long flags;
 	int i;
+	u32 dma_cfg;
 
 	netif_tx_disable(dev);
 	fe_int_disable(priv->soc->tx_int | priv->soc->rx_int);
 	napi_disable(&priv->rx_napi);
 
-	if (priv->phy)
+	if (priv->phy && !priv->dsa_switch)
 		priv->phy->stop(priv);
 
 	spin_lock_irqsave(&priv->page_lock, flags);
@@ -1307,6 +1410,12 @@ static int fe_stop(struct net_device *dev)
 			continue;
 		}
 		break;
+	}
+
+	dma_cfg = fe_reg_r32(FE_REG_PDMA_GLO_CFG);
+	if (dma_cfg & (FE_TX_DMA_BUSY | FE_RX_DMA_BUSY)) {
+		netdev_warn(dev, "DMA did not stop, resetting frame engine\n");
+		fe_reset_dma(priv);
 	}
 
 	fe_free_dma(priv);
@@ -1343,7 +1452,7 @@ static void fe_reset_phy(struct fe_priv *priv)
 	gpiod_set_value(phy_reset, 0);
 }
 
-static int __init fe_init(struct net_device *dev)
+static int fe_init(struct net_device *dev)
 {
 	struct fe_priv *priv = netdev_priv(dev);
 	struct device_node *port;
@@ -1368,17 +1477,19 @@ static int __init fe_init(struct net_device *dev)
 			dev->dev_addr);
 	}
 
-	err = fe_mdio_init(priv);
-	if (err)
-		return err;
+	if (!priv->dsa_switch) {
+		err = fe_mdio_init(priv);
+		if (err)
+			return err;
+	}
 
-	if (priv->soc->port_init)
+	if (priv->soc->port_init && !priv->dsa_switch)
 		for_each_child_of_node(priv->dev->of_node, port)
 			if (of_device_is_compatible(port, "mediatek,eth-port") &&
 			    of_device_is_available(port))
 				priv->soc->port_init(priv, port);
 
-	if (priv->phy) {
+	if (priv->phy && !priv->dsa_switch) {
 		err = priv->phy->connect(priv);
 		if (err)
 			goto err_phy_disconnect;
@@ -1388,13 +1499,14 @@ static int __init fe_init(struct net_device *dev)
 	if (err)
 		goto err_phy_disconnect;
 
-	if ((priv->flags & FE_FLAG_HAS_SWITCH) && priv->soc->switch_config)
+	if ((priv->flags & FE_FLAG_HAS_SWITCH) && priv->soc->switch_config &&
+	    !priv->dsa_switch)
 		priv->soc->switch_config(priv);
 
 	return 0;
 
 err_phy_disconnect:
-	if (priv->phy)
+	if (priv->phy && !priv->dsa_switch)
 		priv->phy->disconnect(priv);
 	fe_mdio_cleanup(priv);
 
@@ -1405,7 +1517,7 @@ static void fe_uninit(struct net_device *dev)
 {
 	struct fe_priv *priv = netdev_priv(dev);
 
-	if (priv->phy)
+	if (priv->phy && !priv->dsa_switch)
 		priv->phy->disconnect(priv);
 	fe_mdio_cleanup(priv);
 
@@ -1526,6 +1638,7 @@ static int fe_probe(struct platform_device *pdev)
 	const struct of_device_id *match;
 	struct fe_soc_data *soc;
 	struct net_device *netdev;
+	struct device_node *ports_np;
 	struct fe_priv *priv;
 	struct clk *sysclk;
 	int err, napi_weight;
@@ -1562,10 +1675,19 @@ static int fe_probe(struct platform_device *pdev)
 
 	priv = netdev_priv(netdev);
 	spin_lock_init(&priv->page_lock);
-	priv->resets = devm_reset_control_array_get_optional_exclusive(&pdev->dev);
-	if (IS_ERR(priv->resets)) {
-		dev_err(&pdev->dev, "Failed to get resets for FE and ESW cores: %pe\n", priv->resets);
-		return PTR_ERR(priv->resets);
+	priv->rst_fe =
+		devm_reset_control_get_optional_exclusive(&pdev->dev, "fe");
+	if (IS_ERR(priv->rst_fe)) {
+		dev_err(&pdev->dev, "failed to get FE reset: %pe\n",
+			priv->rst_fe);
+		return PTR_ERR(priv->rst_fe);
+	}
+	priv->rst_esw =
+		devm_reset_control_get_optional_exclusive(&pdev->dev, "esw");
+	if (IS_ERR(priv->rst_esw)) {
+		dev_err(&pdev->dev, "failed to get ESW reset: %pe\n",
+			priv->rst_esw);
+		return PTR_ERR(priv->rst_esw);
 	}
 
 	if (soc->init_data)
@@ -1605,6 +1727,30 @@ static int fe_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "failed to read switch phandle\n");
 		return -ENODEV;
 	}
+	if (priv->switch_np) {
+		err = devm_add_action_or_reset(&pdev->dev, fe_of_node_put,
+					       priv->switch_np);
+		if (err)
+			return err;
+
+		ports_np = of_get_child_by_name(priv->switch_np, "ports");
+		if (ports_np && !of_device_is_available(ports_np)) {
+			of_node_put(ports_np);
+			ports_np = NULL;
+		}
+		priv->dsa_switch = !!ports_np;
+		of_node_put(ports_np);
+		if (priv->dsa_switch &&
+		    (!(priv->flags & FE_FLAG_HAS_SWITCH) ||
+		     !soc->switch_config)) {
+			dev_err(&pdev->dev,
+				"DSA switch requested on unsupported SoC\n");
+			return -ENODEV;
+		}
+	}
+	if (priv->switch_np && !priv->rst_fe && !priv->rst_esw)
+		dev_warn(&pdev->dev,
+			 "no \"fe\"/\"esw\" reset-names, hardware not reset\n");
 
 	priv->netdev = netdev;
 	priv->dev = &pdev->dev;
@@ -1615,6 +1761,15 @@ static int fe_probe(struct platform_device *pdev)
 	priv->tx_ring.tx_ring_size = NUM_DMA_DESC;
 	priv->rx_ring.rx_ring_size = NUM_DMA_DESC;
 	INIT_WORK(&priv->pending_work, fe_pending_work);
+
+	if (priv->dsa_switch) {
+#if IS_ENABLED(CONFIG_NET_DSA)
+		err = fe_dsa_metadata_init(priv);
+		if (err)
+			return err;
+#endif
+		netif_keep_dst(netdev);
+	}
 
 	napi_weight = 16;
 	if (priv->flags & FE_FLAG_NAPI_WEIGHT) {
@@ -1633,10 +1788,27 @@ static int fe_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, netdev);
 
+	if (priv->dsa_switch) {
+		err = fe_mdio_init(priv);
+		if (err)
+			goto err_clear_drvdata;
+
+		err = priv->soc->switch_config(priv);
+		if (err)
+			goto err_mdio_cleanup;
+	}
+
 	netif_info(priv, probe, netdev, "mediatek frame engine at 0x%08lx, irq %d\n",
 		   netdev->base_addr, netdev->irq);
 
 	return 0;
+
+err_mdio_cleanup:
+	fe_mdio_cleanup(priv);
+err_clear_drvdata:
+	platform_set_drvdata(pdev, NULL);
+
+	return err;
 }
 
 static void fe_remove(struct platform_device *pdev)
@@ -1644,7 +1816,8 @@ static void fe_remove(struct platform_device *pdev)
 	struct net_device *dev = platform_get_drvdata(pdev);
 	struct fe_priv *priv = netdev_priv(dev);
 
-	netif_napi_del(&priv->rx_napi);
+	if (priv->soc->switch_cleanup)
+		priv->soc->switch_cleanup(priv);
 
 	cancel_work_sync(&priv->pending_work);
 
