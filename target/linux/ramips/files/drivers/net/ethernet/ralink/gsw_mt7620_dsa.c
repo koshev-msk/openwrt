@@ -1283,9 +1283,49 @@ static void mt7620_gsw_phylink_get_caps(struct dsa_switch *ds, int port,
 	}
 }
 
+/*
+ * The embedded PHYs on user ports 0-4 are addressed by their port number
+ * on the switch's own indirect MDIO interface (the same GSW_MDIO_ACCESS
+ * mechanism used by mdio_mt7620.c for the external MDIO bus). Wiring
+ * these up as .phy_read/.phy_write makes dsa_switch_setup() allocate
+ * ds->user_mii_bus, which is what lets dsa_user_phy_setup() fall back to
+ * the internal bus when no "phy-handle"/"fixed-link" is given in the
+ * port's DT node.
+ */
+static int mt7620_gsw_phy_read(struct dsa_switch *ds, int port, int regnum)
+{
+	struct mt7620_gsw *gsw = ds->priv;
+	u32 val;
+
+	if (!(BIT(port) & MT7620_DSA_USER_PORTS))
+		return 0xffff;
+
+	val = _mt7620_mii_read(gsw, port, regnum);
+	if (val == 0xffffffff)
+		return -ETIMEDOUT;
+
+	return val & 0xffff;
+}
+
+static int mt7620_gsw_phy_write(struct dsa_switch *ds, int port, int regnum,
+				u16 val)
+{
+	struct mt7620_gsw *gsw = ds->priv;
+
+	if (!(BIT(port) & MT7620_DSA_USER_PORTS))
+		return 0;
+
+	if (_mt7620_mii_write(gsw, port, regnum, val) == 0xffffffff)
+		return -ETIMEDOUT;
+
+	return 0;
+}
+
 static const struct dsa_switch_ops mt7620_gsw_dsa_ops = {
 	.get_tag_protocol	= mt7620_gsw_get_tag_protocol,
 	.setup			= mt7620_gsw_setup,
+	.phy_read		= mt7620_gsw_phy_read,
+	.phy_write		= mt7620_gsw_phy_write,
 	.teardown		= mt7620_gsw_teardown,
 	.port_enable		= mt7620_gsw_port_enable,
 	.port_disable		= mt7620_gsw_port_disable,
