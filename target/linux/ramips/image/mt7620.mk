@@ -18,6 +18,11 @@ define Build/elecom-header
 		--owner=0 --group=0 -f $@ -C $(KDIR) v_0.0.0.bin v_0.0.0.md5
 endef
 
+define Device/dsa-migration
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Config cannot be migrated from swconfig to DSA
+endef
+
 define Device/aigale_ai-br100
   SOC := mt7620a
   IMAGE_SIZE := 7936k
@@ -1563,17 +1568,19 @@ endef
 TARGET_DEVICES += zbtlink_zbt-we2026
 
 define Device/zbtlink_zbt-we826-16m
+  $(Device/dsa-migration)
   SOC := mt7620a
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE826
   DEVICE_VARIANT := 16M
-  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci kmod-mmc-mtk
+  DEVICE_PACKAGES := -swconfig kmod-mt76x2 kmod-usb2 kmod-usb-ohci kmod-mmc-mtk kmod-dsa-mt7620
   SUPPORTED_DEVICES += zbt-we826 zbt-we826-16M
 endef
 TARGET_DEVICES += zbtlink_zbt-we826-16m
 
 define Device/zbtlink_zbt-we826-32m
+  $(Device/dsa-migration)
   SOC := mt7620a
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := Zbtlink
