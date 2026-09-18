@@ -241,7 +241,9 @@ zbtlink,zbt-we2426-b)
 	ucidef_set_led_switch "lan4" "lan4" "green:lan-4" "switch0" "0x08"
 	;;
 zbtlink,zbt-cpe2801-16m|\
-zbtlink,zbt-cpe2801-32m)
+zbtlink,zbt-cpe2801-32m|\
+zbtlink,zbt-we2802d-8m|\
+zbtlink,zbt-we2802d-16m)
 	ucidef_set_led_netdev "lan" "lan" "green:lan" "lan"
 	ucidef_set_led_netdev "lan" "lan" "green:wan" "wan"
 	;;

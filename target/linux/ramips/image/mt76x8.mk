@@ -1505,6 +1505,28 @@ define Device/zbtlink_zbt-we2426-b
 endef
 TARGET_DEVICES += zbtlink_zbt-we2426-b
 
+define Device/zbtlink_zbt-we2802d-8m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-we2802d
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-8m
+
+define Device/zbtlink_zbt-we2802d-16m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-we2802d
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
 define Device/zbtlink_zbt-we826-t3-16m
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
@@ -1524,8 +1546,6 @@ define Device/zbtlink_zbt-we826-t3-32m
   SUPPORTED_DEVICES += zbtlink,zbt-we826-t3-16m zbtlink,zbt-we2126 zbt-we826-t3
 endef
 TARGET_DEVICES += zbtlink_zbt-we826-t3-32m
-
-
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k

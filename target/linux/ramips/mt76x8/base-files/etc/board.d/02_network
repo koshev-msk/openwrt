@@ -130,7 +130,9 @@ ramips_setup_interfaces()
 		;;
 	hiwooya,neo-router|\
 	zbtlink,zbt-cpe2801-16m|\
-	zbtlink,zbt-cpe2801-32m)
+	zbtlink,zbt-cpe2801-32m|\
+        zbtlink,zbt-we2802d-8m|\
+        zbtlink,zbt-we2802d-16m)
 		ucidef_set_interfaces_lan_wan "lan" "wan"
 		;;
 	cudy,wr300-v1|\
