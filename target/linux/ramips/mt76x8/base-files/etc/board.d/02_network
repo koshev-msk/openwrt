@@ -189,8 +189,6 @@ ramips_setup_interfaces()
 	netgear,r6120|\
 	wavlink,wl-wn531a3|\
 	zbtlink,zbt-we2426-b|\
-	zbtlink,zbt-we826-t3-16m|\
-	zbtlink,zbt-we826-t3-32m)
 		ucidef_add_switch "switch0" \
 			"0:lan:4" "1:lan:3" "2:lan:2" "3:lan:1" "4:wan" "6@eth0"
 		;;
@@ -235,6 +233,10 @@ ramips_setup_interfaces()
 	wiznet,wizfi630s)
 		ucidef_add_switch "switch0" \
 			"0:wan" "3:lan" "4:lan" "6@eth0"
+		;;
+	zbtlink,zbt-we826-t3-16m|\
+	zbtlink,zbt-we826-t3-32m)
+		ucidef_set_interfaces_lan_wan "lan4 lan3 lan2 lan1" "wan"
 		;;
 	xiaomi,mi-router-4a-100m|\
 	xiaomi,mi-router-4a-100m-intl|\

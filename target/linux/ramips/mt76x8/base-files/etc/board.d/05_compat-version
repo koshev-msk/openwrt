@@ -11,9 +11,10 @@ case "$(board_name)" in
 	hiwooya,neo-router|\
 	zbtlink,zbt-cpe2801-16m|\
 	zbtlink,zbt-cpe2801-32m|\
+	zbtlink,zbt-we826-t3-16m|\
+	zbtlink,zbt-we826-t3-32m|\
 	zbtlink,zbt-we2802d-8m|\
-	zbtlink,zbt-we2802d-16m|\
-	)
+	zbtlink,zbt-we2802d-16m)
 		ucidef_set_compat_version "1.1"
 		;;
 esac

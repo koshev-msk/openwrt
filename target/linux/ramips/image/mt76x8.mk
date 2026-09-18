@@ -1528,21 +1528,23 @@ endef
 TARGET_DEVICES += zbtlink_zbt-we2802d-16m
 
 define Device/zbtlink_zbt-we826-t3-16m
+  $(Device/dsa-migration)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE826-T3
   DEVICE_VARIANT := 16M
-  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-mmc-mtk kmod-dsa-mt7628
   SUPPORTED_DEVICES += zbtlink,zbt-we2126 zbt-we826-t3
 endef
 TARGET_DEVICES += zbtlink_zbt-we826-t3-16m
 
 define Device/zbtlink_zbt-we826-t3-32m
+  $(Device/dsa-migration)
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE826-T3
   DEVICE_VARIANT := 32M
-  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-mmc-mtk kmod-dsa-mt7628
   SUPPORTED_DEVICES += zbtlink,zbt-we826-t3-16m zbtlink,zbt-we2126 zbt-we826-t3
 endef
 TARGET_DEVICES += zbtlink_zbt-we826-t3-32m
