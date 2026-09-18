@@ -6,7 +6,9 @@ board_config_update
 
 case "$(board_name)" in
 	zbtlink,zbt-we826-16m|\
-	zbtlink,zbt-we826-32m)
+	zbtlink,zbt-we826-32m|\
+	zbtlink,zbt-we826-e|\
+	zbtlink,zbt-wr8305rt)
 		ucidef_set_compat_version "1.1"
 		;;
 esac
