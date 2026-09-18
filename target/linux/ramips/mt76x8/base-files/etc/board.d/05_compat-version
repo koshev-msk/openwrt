@@ -8,6 +8,11 @@ case "$(board_name)" in
 	tplink,re305-v1)
 		ucidef_set_compat_version "2.0"
 		;;
+	hiwooya,neo-router|\
+	zbtlink,zbt-we2802d-8m|\
+	zbtlink,zbt-we2802d-16m)
+		ucidef_set_compat_version "1.1"
+		;;
 esac
 
 board_config_flush

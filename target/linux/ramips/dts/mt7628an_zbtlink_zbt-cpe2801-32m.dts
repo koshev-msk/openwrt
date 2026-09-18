@@ -1,0 +1,10 @@
+#include "mt7628an_zbtlink_zbt-cpe2801.dtsi"
+
+/ {
+	compatible = "zbtlink,zbt-cpe2801-32m", "zbtlink,zbt-cpe2801", "mediatek,mt7628an-soc";
+	model = "Zbtlink ZBT-CPE2801 (32M)";
+};
+
+&firmware {
+	reg = <0x50000 0x1fb0000>;
+};

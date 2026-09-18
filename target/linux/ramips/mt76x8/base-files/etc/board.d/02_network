@@ -128,7 +128,9 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"0:lan" "1:lan" "4:wan" "6@eth0"
 		;;
-	hiwooya,neo-router)
+	hiwooya,neo-router|\
+	zbtlink,zbt-cpe2801-16m|\
+	zbtlink,zbt-cpe2801-32m)
 		ucidef_set_interfaces_lan_wan "lan" "wan"
 		;;
 	cudy,wr300-v1|\
