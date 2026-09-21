@@ -25,7 +25,6 @@ ramips_setup_interfaces()
 	ralink,mt7620a-v22sg-evb|\
 	sanlinking,d240|\
 	zbtlink,zbt-ape522ii|\
-	zbtlink,zbt-we826-e|\
 	zyxel,keenetic-lite-iii-a|\
 	zyxel,keenetic-omni)
 		ucidef_add_switch "switch0" \
@@ -284,6 +283,7 @@ ramips_setup_interfaces()
 		;;
 	zbtlink,zbt-we826-16m|\
 	zbtlink,zbt-we826-32m|\
+	zbtlink,zbt-we826-e|\
 	zbtlink,zbt-wr8305rt)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
 		;;

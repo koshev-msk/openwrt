@@ -1597,7 +1597,7 @@ define Device/zbtlink_zbt-we826-e
   IMAGE_SIZE := 32448k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE826-E
-  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci kmod-mmc-mtk uqmi \
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-usb-ohci kmod-mmc-mtk uqmi \
 	kmod-usb-serial-option kmod-dsa-mt7620
 endef
 TARGET_DEVICES += zbtlink_zbt-we826-e
