@@ -80,9 +80,13 @@ else
 		-exec $(CP) -t $(PKG_BUILD_DIR)/packages/ {} +
 endif
 
-	# Always copy base-files package to archive
+	# Always copy base-files and DSA packages to archive
 	$(FIND) $(wildcard $(PACKAGE_SUBDIRS)) -type f \
-		\( -name 'base-files$(PACKAGE_VERSION_SEPARATOR)*.$(PACKAGE_SUFFIX)' \) \
+		\( \
+			-name 'base-files$(PACKAGE_VERSION_SEPARATOR)*.$(PACKAGE_SUFFIX)' -or \
+			-name 'kmod-dsa-mt7620$(PACKAGE_VERSION_SEPARATOR)*.$(PACKAGE_SUFFIX)' -or \
+			-name 'kmod-dsa-mt7628$(PACKAGE_VERSION_SEPARATOR)*.$(PACKAGE_SUFFIX)' \
+		\) \
 		-exec $(CP) -t $(PKG_BUILD_DIR)/packages {} +
 
 ifneq ($(CONFIG_SIGNATURE_CHECK),)
