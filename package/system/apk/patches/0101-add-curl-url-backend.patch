@@ -1,0 +1,332 @@
+Add libcurl-based url_backend with SOCKS proxy support
+
+Adds `curl` as a selectable url_backend (-Durl_backend=curl), implemented
+with libcurl's easy API. Supports SOCKS4/4a/5/5h proxies via CURLOPT_PROXY,
+set explicitly through apk_io_url_set_proxy() (not wired to a CLI flag yet)
+or picked up from the standard ALL_PROXY / all_proxy environment variables,
+e.g. ALL_PROXY=socks5h://127.0.0.1:1080.
+
+The transfer runs in a worker thread feeding a pipe via CURLOPT_WRITEFUNCTION,
+since apk_istream is a synchronous pull interface while curl_easy_perform()
+is blocking/push-based.
+
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -11,6 +11,6 @@
+ option('minimal', description: 'Build with minimal set of commands', type: 'boolean', value: false)
+ option('python', description: 'Build python binding', type: 'feature', value: 'auto')
+ option('tests', description: 'Build tests', type: 'feature', value: 'auto')
+-option('url_backend', description: 'URL backend', type: 'combo', choices: ['libfetch', 'wget'], value: 'libfetch')
++option('url_backend', description: 'URL backend', type: 'combo', choices: ['libfetch', 'wget', 'curl'], value: 'libfetch')
+ option('uvol_db_target', description: 'Default target for uvol database layer', type: 'string')
+ option('zstd', description: 'Build with zstd support', type: 'feature', value: 'auto', deprecated: {'true': 'enabled', 'false': 'disabled'})
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1,6 +1,14 @@
+ crypto_backend = get_option('crypto_backend')
+ url_backend = get_option('url_backend')
+ 
++if url_backend == 'curl'
++	curl_dep = dependency('libcurl')
++	threads_dep = dependency('threads')
++else
++	curl_dep = dependency('', required: false)
++	threads_dep = dependency('', required: false)
++endif
++
+ libapk_so_version = so_version
+ libapk_src = [
+ 	'adb.c',
+@@ -150,6 +158,8 @@
+ 		libfetch_dep,
+ 		libportability_dep,
+ 		apk_deps,
++		curl_dep,
++		threads_dep,
+ 	],
+ 	c_args: apk_cargs,
+ )
+--- /dev/null
++++ b/src/io_url_curl.c
+@@ -0,0 +1,281 @@
++/* io_url_curl.c - Alpine Package Keeper (APK)
++ *
++ * libcurl-based URL backend with SOCKS4/4a/5/5h proxy support.
++ * Selectable via `-Durl_backend=curl` (see meson_options.txt).
++ *
++ * SPDX-License-Identifier: GPL-2.0-only
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <stdbool.h>
++#include <unistd.h>
++#include <errno.h>
++#include <pthread.h>
++
++#include <curl/curl.h>
++
++#include "apk_io.h"
++#include "apk_print.h"
++#include "apk_defines.h"
++
++static struct apk_out *curl_out;
++static long curl_timeout_sec;
++static bool curl_check_certificate = true;
++static void (*curl_redirect_cb)(int, const char *);
++
++static char curl_proxy_url[256];
++static curl_proxytype curl_proxy_type = CURLPROXY_HTTP;
++
++struct apk_curl_istream {
++	struct apk_istream is;
++	CURL *easy;
++	pthread_t thread;
++	int pipe_rd, pipe_wr;
++	int started;		/* worker thread was actually launched */
++	int joined;
++	int result;		/* CURLcode from curl_easy_perform() */
++	time_t mtime;
++};
++
++/* ---- worker thread: blocking transfer, feeds the pipe ---- */
++
++static size_t curl_write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
++{
++	struct apk_curl_istream *cis = userdata;
++	size_t total = size * nmemb, off = 0;
++
++	while (off < total) {
++		ssize_t n = write(cis->pipe_wr, ptr + off, total - off);
++		if (n < 0) {
++			if (errno == EINTR) continue;
++			return 0; /* -> CURLE_WRITE_ERROR, aborts transfer */
++		}
++		off += n;
++	}
++	return total;
++}
++
++static void *curl_worker(void *arg)
++{
++	struct apk_curl_istream *cis = arg;
++	cis->result = curl_easy_perform(cis->easy);
++	close(cis->pipe_wr);
++	return NULL;
++}
++
++static void curl_join(struct apk_curl_istream *cis)
++{
++	if (cis->started && !cis->joined) {
++		pthread_join(cis->thread, NULL);
++		cis->joined = 1;
++	}
++}
++
++/* ---- apk_istream_ops ---- */
++
++static void curl_get_meta(struct apk_istream *is, struct apk_file_meta *meta)
++{
++	struct apk_curl_istream *cis = container_of(is, struct apk_curl_istream, is);
++	long filetime = -1;
++
++	if (cis->easy)
++		curl_easy_getinfo(cis->easy, CURLINFO_FILETIME, &filetime);
++	meta->mtime = filetime > 0 ? (time_t)filetime : cis->mtime;
++	meta->atime = 0;
++}
++
++static ssize_t curl_read(struct apk_istream *is, void *ptr, size_t size)
++{
++	struct apk_curl_istream *cis = container_of(is, struct apk_curl_istream, is);
++	ssize_t n;
++
++	if (!cis->started) {
++		/* setup failed before the worker ever ran; is->err already set */
++		return is->err;
++	}
++
++again:
++	n = read(cis->pipe_rd, ptr, size);
++	if (n < 0) {
++		if (errno == EINTR) goto again;
++		return -errno;
++	}
++	if (n == 0) {
++		curl_join(cis);
++		if (cis->result != CURLE_OK) {
++			long http_code = 0;
++			curl_easy_getinfo(cis->easy, CURLINFO_RESPONSE_CODE, &http_code);
++			if (curl_out)
++				apk_warn(curl_out, "%s", curl_easy_strerror(cis->result));
++			switch (cis->result) {
++			case CURLE_COULDNT_RESOLVE_PROXY:
++			case CURLE_COULDNT_RESOLVE_HOST:
++				return -ENXIO;
++			case CURLE_COULDNT_CONNECT:
++				return -ECONNREFUSED;
++			case CURLE_OPERATION_TIMEDOUT:
++				return -ETIMEDOUT;
++			case CURLE_SSL_CONNECT_ERROR:
++			case CURLE_PEER_FAILED_VERIFICATION:
++				return -EPROTO;
++			case CURLE_HTTP_RETURNED_ERROR:
++				return http_code == 404 ? -ENOENT : -EREMOTEIO;
++			default:
++				return -EIO;
++			}
++		}
++	}
++	return n;
++}
++
++static int curl_close(struct apk_istream *is)
++{
++	struct apk_curl_istream *cis = container_of(is, struct apk_curl_istream, is);
++	int rc = (is->err < 0) ? is->err : 0;
++
++	curl_join(cis);
++	if (cis->pipe_rd >= 0) close(cis->pipe_rd);
++	if (cis->easy) curl_easy_cleanup(cis->easy);
++	free(cis);
++	return rc;
++}
++
++static const struct apk_istream_ops apk_curl_istream_ops = {
++	.get_meta = curl_get_meta,
++	.read = curl_read,
++	.close = curl_close,
++};
++
++/* ---- proxy config ---- */
++
++static void curl_apply_proxy(CURL *easy)
++{
++	const char *env;
++
++	if (curl_proxy_url[0]) {
++		curl_easy_setopt(easy, CURLOPT_PROXY, curl_proxy_url);
++		curl_easy_setopt(easy, CURLOPT_PROXYTYPE, curl_proxy_type);
++		return;
++	}
++
++	/* Standard curl-compatible env vars, e.g.:
++	 *   ALL_PROXY=socks5h://127.0.0.1:1080
++	 * "socks5h" resolves DNS through the proxy (needed when there is no
++	 * direct route to a DNS server, e.g. behind Tor or a VPN tunnel). */
++	env = getenv("ALL_PROXY");
++	if (!env) env = getenv("all_proxy");
++	if (!env) return;
++
++	curl_easy_setopt(easy, CURLOPT_PROXY, env);
++	if (!strstr(env, "://"))
++		curl_easy_setopt(easy, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
++}
++
++/* ---- public API (matches apk_io.h) ---- */
++
++void apk_io_url_init(struct apk_out *out)
++{
++	curl_out = out;
++	curl_global_init(CURL_GLOBAL_DEFAULT);
++}
++
++void apk_io_url_set_timeout(int timeout)
++{
++	curl_timeout_sec = timeout;
++}
++
++void apk_io_url_check_certificate(bool check)
++{
++	curl_check_certificate = check;
++}
++
++void apk_io_url_set_redirect_callback(void (*cb)(int, const char *))
++{
++	curl_redirect_cb = cb;
++}
++
++/* Optional explicit setter for a future --socks5-proxy / apk.conf option,
++ * independent of ALL_PROXY env. Not wired into cmdline parsing here. */
++void apk_io_url_set_proxy(const char *proxy_url, int is_socks)
++{
++	strncpy(curl_proxy_url, proxy_url, sizeof(curl_proxy_url) - 1);
++	curl_proxy_url[sizeof(curl_proxy_url) - 1] = 0;
++	curl_proxy_type = is_socks ? CURLPROXY_SOCKS5_HOSTNAME : CURLPROXY_HTTP;
++}
++
++static struct apk_istream *curl_fail(struct apk_curl_istream *cis, int err)
++{
++	cis->is.ops = &apk_curl_istream_ops;
++	cis->is.err = err;
++	cis->is.flags = 0;
++	cis->is.prog = NULL;
++	cis->pipe_rd = -1;
++	cis->started = 0;
++	return &cis->is;
++}
++
++struct apk_istream *apk_io_url_istream(const char *url, time_t since)
++{
++	struct apk_curl_istream *cis;
++	int fds[2];
++
++	cis = calloc(1, sizeof *cis + apk_io_bufsize);
++	if (!cis) return NULL;
++	cis->mtime = since;
++
++	if (pipe(fds) < 0)
++		return curl_fail(cis, -errno);
++	cis->pipe_rd = fds[0];
++	cis->pipe_wr = fds[1];
++
++	cis->easy = curl_easy_init();
++	if (!cis->easy) {
++		close(cis->pipe_rd);
++		close(cis->pipe_wr);
++		return curl_fail(cis, -ENOMEM);
++	}
++
++	curl_easy_setopt(cis->easy, CURLOPT_URL, url);
++	curl_easy_setopt(cis->easy, CURLOPT_WRITEFUNCTION, curl_write_cb);
++	curl_easy_setopt(cis->easy, CURLOPT_WRITEDATA, cis);
++	curl_easy_setopt(cis->easy, CURLOPT_FOLLOWLOCATION, 1L);
++	curl_easy_setopt(cis->easy, CURLOPT_FAILONERROR, 1L);
++	curl_easy_setopt(cis->easy, CURLOPT_NOSIGNAL, 1L);
++	curl_easy_setopt(cis->easy, CURLOPT_FILETIME, 1L);
++	curl_easy_setopt(cis->easy, CURLOPT_USERAGENT, "apk/3.0 (curl backend)");
++
++	if (curl_timeout_sec > 0)
++		curl_easy_setopt(cis->easy, CURLOPT_CONNECTTIMEOUT, curl_timeout_sec);
++
++	if (!curl_check_certificate) {
++		curl_easy_setopt(cis->easy, CURLOPT_SSL_VERIFYPEER, 0L);
++		curl_easy_setopt(cis->easy, CURLOPT_SSL_VERIFYHOST, 0L);
++	}
++
++	if (since > 0) {
++		curl_easy_setopt(cis->easy, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
++		curl_easy_setopt(cis->easy, CURLOPT_TIMEVALUE, (long)since);
++	}
++
++	curl_apply_proxy(cis->easy);
++
++	cis->is.ops = &apk_curl_istream_ops;
++	cis->is.buf = (uint8_t *)(cis + 1);
++	cis->is.buf_size = apk_io_bufsize;
++	cis->is.ptr = cis->is.end = cis->is.buf;
++	cis->is.err = 0;
++	cis->is.flags = 0;
++	cis->is.prog = NULL;
++
++	if (pthread_create(&cis->thread, NULL, curl_worker, cis) != 0) {
++		curl_easy_cleanup(cis->easy);
++		cis->easy = NULL;
++		close(cis->pipe_wr);
++		return curl_fail(cis, -EAGAIN);
++	}
++	cis->started = 1;
++
++	return &cis->is;
++}

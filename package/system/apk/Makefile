@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=apk
-PKG_RELEASE:=3
+PKG_RELEASE:=23
 
 PKG_SOURCE_URL=https://gitlab.alpinelinux.org/alpine/apk-tools.git
 PKG_SOURCE_PROTO:=git
@@ -22,11 +22,19 @@ include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/meson.mk
 
+define Package/apk/config
+  source "$(SOURCE)/Config.in"
+endef
+
+Package/apk-mbedtls/config = $(Package/apk/config)
+
 define Package/apk/default
   SECTION:=base
   CATEGORY:=Base system
   TITLE:=apk package manager
-  DEPENDS:=+zlib +wget-any
+  DEPENDS:=+zlib \
+	+PACKAGE_apk_url_backend_wget:wget-any \
+	+PACKAGE_apk_url_backend_curl:libcurl
   URL:=$(PKG_SOURCE_URL)
   PROVIDES:=apk
 endef
@@ -39,6 +47,7 @@ define Package/apk-mbedtls
   VARIANT:=mbedtls
   DEFAULT_VARIANT:=1
   CONFLICTS:=apk-openssl
+  MENU:=1
 endef
 
 define Package/apk-openssl
@@ -46,6 +55,7 @@ define Package/apk-openssl
   TITLE += (openssl)
   DEPENDS +=+libopenssl
   VARIANT:=openssl
+  MENU:=1
 endef
 
 MESON_HOST_VARS+=VERSION=$(PKG_VERSION)
@@ -57,7 +67,7 @@ MESON_COMMON_ARGS = \
 	-Dhelp=enabled \
 	-Dlua_version=5.1 \
 	-Ddefault_library=static \
-	-Durl_backend=wget \
+	-Durl_backend=$(if $(CONFIG_PACKAGE_apk_url_backend_curl),curl,wget) \
 	-Dzstd=disabled \
 	-Dpython=disabled \
 	-Dtests=disabled
