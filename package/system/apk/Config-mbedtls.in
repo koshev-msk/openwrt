@@ -1,0 +1,24 @@
+choice
+	prompt "URL backend"
+	depends on PACKAGE_apk-mbedtls
+	default PACKAGE_apk_mbedtls_url_backend_wget
+        help
+          Selects which downloader apk-tools uses for fetching
+          remote indexes and packages.
+
+	config PACKAGE_apk_mbedtls_url_backend_wget
+		bool "wget"
+		help
+		  Forks the wget binary for HTTP(S) transfers.
+		  Simple, matches upstream default packaging.
+
+	config PACKAGE_apk_mbedtls_url_backend_curl
+		bool "curl (libcurl, with SOCKS proxy support)"
+		select PACKAGE_libcurl
+		help
+		  Uses libcurl directly. Adds support for SOCKS4/4a/5/5h
+		  proxies via the ALL_PROXY environment variable
+		  (e.g. ALL_PROXY=socks5h://127.0.0.1:1080), which the
+		  wget backend cannot do.
+endchoice
+

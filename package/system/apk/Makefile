@@ -22,19 +22,20 @@ include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/meson.mk
 
-define Package/apk/config
-  source "$(SOURCE)/Config.in"
+define Package/apk-mbedtls/config
+  source "$(SOURCE)/Config-mbedtls.in"
 endef
 
-Package/apk-mbedtls/config = $(Package/apk/config)
+define Package/apk-openssl/config
+  source "$(SOURCE)/Config-openssl.in"
+endef
+
 
 define Package/apk/default
   SECTION:=base
   CATEGORY:=Base system
   TITLE:=apk package manager
-  DEPENDS:=+zlib \
-	+PACKAGE_apk_url_backend_wget:wget-any \
-	+PACKAGE_apk_url_backend_curl:libcurl
+  DEPENDS:=+zlib
   URL:=$(PKG_SOURCE_URL)
   PROVIDES:=apk
 endef
@@ -42,7 +43,9 @@ endef
 define Package/apk-mbedtls
   $(Package/apk/default)
   TITLE += (mbedtls)
-  DEPENDS +=+libmbedtls
+  DEPENDS +=+libmbedtls \
+	+PACKAGE_apk_mbedtls_url_backend_wget:wget-any \
+	+PACKAGE_apk_mbedtls_url_backend_curl:libcurl
   DEFAULT:=y if USE_APK
   VARIANT:=mbedtls
   DEFAULT_VARIANT:=1
@@ -53,7 +56,9 @@ endef
 define Package/apk-openssl
   $(Package/apk/default)
   TITLE += (openssl)
-  DEPENDS +=+libopenssl
+  DEPENDS +=+libopenssl \
+	+PACKAGE_apk_openssl_url_backend_wget:wget-any \
+	+PACKAGE_apk_openssl_url_backend_curl:libcurl
   VARIANT:=openssl
   MENU:=1
 endef
@@ -67,7 +72,7 @@ MESON_COMMON_ARGS = \
 	-Dhelp=enabled \
 	-Dlua_version=5.1 \
 	-Ddefault_library=static \
-	-Durl_backend=$(if $(CONFIG_PACKAGE_apk_url_backend_curl),curl,wget) \
+	-Durl_backend=$(if $(CONFIG_PACKAGE_apk_$(BUILD_VARIANT)_url_backend_curl),curl,wget) \
 	-Dzstd=disabled \
 	-Dpython=disabled \
 	-Dtests=disabled
