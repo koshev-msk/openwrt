@@ -83,7 +83,7 @@
 		};
 
 		wlan {
-			label = "green:lan";
+			label = "green:wlan";
 			gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
 			linux-default-trigger = "phy0pt";
 		};

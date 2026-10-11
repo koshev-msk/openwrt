@@ -1610,7 +1610,6 @@ define Device/zbtlink_zbt-wr8305rt
   DEVICE_MODEL := ZBT-WR8305RT
   DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-usb-ohci kmod-dsa-mt7620
   SUPPORTED_DEVICES += zbt-wr8305rt
-  DEFAULT := n
 endef
 TARGET_DEVICES += zbtlink_zbt-wr8305rt
 
