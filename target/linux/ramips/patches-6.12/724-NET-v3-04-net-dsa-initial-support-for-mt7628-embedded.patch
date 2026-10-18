@@ -32,9 +32,9 @@ diff --git a/drivers/net/dsa/Kconfig b/drivers/net/dsa/Kconfig
 index 39fb8ead16b5..defe74625cef 100644
 --- a/drivers/net/dsa/Kconfig
 +++ b/drivers/net/dsa/Kconfig
-@@ -28,6 +28,14 @@ source "drivers/net/dsa/hirschmann/Kconfig"
- 
- source "drivers/net/dsa/lantiq/Kconfig"
+@@ -34,6 +34,14 @@
+ 	  This enables support for the Lantiq / Intel GSWIP 2.1 found in
+ 	  the xrx200 / VR9 SoC.
  
 +config NET_DSA_MT7628
 +	tristate "MediaTek MT7628 Embedded Ethernet switch support"
@@ -51,7 +51,7 @@ diff --git a/drivers/net/dsa/Makefile b/drivers/net/dsa/Makefile
 index f5a463b87ec2..8d4461f2d437 100644
 --- a/drivers/net/dsa/Makefile
 +++ b/drivers/net/dsa/Makefile
-@@ -6,6 +6,7 @@ obj-$(CONFIG_NET_DSA_KS8995) 	+= ks8995.o
+@@ -10,6 +10,7 @@
  obj-$(CONFIG_NET_DSA_MT7530)	+= mt7530.o
  obj-$(CONFIG_NET_DSA_MT7530_MDIO) += mt7530-mdio.o
  obj-$(CONFIG_NET_DSA_MT7530_MMIO) += mt7530-mmio.o

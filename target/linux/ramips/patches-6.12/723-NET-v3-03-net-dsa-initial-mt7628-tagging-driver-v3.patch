@@ -35,14 +35,15 @@ Reviewed-by: Andrew Lunn <andrew@lunn.ch>
 diff --git a/include/net/dsa.h b/include/net/dsa.h
 --- a/include/net/dsa.h
 +++ b/include/net/dsa.h
-@@ -55,5 +55,6 @@
+@@ -55,6 +55,7 @@
  #define DSA_TAG_PROTO_LAN937X_VALUE		27
  #define DSA_TAG_PROTO_VSC73XX_8021Q_VALUE	28
  #define DSA_TAG_PROTO_BRCM_LEGACY_FCS_VALUE	29
 +#define DSA_TAG_PROTO_MT7628_VALUE		33
  
  enum dsa_tag_protocol {
-@@ -87,6 +87,7 @@
+ 	DSA_TAG_PROTO_NONE		= DSA_TAG_PROTO_NONE_VALUE,
+@@ -87,6 +88,7 @@
  	DSA_TAG_PROTO_RZN1_A5PSW	= DSA_TAG_PROTO_RZN1_A5PSW_VALUE,
  	DSA_TAG_PROTO_LAN937X		= DSA_TAG_PROTO_LAN937X_VALUE,
  	DSA_TAG_PROTO_VSC73XX_8021Q	= DSA_TAG_PROTO_VSC73XX_8021Q_VALUE,
@@ -54,7 +55,7 @@ diff --git a/net/dsa/Kconfig b/net/dsa/Kconfig
 index 5ed8c704636d..946f44f0b843 100644
 --- a/net/dsa/Kconfig
 +++ b/net/dsa/Kconfig
-@@ -98,6 +98,12 @@ config NET_DSA_TAG_EDSA
+@@ -98,6 +98,12 @@
  	  Say Y or M if you want to enable support for tagging frames for the
  	  Marvell switches which use EtherType DSA headers.
  
@@ -71,14 +72,14 @@ diff --git a/net/dsa/Makefile b/net/dsa/Makefile
 index bf7247759a64..a84f33f0963d 100644
 --- a/net/dsa/Makefile
 +++ b/net/dsa/Makefile
-@@ -27,6 +27,7 @@ obj-$(CONFIG_NET_DSA_TAG_GSWIP) += tag_gswip.o
+@@ -27,6 +27,7 @@
  obj-$(CONFIG_NET_DSA_TAG_HELLCREEK) += tag_hellcreek.o
  obj-$(CONFIG_NET_DSA_TAG_KSZ) += tag_ksz.o
  obj-$(CONFIG_NET_DSA_TAG_LAN9303) += tag_lan9303.o
 +obj-$(CONFIG_NET_DSA_TAG_MT7628) += tag_mt7628.o
  obj-$(CONFIG_NET_DSA_TAG_MTK) += tag_mtk.o
- obj-$(CONFIG_NET_DSA_TAG_MXL_862XX) += tag_mxl862xx.o
- obj-$(CONFIG_NET_DSA_TAG_MXL_GSW1XX) += tag_mxl-gsw1xx.o
+ obj-$(CONFIG_NET_DSA_TAG_NONE) += tag_none.o
+ obj-$(CONFIG_NET_DSA_TAG_OCELOT) += tag_ocelot.o
 diff --git a/net/dsa/tag_mt7628.c b/net/dsa/tag_mt7628.c
 new file mode 100644
 index 000000000000..f0e346595f30
