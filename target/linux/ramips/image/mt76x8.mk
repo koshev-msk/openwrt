@@ -50,6 +50,11 @@ define Build/ravpower-wd009-factory
 	@mv $@.new $@
 endef
 
+define Device/dsa-migration
+  DEVICE_COMPAT_VERSION := 1.1
+  DEVICE_COMPAT_MESSAGE := Config cannot be migrated from swconfig to DSA
+endef
+
 define Device/7links_wlr-12xx
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := 7Links
@@ -395,6 +400,27 @@ define Device/hiwifi_hc5861b
   DEVICE_PACKAGES := kmod-mt76x2
 endef
 TARGET_DEVICES += hiwifi_hc5861b
+
+define Device/hiwooya_neo-router
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (Router mode)
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-router
+
+define Device/hiwooya_neo-iot
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := HiWooya
+  DEVICE_MODEL := NEO
+  DEVICE_VARIANT := (IoT mode)
+  DEVICE_PACKAGES := kmod-usb2 kmod-mmc-mtk
+  SUPPORTED_DEVICES += hiwooya,neo
+endef
+TARGET_DEVICES += hiwooya_neo-iot
 
 define Device/hongdian_h7920-v40
   IMAGE_SIZE := 16064k
@@ -1454,6 +1480,28 @@ define Device/yuncore_m300
 endef
 TARGET_DEVICES += yuncore_m300
 
+define Device/zbtlink_zbt-cpe2801-16m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-cpe2801
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-16m
+
+define Device/zbtlink_zbt-cpe2801-32m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-CPE2801
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-cpe2801 zbtlink,zbt-cpe2801-16m
+endef
+TARGET_DEVICES += zbtlink_zbt-cpe2801-32m
+
 define Device/zbtlink_zbt-we1226
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := Zbtlink
@@ -1468,6 +1516,50 @@ define Device/zbtlink_zbt-we2426-b
   DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ohci
 endef
 TARGET_DEVICES += zbtlink_zbt-we2426-b
+
+define Device/zbtlink_zbt-we2802d-8m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 7872k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 8M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-we2802d
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-8m
+
+define Device/zbtlink_zbt-we2802d-16m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE2802D
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbt-we2802d
+endef
+TARGET_DEVICES += zbtlink_zbt-we2802d-16m
+
+define Device/zbtlink_zbt-we826-t3-16m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE826-T3
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-mmc-mtk kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbtlink,zbt-we2126 zbt-we826-t3
+endef
+TARGET_DEVICES += zbtlink_zbt-we826-t3-16m
+
+define Device/zbtlink_zbt-we826-t3-32m
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 32448k
+  DEVICE_VENDOR := Zbtlink
+  DEVICE_MODEL := ZBT-WE826-T3
+  DEVICE_VARIANT := 32M
+  DEVICE_PACKAGES := -swconfig kmod-usb2 kmod-mmc-mtk kmod-dsa-mt7628
+  SUPPORTED_DEVICES += zbtlink,zbt-we826-t3-16m zbtlink,zbt-we2126 zbt-we826-t3
+endef
+TARGET_DEVICES += zbtlink_zbt-we826-t3-32m
 
 define Device/zyxel_keenetic-extra-ii
   IMAGE_SIZE := 29824k

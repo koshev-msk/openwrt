@@ -48,7 +48,7 @@ $(eval $(call KernelPackage,pwm-mediatek-ramips))
 
 define KernelPackage/sdhci-mt7620
   SUBMENU:=Other modules
-  TITLE:=MT7620 SDCI
+  TITLE:=MT7620 SDHCI
   CONFLICTS:=kmod-mmc-mtk
   DEPENDS:=@(TARGET_ramips_mt7620||TARGET_ramips_mt76x8||TARGET_ramips_mt7621) +kmod-mmc
   KCONFIG:= \
@@ -114,6 +114,26 @@ endef
 
 $(eval $(call KernelPackage,dma-ralink))
 
+define KernelPackage/dsa-mt7620
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=MediaTek MT7620 integrated switch DSA support
+  DEPENDS:=@TARGET_ramips_mt7620 +kmod-dsa
+  CONFLICTS:=swconfig
+  KCONFIG:= \
+	CONFIG_NET_DSA_MT7620 \
+	CONFIG_NET_DSA_TAG_RALINK
+  FILES:= \
+	$(LINUX_DIR)/drivers/net/ethernet/ralink/gsw_mt7620_dsa.ko \
+	$(LINUX_DIR)/net/dsa/tag_ralink.ko
+  AUTOLOAD:=$(call AutoProbe,tag_ralink gsw_mt7620_dsa,1)
+endef
+
+define KernelPackage/dsa-mt7620/description
+ DSA support for the switch integrated in the MediaTek MT7620 SoC.
+endef
+
+$(eval $(call KernelPackage,dsa-mt7620))
+
 define KernelPackage/hsdma-mtk
   SUBMENU:=Other modules
   TITLE:=MediaTek HSDMA Engine
@@ -172,3 +192,23 @@ define KernelPackage/keyboard-sx951x/description
 endef
 
 $(eval $(call KernelPackage,keyboard-sx951x))
+
+define KernelPackage/dsa-mt7628
+  SUBMENU:=Other modules
+  TITLE:=MediaTek MT7628 Embedded Ethernet Switch
+  DEPENDS:=@TARGET_ramips_mt76x8 +kmod-dsa +kmod-regmap-core
+  KCONFIG:= \
+	CONFIG_MEDIATEK_FE_SOC_PHY=y \
+	CONFIG_NET_DSA_TAG_MT7628 \
+	CONFIG_NET_DSA_MT7628
+  FILES:= \
+	$(LINUX_DIR)/drivers/net/dsa/mt7628.ko \
+	$(LINUX_DIR)/net/dsa/tag_mt7628.ko
+  AUTOLOAD:=$(call AutoLoad,10,tag_mt7628 mt7628,1)
+endef
+
+define KernelPackage/dsa-mt7628/description
+  Kernel modules for the MediaTek MT7628 embedded Ethernet switch
+endef
+
+$(eval $(call KernelPackage,dsa-mt7628))

@@ -25,10 +25,6 @@ ramips_setup_interfaces()
 	ralink,mt7620a-v22sg-evb|\
 	sanlinking,d240|\
 	zbtlink,zbt-ape522ii|\
-	zbtlink,zbt-we826-16m|\
-	zbtlink,zbt-we826-32m|\
-	zbtlink,zbt-we826-e|\
-	zbtlink,zbt-wr8305rt|\
 	zyxel,keenetic-lite-iii-a|\
 	zyxel,keenetic-omni)
 		ucidef_add_switch "switch0" \
@@ -200,6 +196,10 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1" "0:wan" "6@eth0"
 		;;
+	kroks,ap221m3)
+		ucidef_add_switch "switch0" \
+			"2:lan" "6@eth0"
+		;;
 	lenovo,newifi-y1|\
 	xiaomi,miwifi-mini)
 		ucidef_add_switch "switch0" \
@@ -280,6 +280,12 @@ ramips_setup_interfaces()
 	youku,yk-l1c)
 		ucidef_add_switch "switch0" \
 			"0:lan" "1:lan" "4:wan" "6@eth0"
+		;;
+	zbtlink,zbt-we826-16m|\
+	zbtlink,zbt-we826-32m|\
+	zbtlink,zbt-we826-e|\
+	zbtlink,zbt-wr8305rt)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
 		;;
 	zbtlink,zbt-we1026-5g-16m)
 		ucidef_add_switch "switch0" \

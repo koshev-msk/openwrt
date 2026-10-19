@@ -1,0 +1,178 @@
+/dts-v1/;
+#include "sf21h8898_bananapi_bpi-rv2.dtsi"
+
+/*
+ * Bananapi BPI-RV2 — загрузка с NAND flash.
+ * Подключает sf21h8898_bananapi_bpi-rv2.dtsi (v3).
+ *
+ * SPI0 шина: два устройства на одной шине, CS через отдельные GPIO.
+ *
+ * Схема P10:
+ *   flash@0: W25N01GVZEIG SPI NAND 128MB
+ *            CS: GPIO36 (SXGMII_MDIO/A5) → SPI0_NAND_CS
+ *   flash@1: EN25QH128    SPI NOR  16MB
+ *            CS: GPIO5  (SPI0_CSN/L22)   → SPI0_NOR_CS
+ *
+ * cs-gpios порядок: [0] = flash@0 CS, [1] = flash@1 CS.
+ *   cs-gpios = <GPIO5 active_low>, <GPIO36 active_low>
+ *   flash@0 (reg=0) → использует cs-gpios[0] = GPIO5
+ *   flash@1 (reg=1) → использует cs-gpios[1] = GPIO36
+ *
+ * ПРИМЕЧАНИЕ о GPIO36:
+ *   GPIO36 (SXGMII_MDIO/A5) используется как CS для NAND flash.
+ *   Тот же GPIO36 физически подключён к SXGMII_MDIO линии EN8811H.
+ *   mdio1 в dtsi переключает GPIO36/37 в FUNC_MODE0 (SXGMII_MDC/MDIO)
+ *   при инициализации PHY драйвера. После инициализации PHY пин
+ *   используется редко (только при MDIO операциях), а CS для NAND
+ *   используется при каждом доступе к flash. Потенциальный конфликт
+ *   маловероятен т.к. MDIO и SPI операции не происходят одновременно,
+ *   но это архитектурное ограничение платы BPI-RV2.
+ *
+ * spi-max-frequency = 35MHz: безопасная частота для обоих чипов
+ *   в dual-SPI режиме (W25N01: до 75MHz quad, EN25QH128: до 80MHz).
+ * spi-tx/rx-bus-width = 2: dual SPI (2 линии данных).
+ *   SPI0_HOLD (GPIO6) и SPI0_WP (GPIO7) задействованы как
+ *   второй бит данных при dual-SPI передаче.
+ */
+
+/ {
+	model = "Bananapi BPI-RV2 (Booting from NAND)";
+	compatible = "bananapi,bpi-rv2-nand", "siflower,sf21h8898";
+};
+
+&spi0 {
+	status = "okay";
+	num-cs = <2>;
+	/*
+	 * cs-gpios[0] = GPIO5  (SPI0_CSN/L22)   → CS для flash@0 (NAND)
+	 * cs-gpios[1] = GPIO36 (SXGMII_MDIO/A5) → CS для flash@1 (NOR)
+	 *
+	 * ВАЖНО: порядок cs-gpios соответствует reg = <0> и reg = <1>.
+	 * GPIO5  — штатный аппаратный CS0 SPI0 (FUNC_MODE0 = SPI0_CSN).
+	 * GPIO36 — используется как программный GPIO CS (GPIO_MODE).
+	 */
+	cs-gpios = <&gpio 5 GPIO_ACTIVE_LOW>, <&gpio 36 GPIO_ACTIVE_LOW>;
+
+	/*
+	 * NAND flash: Winbond W25N01GVZEIG, 1Gbit (128MB).
+	 * Схема P10: U14, подключён к SPI0.
+	 * Используется как основной загрузочный носитель.
+	 * Содержит UBI том с factory данными и rootfs FIT image.
+	 *
+	 * Разметка:
+	 *   0x000000 - 0x01FFFF (128KB):  fbl — First Boot Loader (read-only)
+	 *   0x020000 - конец    (~128MB): ubi — UBI том
+	 *     ├── factory: MAC адреса, заводские параметры (nvmem)
+	 *     └── fit:     корневая ФС + ядро в формате FIT image
+	 */
+	flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-max-frequency = <35000000>;
+		spi-tx-bus-width = <2>;
+		spi-rx-bus-width = <2>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			/*
+			 * FBL: First Boot Loader.
+			 * 128KB, read-only — защита от случайной перезаписи.
+			 * Содержит первичный загрузчик SF21 (до U-Boot).
+			 */
+			partition@0 {
+				label = "fbl";
+				reg = <0x0 0x20000>;
+				read-only;
+			};
+
+			/*
+			 * UBI: основной раздел.
+			 * Размер: 0 = занимает всё оставшееся пространство NAND.
+			 * compatible = "linux,ubi": ядро монтирует как UBI том.
+			 *
+			 * UBI volumes:
+			 *   factory: заводские данные
+			 *     nvmem layout: MAC адрес @ offset 0, 6 байт.
+			 *     mac-base: базовый MAC для всех портов.
+			 *       index 0: LAN MAC (xgmac0,1,2,3,5)
+			 *       index 1: WAN MAC (xgmac4, base MAC + 1)
+			 *   fit: корневая ФС + ядро (FIT image)
+			 *     rootdisk: ссылка используется в chosen.rootdisk
+			 *     для монтирования root ФС из UBI volume.
+			 */
+			partition@20000 {
+				label = "ubi";
+				reg = <0x20000 0x0>;
+				compatible = "linux,ubi";
+
+				volumes {
+					factory: ubi-volume-factory {
+						volname = "factory";
+
+						nvmem-layout {
+							compatible = "fixed-layout";
+							#address-cells = <1>;
+							#size-cells = <1>;
+
+							macaddr_factory_0: macaddr@0 {
+								compatible = "mac-base";
+								reg = <0x0 0x6>;
+								#nvmem-cell-cells = <1>;
+							};
+						};
+					};
+
+					rootdisk: ubi-volume-fit {
+						volname = "fit";
+					};
+				};
+			};
+		};
+	};
+
+	/*
+	 * NOR flash: EON EN25QH128, 128Mbit (16MB).
+	 * Схема P10: U24, подключён к SPI0.
+	 * Используется для хранения резервного загрузчика и прошивки.
+	 *
+	 * Разметка:
+	 *   0x000000 - 0x08FFFF (576KB):   bootloader-nor (read-only)
+	 *     Содержит U-Boot для NOR boot.
+	 *   0x090000 - 0x09FFFF (64KB):    factory-nor
+	 *     Заводские параметры, MAC адреса (дублирует NAND factory).
+	 *   0x0A0000 - 0xFFFFFF (~15.4MB): firmware-nor
+	 *     Резервная прошивка для NOR boot (альтернатива NAND).
+	 */
+	flash@1 {
+		compatible = "jedec,spi-nor";
+		reg = <1>;
+		spi-max-frequency = <35000000>;
+		spi-tx-bus-width = <2>;
+		spi-rx-bus-width = <2>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "bootloader-nor";
+				reg = <0x0 0x90000>;
+				read-only;
+			};
+
+			partition@90000 {
+				label = "factory-nor";
+				reg = <0x90000 0x10000>;
+			};
+
+			partition@a0000 {
+				label = "firmware-nor";
+				reg = <0xa0000 0xf60000>;
+			};
+		};
+	};
+};

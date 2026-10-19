@@ -1,0 +1,114 @@
+Subject: [PATCH v3 2/4] net: phy: mediatek: add phy driver for MT7628
+ built-in Fast Ethernet PHYs
+From: Joris Vaisvila <joey@tinyisr.com>
+Date: Tue, 28 Apr 2026 21:55:08 +0300
+Message-Id: <20260428185510.261521-3-joey@tinyisr.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+The Fast Ethernet PHYs present in the MT7628 SoCs require an
+undocumented bit to be set before they can establish 100mbps links.
+
+This commit adds the Kconfig option MEDIATEK_FE_SOC_PHY and the
+corresponding driver mtk-fe-soc.c.
+
+Signed-off-by: Joris Vaisvila <joey@tinyisr.com>
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
+---
+ drivers/net/phy/mediatek/Kconfig      | 10 +++++-
+ drivers/net/phy/mediatek/Makefile     |  1 +
+ drivers/net/phy/mediatek/mtk-fe-soc.c | 50 +++++++++++++++++++++++++++
+ 3 files changed, 60 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/net/phy/mediatek/mtk-fe-soc.c
+
+diff --git a/drivers/net/phy/mediatek/Kconfig b/drivers/net/phy/mediatek/Kconfig
+index bb7dc876271e..b6a51f38c358 100644
+--- a/drivers/net/phy/mediatek/Kconfig
++++ b/drivers/net/phy/mediatek/Kconfig
+@@ -21,8 +21,16 @@ config MEDIATEK_GE_PHY
+ 	  common operations with MediaTek SoC built-in Gigabit
+ 	  Ethernet PHYs.
+ 
++config MEDIATEK_FE_SOC_PHY
++	tristate "MediaTek SoC Fast Ethernet PHYs"
++	help
++	  Support for MediaTek MT7628 built-in Fast Ethernet PHYs.
++	  This driver only sets an initialization bit required for the PHY
++	  to establish 100 Mbps links. All other PHY operations are handled
++	  by the kernel's generic PHY code.
++
+ config MEDIATEK_GE_SOC_PHY
+-	tristate "MediaTek SoC Ethernet PHYs"
++	tristate "MediaTek SoC Gigabit Ethernet PHYs"
+ 	depends on ARM64 || COMPILE_TEST
+ 	depends on ARCH_AIROHA || (ARCH_MEDIATEK && NVMEM_MTK_EFUSE) || \
+ 		   COMPILE_TEST
+diff --git a/drivers/net/phy/mediatek/Makefile b/drivers/net/phy/mediatek/Makefile
+index ac57ecc799fc..6f9cacf7f906 100644
+--- a/drivers/net/phy/mediatek/Makefile
++++ b/drivers/net/phy/mediatek/Makefile
+@@ -1,4 +1,5 @@
+ # SPDX-License-Identifier: GPL-2.0
++obj-$(CONFIG_MEDIATEK_FE_SOC_PHY)	+= mtk-fe-soc.o
+ obj-$(CONFIG_MTK_NET_PHYLIB)		+= mtk-phy-lib.o
+ obj-$(CONFIG_MEDIATEK_GE_PHY)		+= mtk-ge.o
+ obj-$(CONFIG_MEDIATEK_GE_SOC_PHY)	+= mtk-ge-soc.o
+diff --git a/drivers/net/phy/mediatek/mtk-fe-soc.c b/drivers/net/phy/mediatek/mtk-fe-soc.c
+new file mode 100644
+index 000000000000..317944411fbe
+--- /dev/null
++++ b/drivers/net/phy/mediatek/mtk-fe-soc.c
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Driver for MT7628 Embedded Switch internal Fast Ethernet PHYs
++ */
++#include <linux/module.h>
++#include <linux/phy.h>
++
++#define MTK_FPHY_ID_MT7628	0x03a29410
++#define MTK_EXT_PAGE_ACCESS	0x1f
++
++static int mt7628_phy_read_page(struct phy_device *phydev)
++{
++	return __phy_read(phydev, MTK_EXT_PAGE_ACCESS);
++}
++
++static int mt7628_phy_write_page(struct phy_device *phydev, int page)
++{
++	return __phy_write(phydev, MTK_EXT_PAGE_ACCESS, page);
++}
++
++static int mt7628_phy_config_init(struct phy_device *phydev)
++{
++	/*
++	 * This undocumented bit is required for the PHYs to be able to
++	 * establish 100mbps links.
++	 */
++	return phy_write_paged(phydev, 0x8000, 30, BIT(13));
++}
++
++static struct phy_driver mtk_soc_fe_phy_driver[] = {
++	{
++		PHY_ID_MATCH_EXACT(MTK_FPHY_ID_MT7628),
++		.name = "MediaTek MT7628 PHY",
++		.config_init = mt7628_phy_config_init,
++		.read_page = mt7628_phy_read_page,
++		.write_page = mt7628_phy_write_page,
++	},
++};
++
++module_phy_driver(mtk_soc_fe_phy_driver);
++static const struct mdio_device_id __maybe_unused mtk_soc_fe_phy_tbl[] = {
++	{ PHY_ID_MATCH_EXACT(MTK_FPHY_ID_MT7628) },
++	{ }
++};
++
++MODULE_DESCRIPTION("MediaTek SoC Fast Ethernet PHY driver");
++MODULE_AUTHOR("Joris Vaisvila <joey@tinyisr.com>");
++MODULE_LICENSE("GPL");
++
++MODULE_DEVICE_TABLE(mdio, mtk_soc_fe_phy_tbl);
+-- 
+2.54.0

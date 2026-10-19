@@ -1,0 +1,178 @@
+Subject: [PATCH v3 3/4] net: dsa: initial MT7628 tagging driver
+From: Joris Vaisvila <joey@tinyisr.com>
+Date: Tue, 28 Apr 2026 21:55:09 +0300
+Message-Id: <20260428185510.261521-4-joey@tinyisr.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Add support for the MT7628 embedded switch's tag.
+
+The MT7628 tag is merged with the VLAN TPID field when a VLAN is
+appended by the switch hardware. It is not installed if the VLAN tag is
+already there on ingress. Due to this hardware quirk the tag cannot be
+trusted for port 0 if we don't know that the VLAN was added by the
+hardware. As a workaround for this the switch is configured to always
+append the port PVID tag even if the incoming packet is already tagged.
+The tagging driver can then trust that the tag is always accurate and
+the whole VLAN tag can be removed on ingress as it's only metadata for
+the tagger.
+
+On egress the MT7628 tag allows precise TX, but the correct VLAN tag
+from tag_8021q is still appended or the switch will not forward the
+packet.
+
+Signed-off-by: Joris Vaisvila <joey@tinyisr.com>
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
+---
+ include/net/dsa.h    |  2 +
+ net/dsa/Kconfig      |  6 +++
+ net/dsa/Makefile     |  1 +
+ net/dsa/tag_mt7628.c | 89 ++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 98 insertions(+)
+ create mode 100644 net/dsa/tag_mt7628.c
+
+diff --git a/include/net/dsa.h b/include/net/dsa.h
+--- a/include/net/dsa.h
++++ b/include/net/dsa.h
+@@ -55,5 +55,6 @@
+ #define DSA_TAG_PROTO_LAN937X_VALUE		27
+ #define DSA_TAG_PROTO_VSC73XX_8021Q_VALUE	28
+ #define DSA_TAG_PROTO_BRCM_LEGACY_FCS_VALUE	29
++#define DSA_TAG_PROTO_MT7628_VALUE		33
+ 
+ enum dsa_tag_protocol {
+@@ -87,6 +87,7 @@
+ 	DSA_TAG_PROTO_RZN1_A5PSW	= DSA_TAG_PROTO_RZN1_A5PSW_VALUE,
+ 	DSA_TAG_PROTO_LAN937X		= DSA_TAG_PROTO_LAN937X_VALUE,
+ 	DSA_TAG_PROTO_VSC73XX_8021Q	= DSA_TAG_PROTO_VSC73XX_8021Q_VALUE,
++	DSA_TAG_PROTO_MT7628		= DSA_TAG_PROTO_MT7628_VALUE,
+ };
+ 
+ struct dsa_switch;
+diff --git a/net/dsa/Kconfig b/net/dsa/Kconfig
+index 5ed8c704636d..946f44f0b843 100644
+--- a/net/dsa/Kconfig
++++ b/net/dsa/Kconfig
+@@ -98,6 +98,12 @@ config NET_DSA_TAG_EDSA
+ 	  Say Y or M if you want to enable support for tagging frames for the
+ 	  Marvell switches which use EtherType DSA headers.
+ 
++config NET_DSA_TAG_MT7628
++	tristate "Tag driver for the MT7628 embedded switch"
++	help
++	  Say Y or M if you want to enable support for tagging frames for the
++	  switch embedded in the MT7628 SoC.
++
+ config NET_DSA_TAG_MTK
+ 	tristate "Tag driver for Mediatek switches"
+ 	help
+diff --git a/net/dsa/Makefile b/net/dsa/Makefile
+index bf7247759a64..a84f33f0963d 100644
+--- a/net/dsa/Makefile
++++ b/net/dsa/Makefile
+@@ -27,6 +27,7 @@ obj-$(CONFIG_NET_DSA_TAG_GSWIP) += tag_gswip.o
+ obj-$(CONFIG_NET_DSA_TAG_HELLCREEK) += tag_hellcreek.o
+ obj-$(CONFIG_NET_DSA_TAG_KSZ) += tag_ksz.o
+ obj-$(CONFIG_NET_DSA_TAG_LAN9303) += tag_lan9303.o
++obj-$(CONFIG_NET_DSA_TAG_MT7628) += tag_mt7628.o
+ obj-$(CONFIG_NET_DSA_TAG_MTK) += tag_mtk.o
+ obj-$(CONFIG_NET_DSA_TAG_MXL_862XX) += tag_mxl862xx.o
+ obj-$(CONFIG_NET_DSA_TAG_MXL_GSW1XX) += tag_mxl-gsw1xx.o
+diff --git a/net/dsa/tag_mt7628.c b/net/dsa/tag_mt7628.c
+new file mode 100644
+index 000000000000..f0e346595f30
+--- /dev/null
++++ b/net/dsa/tag_mt7628.c
+@@ -0,0 +1,89 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2026, Joris Vaisvila <joey@tinyisr.com>
++ * MT7628 switch tag support
++ */
++
++#include <linux/etherdevice.h>
++#include <linux/dsa/8021q.h>
++#include <net/dsa.h>
++
++#include "tag.h"
++
++/*
++ * The MT7628 tag is encoded in the VLAN TPID field.
++ * On TX the lower 6 bits encode the destination port bitmask.
++ * On RX the lower 3 bits encode the source port number.
++ *
++ * The switch hardware will not modify the TPID of an incoming packet if it is
++ * already VLAN tagged. To work around this the switch is configured to always
++ * append a tag_8021q standalone VLAN tag for each port. That means we can
++ * safely strip the outer VLAN tag after parsing it.
++ *
++ * A VLAN tag is constructed on egress to target the standalone VLAN and
++ * destination port.
++ */
++
++#define MT7628_TAG_NAME "mt7628"
++
++#define MT7628_TAG_TX_PORT GENMASK(5, 0)
++#define MT7628_TAG_RX_PORT GENMASK(2, 0)
++#define MT7628_TAG_LEN 4
++
++static struct sk_buff *mt7628_tag_xmit(struct sk_buff *skb,
++				       struct net_device *dev)
++{
++	struct dsa_port *dp;
++	u16 xmit_vlan;
++	__be16 *tag;
++
++	dp = dsa_user_to_port(dev);
++	xmit_vlan = dsa_tag_8021q_standalone_vid(dp);
++
++	skb_push(skb, MT7628_TAG_LEN);
++	dsa_alloc_etype_header(skb, MT7628_TAG_LEN);
++
++	tag = dsa_etype_header_pos_tx(skb);
++
++	tag[0] = htons(ETH_P_8021Q |
++		       FIELD_PREP(MT7628_TAG_TX_PORT,
++				 BIT(dsa_user_to_port(dev)->index)));
++	tag[1] = htons(xmit_vlan);
++
++	return skb;
++}
++
++static struct sk_buff *mt7628_tag_rcv(struct sk_buff *skb,
++				      struct net_device *dev)
++{
++	__be16 *phdr;
++
++	if (unlikely(!pskb_may_pull(skb, MT7628_TAG_LEN)))
++		return NULL;
++
++	phdr = dsa_etype_header_pos_rx(skb);
++	skb->dev =
++	    dsa_conduit_find_user(dev, 0,
++				  FIELD_GET(MT7628_TAG_RX_PORT, ntohs(*phdr)));
++	if (!skb->dev)
++		return NULL;
++
++	skb_pull_rcsum(skb, MT7628_TAG_LEN);
++	dsa_strip_etype_header(skb, MT7628_TAG_LEN);
++	dsa_default_offload_fwd_mark(skb);
++	return skb;
++}
++
++static const struct dsa_device_ops mt7628_tag_ops = {
++	.name = MT7628_TAG_NAME,
++	.proto = DSA_TAG_PROTO_MT7628,
++	.xmit = mt7628_tag_xmit,
++	.rcv = mt7628_tag_rcv,
++	.needed_headroom = MT7628_TAG_LEN,
++};
++
++module_dsa_tag_driver(mt7628_tag_ops);
++
++MODULE_ALIAS_DSA_TAG_DRIVER(DSA_TAG_PROTO_MT7628, MT7628_TAG_NAME);
++MODULE_DESCRIPTION("DSA tag driver for MT7628 switch");
++MODULE_LICENSE("GPL");
+-- 
+2.54.0

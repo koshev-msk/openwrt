@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+/dts-v1/;
+
+#include "mt7981b-zbtlink-zbt-z8102ax-nand.dtsi"
+
+/ {
+	model = "ZBT Z8102AX (ALL nAND)";
+	compatible = "zbtlink,zbt-z8102ax-nand-all", "zbtlink,zbt-z8102ax-nand", "zbtlink,zbt-z8102ax", "mediatek,mt7981";
+};
+
+&spi0 {
+	spi_nand@0 {
+		partitions {
+			partition@580000 {
+				reg = <0x580000 0x20000000>;
+			};
+		};
+	};
+};
