@@ -1158,8 +1158,8 @@ static int fe_poll(struct napi_struct *napi, int budget)
 			goto poll_again;
 		}
 
-		napi_complete_done(napi, rx_done);
-		fe_int_enable(tx_intr | rx_intr);
+		if (napi_complete_done(napi, rx_done))
+			fe_int_enable(tx_intr | rx_intr);
 	} else {
 		rx_done = budget;
 	}
@@ -1668,6 +1668,17 @@ static int fe_probe(struct platform_device *pdev)
 	SET_NETDEV_DEV(netdev, &pdev->dev);
 	netdev->netdev_ops = &fe_netdev_ops;
 	netdev->base_addr = (unsigned long)fe_base;
+
+	/* Set the MAC address if it is correct, if not use a random MAC address  */
+	err = of_get_ethdev_address(pdev->dev.of_node, netdev);
+	if (err == -EPROBE_DEFER)
+		return err;
+
+	if (err) {
+		eth_hw_addr_random(netdev);
+		dev_err(&pdev->dev, "generated random MAC address %pM\n",
+			netdev->dev_addr);
+	}
 
 	netdev->irq = platform_get_irq(pdev, 0);
 	if (netdev->irq < 0)
