@@ -8,12 +8,18 @@ define Image/Prepare
 	echo -ne '\xde\xad\xc0\xde' > $(KDIR)/ubi_mark
 endef
 
+# With per-device rootfs, ROOTFS_ID is empty for devices that are not
+# selected (e.g. when only building the ImageBuilder), so there is no
+# rootfs to hash. Skip the rootfs node then instead of emitting an
+# invalid .its.
 define Build/fit-with-netgear-top-level-rootfs-node
 	$(call Build/fit-its,$(1))
-	$(TOPDIR)/scripts/gen_netgear_rootfs_node.sh $(KERNEL_BUILD_DIR)/root.squashfs$(if $(TARGET_PER_DEVICE_ROOTFS),+pkg=$(ROOTFS_ID/$(DEVICE_NAME))) > $@.rootfs
-	awk '/configurations/ { system("cat $@.rootfs") } 1' $@.its > $@.its.tmp
-	@mv -f $@.its.tmp $@.its
-	@rm -f $@.rootfs
+	if [ -n "$(if $(TARGET_PER_DEVICE_ROOTFS),$(ROOTFS_ID/$(DEVICE_NAME)),1)" ]; then \
+		$(TOPDIR)/scripts/gen_netgear_rootfs_node.sh $(KERNEL_BUILD_DIR)/root.squashfs$(if $(TARGET_PER_DEVICE_ROOTFS),+pkg=$(ROOTFS_ID/$(DEVICE_NAME))) > $@.rootfs; \
+		awk '/configurations/ { system("cat $@.rootfs") } 1' $@.its > $@.its.tmp; \
+		mv -f $@.its.tmp $@.its; \
+		rm -f $@.rootfs; \
+	fi
 	$(call Build/fit-image,$(1))
 endef
 
