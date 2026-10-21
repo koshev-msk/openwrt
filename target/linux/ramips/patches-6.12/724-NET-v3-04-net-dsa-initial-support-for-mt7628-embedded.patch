@@ -64,7 +64,7 @@ new file mode 100644
 index 000000000000..1ed99706e41d
 --- /dev/null
 +++ b/drivers/net/dsa/mt7628.c
-@@ -0,0 +1,643 @@
+@@ -0,0 +1,652 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Mediatek MT7628 Embedded Switch (ESW) DSA driver
@@ -541,6 +541,14 @@ index 000000000000..1ed99706e41d
 +	}
 +}
 +
++static struct phylink_pcs *
++mt7628_phylink_mac_select_pcs(struct dsa_switch *ds, int port,
++			      phy_interface_t interface)
++{
++	/* internal PHYs only, there is no PCS */
++	return NULL;
++}
++
 +static int mt7628_dsa_8021q_vlan_add(struct dsa_switch *ds, int port,
 +				     u16 vid, u16 flags)
 +{
@@ -617,6 +625,7 @@ index 000000000000..1ed99706e41d
 +	.port_enable = mt7628_port_enable,
 +	.port_disable = mt7628_port_disable,
 +	.phylink_get_caps = mt7628_phylink_get_caps,
++	.phylink_mac_select_pcs = mt7628_phylink_mac_select_pcs,
 +	.tag_8021q_vlan_add = mt7628_dsa_8021q_vlan_add,
 +	.tag_8021q_vlan_del = mt7628_dsa_8021q_vlan_del,
 +};
