@@ -250,6 +250,7 @@ zbtlink,zbt-we2802d-8m|\
 zbtlink,zbt-we2802d-16m)
 	ucidef_set_led_netdev "lan" "lan" "green:lan" "lan" "link tx rx"
 	ucidef_set_led_netdev "wan" "wan" "green:wan" "wan" "link tx rx"
+	ucidef_set_led_wlan "wlan" "wlan" "green:wlan" "phy0tpt"
 	;;
 zyxel,keenetic-extra-ii)
 	ucidef_set_led_netdev "wifi_led" "wifi" "green:wifi" "wlan0"
