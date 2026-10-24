@@ -6,6 +6,7 @@
 KERNEL_LOADADDR:=0x40008000
 
 define Device/b4com_mcr100
+  $(call Device/FitImageGzip)
   DEVICE_VENDOR := B4COM
   DEVICE_MODEL := MCR-100
   DEVICE_PACKAGES := kmod-usb-net-smsc95xx
@@ -14,6 +15,7 @@ endef
 TARGET_DEVICES += b4com_mcr100
 
 define Device/b4com_mcr200
+  $(call Device/FitImageGzip)
   DEVICE_VENDOR := B4COM
   DEVICE_MODEL := MCR-200
   DEVICE_PACKAGES := kmod-usb-net-smsc95xx
