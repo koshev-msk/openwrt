@@ -10,7 +10,7 @@
  	sun8i-h3-beelink-x2.dtb \
 --- /dev/null
 +++ b/arch/arm/boot/dts/allwinner/sun8i-h3-mcr100.dts
-@@ -0,0 +1,191 @@
+@@ -0,0 +1,199 @@
 +/dts-v1/;
 +#include "sun8i-h3.dtsi"
 +#include "sunxi-common-regulators.dtsi"
@@ -106,6 +106,10 @@
 +	status = "okay";
 +};
 +
++&ehci3 {
++	status = "okay";
++};
++
 +&emac {
 +	phy-handle = <&int_mii_phy>;
 +	phy-mode = "mii";
@@ -141,6 +145,10 @@
 +};
 +
 +&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
 +	status = "okay";
 +};
 +
