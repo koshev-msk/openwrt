@@ -349,78 +349,102 @@ proto_qmi_setup() {
 		cid_4=$(uqmi -s -d "$device" -t 1000 --get-client-id wds)
 		if ! [ "$cid_4" -eq "$cid_4" ] 2> /dev/null; then
 			echo "Unable to obtain client ID"
-			proto_notify_error "$interface" NO_CID
-			return 1
-		fi
+				if [ "$pdptype" != "ipv4v6" ]; then
+					proto_notify_error "$interface" NO_CID
+					return 1
+				fi
+				echo "IPv4 unavailable, trying IPv6"
+				cid_4=""
+				pdh_4=""
+		else
+			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --set-ip-family ipv4 > /dev/null 2>&1
 
-		uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --set-ip-family ipv4 > /dev/null 2>&1
-
-		pdh_4=$(uqmi -s -d "$device" -t 5000 --set-client-id wds,"$cid_4" \
-			--start-network \
-			${apn:+--apn $apn} \
-			${profile:+--profile $profile} \
-			${auth:+--auth-type $auth} \
-			${username:+--username $username} \
-			${password:+--password $password} \
+			pdh_4=$(uqmi -s -d "$device" -t 5000 --set-client-id wds,"$cid_4" \
+				--start-network \
+				${apn:+--apn $apn} \
+				${profile:+--profile $profile} \
+				${auth:+--auth-type $auth} \
+				${username:+--username $username} \
+				${password:+--password $password} \
 			${autoconnect:+--autoconnect})
 
-		# pdh_4 is a numeric value on success
-		if ! [ "$pdh_4" -eq "$pdh_4" ] 2> /dev/null; then
-			echo "Unable to connect IPv4"
-			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --release-client-id wds > /dev/null 2>&1
-			proto_notify_error "$interface" CALL_FAILED
-			return 1
-		fi
+			if ! [ "$pdh_4" -eq "$pdh_4" ] 2> /dev/null; then
+				echo "Unable to connect IPv4"
+				uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --release-client-id wds > /dev/null 2>&1
+				cid_4=""
+				pdh_4=""
+			else
+				connstat=$(uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --get-data-status)
+				if [ "$connstat" != '"connected"' ]; then
+					echo "No IPv4 data link!"
+					uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --release-client-id wds > /dev/null 2>&1
+					cid_4=""
+					pdh_4=""
+				fi
+			fi
 
-		# Check data connection state
-		connstat=$(uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --get-data-status)
-		[ "$connstat" == '"connected"' ] || {
-			echo "No data link!"
-			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_4" --release-client-id wds > /dev/null 2>&1
-			proto_notify_error "$interface" CALL_FAILED
-			return 1
-		}
+			if [ -z "$pdh_4" ] && [ "$pdptype" != "ipv4v6" ]; then
+				proto_notify_error "$interface" CALL_FAILED
+				return 1
+			fi
+		fi
 	}
 
 	[ "$pdptype" = "ipv6" -o "$pdptype" = "ipv4v6" ] && {
 		cid_6=$(uqmi -s -d "$device" -t 1000 --get-client-id wds)
 		if ! [ "$cid_6" -eq "$cid_6" ] 2> /dev/null; then
 			echo "Unable to obtain client ID"
-			proto_notify_error "$interface" NO_CID
-			return 1
+			if [ "$pdptype" != "ipv4v6" ]; then
+				proto_notify_error "$interface" NO_CID
+				return 1
+			fi
+			echo "IPv6 unavailable, keeping IPv4 if available"
+			cid_6=""
+			pdh_6=""
+		else
+			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --set-ip-family ipv6 > /dev/null 2>&1
+
+			: "${v6apn:=${apn}}"
+			: "${v6profile:=${profile}}"
+
+			pdh_6=$(uqmi -s -d "$device" -t 5000 --set-client-id wds,"$cid_6" \
+				--start-network \
+				${v6apn:+--apn $v6apn} \
+				${v6profile:+--profile $v6profile} \
+				${auth:+--auth-type $auth} \
+				${username:+--username $username} \
+				${password:+--password $password} \
+				${autoconnect:+--autoconnect})
+
+			if ! [ "$pdh_6" -eq "$pdh_6" ] 2> /dev/null; then
+				echo "Unable to connect IPv6"
+				uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --release-client-id wds > /dev/null 2>&1
+				cid_6=""
+				pdh_6=""
+			else
+				connstat=$(uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --set-ip-family ipv6 --get-data-status)
+				if [ "$connstat" != '"connected"' ]; then
+					echo "No IPv6 data link!"
+					uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --release-client-id wds > /dev/null 2>&1
+					cid_6=""
+					pdh_6=""
+				fi
+			fi
+
+			if [ -z "$pdh_6" ] && [ "$pdptype" != "ipv4v6" ]; then
+				proto_notify_error "$interface" CALL_FAILED
+				return 1
+			fi
 		fi
 
-		uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --set-ip-family ipv6 > /dev/null 2>&1
-
-		: "${v6apn:=${apn}}"
-		: "${v6profile:=${profile}}"
-
-		pdh_6=$(uqmi -s -d "$device" -t 5000 --set-client-id wds,"$cid_6" \
-			--start-network \
-			${v6apn:+--apn $v6apn} \
-			${v6profile:+--profile $v6profile} \
-			${auth:+--auth-type $auth} \
-			${username:+--username $username} \
-			${password:+--password $password} \
-			${autoconnect:+--autoconnect})
-
-		# pdh_6 is a numeric value on success
-		if ! [ "$pdh_6" -eq "$pdh_6" ] 2> /dev/null; then
-			echo "Unable to connect IPv6"
-			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --release-client-id wds > /dev/null 2>&1
-			proto_notify_error "$interface" CALL_FAILED
-			return 1
-		fi
-
-		# Check data connection state
-		connstat=$(uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --set-ip-family ipv6 --get-data-status)
-		[ "$connstat" == '"connected"' ] || {
-			echo "No data link!"
-			uqmi -s -d "$device" -t 1000 --set-client-id wds,"$cid_6" --release-client-id wds > /dev/null 2>&1
-			proto_notify_error "$interface" CALL_FAILED
-			return 1
-		}
 	}
+	
+	# Dual-stack mode succeeds if at least one address family connects.
+	if [ "$pdptype" = "ipv4v6" ] && [ -z "$pdh_4" ] && [ -z "$pdh_6" ]; then
+		echo "Unable to connect IPv4 or IPv6"
+		proto_notify_error "$interface" CALL_FAILED
+		return 1
+	fi
 
 	echo "Setting up $ifname"
 	proto_init_update "$ifname" 1
