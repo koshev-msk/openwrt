@@ -1,0 +1,39 @@
+From: Konstantine <shevlakov@132lan.ru>
+Subject: [PATCH] usb: host: ehci/ohci-platform: probe synchronously
+
+ehci-platform and ohci-platform are marked PROBE_PREFER_ASYNCHRONOUS, so
+on SoCs with several host controllers (e.g. sunxi H3: 3 EHCI + 3 OHCI)
+the controllers are probed in parallel and race in usb_register_bus().
+The assigned bus numbers (usb1..usbN) then differ from boot to boot, and
+so do the sysfs paths of the attached devices, which breaks anything
+that identifies a device by path (e.g. ModemManager "option device").
+
+Probe the controllers synchronously so that bus numbers follow the
+device registration order and are stable between boots.
+
+diff --git a/drivers/usb/host/ehci-platform.c b/drivers/usb/host/ehci-platform.c
+index 98b0731..57ac678 100644
+--- a/drivers/usb/host/ehci-platform.c
++++ b/drivers/usb/host/ehci-platform.c
+@@ -515,7 +515,7 @@ static struct platform_driver ehci_platform_driver = {
+ 		.pm	= pm_ptr(&ehci_platform_pm_ops),
+ 		.of_match_table = vt8500_ehci_ids,
+ 		.acpi_match_table = ACPI_PTR(ehci_acpi_match),
+-		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
++		.probe_type = PROBE_FORCE_SYNCHRONOUS,
+ 	}
+ };
+ 
+diff --git a/drivers/usb/host/ohci-platform.c b/drivers/usb/host/ohci-platform.c
+index 4a75507..cec351b 100644
+--- a/drivers/usb/host/ohci-platform.c
++++ b/drivers/usb/host/ohci-platform.c
+@@ -352,7 +352,7 @@ static struct platform_driver ohci_platform_driver = {
+ 		.pm	= &ohci_platform_pm_ops,
+ #endif
+ 		.of_match_table = ohci_platform_ids,
+-		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
++		.probe_type = PROBE_FORCE_SYNCHRONOUS,
+ 	}
+ };
+ 
