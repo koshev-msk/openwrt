@@ -10,7 +10,7 @@
  	sun8i-h3-beelink-x2.dtb \
 --- /dev/null
 +++ b/arch/arm/boot/dts/allwinner/sun8i-h3-mcr200.dts
-@@ -0,0 +1,198 @@
+@@ -0,0 +1,200 @@
 +/dts-v1/;
 +#include "sun8i-h3.dtsi"
 +#include "sunxi-common-regulators.dtsi"
@@ -27,6 +27,8 @@
 +		/* ethernet0 is the H3 emac, defined in sun8i-h3.dtsi */
 +		ethernet0 = &emac;
 +		ethernet1 = &xr819;
++		mmc0 = &mmc0;
++		mmc1 = &mmc1;
 +	};
 +
 +	chosen {
