@@ -1,0 +1,11 @@
+--- a/arch/arm/boot/dts/allwinner/sun8i-h2-plus-orangepi-zero.dts
++++ b/arch/arm/boot/dts/allwinner/sun8i-h2-plus-orangepi-zero.dts
+@@ -59,6 +59,8 @@
+ 		/* ethernet0 is the H3 emac, defined in sun8i-h3.dtsi */
+ 		ethernet0 = &emac;
+ 		ethernet1 = &xr819;
++		mmc0 = &mmc0;
++		mmc1 = &mmc1;
+ 	};
+ 
+ 	chosen {

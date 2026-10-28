@@ -1,0 +1,379 @@
+Add a "geoip" statement backed by the out-of-tree nft_geoip kernel module.
+
+Syntax: geoip saddr|daddr [!=] CC[,CC...]  (country codes are case-insensitive).
+
+diff --git a/include/json.h b/include/json.h
+--- a/include/json.h
++++ b/include/json.h
+@@ -92,6 +92,7 @@
+ json_t *queue_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+ json_t *verdict_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+ json_t *connlimit_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
++json_t *geoip_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+ json_t *tproxy_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+ json_t *synproxy_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+ json_t *optstrip_stmt_json(const struct stmt *stmt, struct output_ctx *octx);
+@@ -199,6 +200,7 @@
+ STMT_PRINT_STUB(queue)
+ STMT_PRINT_STUB(verdict)
+ STMT_PRINT_STUB(connlimit)
++STMT_PRINT_STUB(geoip)
+ STMT_PRINT_STUB(tproxy)
+ STMT_PRINT_STUB(synproxy)
+ STMT_PRINT_STUB(optstrip)
+diff --git a/include/statement.h b/include/statement.h
+--- a/include/statement.h
++++ b/include/statement.h
+@@ -39,6 +39,19 @@
+ };
+ 
+ extern struct stmt *connlimit_stmt_alloc(const struct location *loc);
++
++#define NFT_GEOIP_MAX		16
++#define NFT_GEOIP_F_DST		(1 << 0)
++#define NFT_GEOIP_F_INV		(1 << 1)
++
++struct geoip_stmt {
++	uint32_t		flags;
++	uint32_t		count;
++	char			cc[NFT_GEOIP_MAX][2];
++};
++
++extern struct stmt *geoip_stmt_alloc(const struct location *loc);
++extern int geoip_stmt_add_cc(struct stmt *stmt, const char *cc);
+ 
+ struct counter_stmt {
+ 	uint64_t		packets;
+@@ -311,6 +324,7 @@
+  * @STMT_CHAIN:		chain statement
+  * @STMT_OPTSTRIP:	optstrip statement
+  * @STMT_LAST:		last statement
++ * @STMT_GEOIP:		geoip statement
+  */
+ enum stmt_types {
+ 	STMT_INVALID,
+@@ -342,6 +356,7 @@
+ 	STMT_CHAIN,
+ 	STMT_OPTSTRIP,
+ 	STMT_LAST,
++	STMT_GEOIP,
+ };
+ 
+ /**
+@@ -388,6 +403,7 @@
+ 		struct exthdr_stmt	exthdr;
+ 		struct meter_stmt	meter;
+ 		struct connlimit_stmt	connlimit;
++		struct geoip_stmt	geoip;
+ 		struct counter_stmt	counter;
+ 		struct payload_stmt	payload;
+ 		struct meta_stmt	meta;
+diff --git a/src/evaluate.c b/src/evaluate.c
+--- a/src/evaluate.c
++++ b/src/evaluate.c
+@@ -5046,6 +5046,7 @@
+ 
+ 	switch (stmt->type) {
+ 	case STMT_CONNLIMIT:
++	case STMT_GEOIP:
+ 	case STMT_COUNTER:
+ 	case STMT_LAST:
+ 	case STMT_LIMIT:
+diff --git a/src/json.c b/src/json.c
+--- a/src/json.c
++++ b/src/json.c
+@@ -1734,6 +1734,24 @@
+ 	return nft_json_pack("{s:o}", "ct count", root);
+ }
+ 
++json_t *geoip_stmt_json(const struct stmt *stmt, struct output_ctx *octx)
++{
++	json_t *cc = json_array();
++	unsigned int i;
++
++	for (i = 0; i < stmt->geoip.count; i++) {
++		char buf[3] = { stmt->geoip.cc[i][0], stmt->geoip.cc[i][1], '\0' };
++
++		json_array_append_new(cc, json_string(buf));
++	}
++
++	return nft_json_pack("{s:{s:s, s:b, s:o}}", "geoip",
++			     "dir", stmt->geoip.flags & NFT_GEOIP_F_DST ?
++				    "daddr" : "saddr",
++			     "inv", !!(stmt->geoip.flags & NFT_GEOIP_F_INV),
++			     "cc", cc);
++}
++
+ json_t *tproxy_stmt_json(const struct stmt *stmt, struct output_ctx *octx)
+ {
+ 	json_t *tmp, *root = json_object();
+diff --git a/src/netlink_delinearize.c b/src/netlink_delinearize.c
+--- a/src/netlink_delinearize.c
++++ b/src/netlink_delinearize.c
+@@ -1108,6 +1108,28 @@
+ 	ctx->stmt = stmt;
+ }
+ 
++static void netlink_parse_geoip(struct netlink_parse_ctx *ctx,
++				const struct location *loc,
++				const struct nftnl_expr *nle)
++{
++	const char *cc;
++	uint32_t len = 0, i;
++	struct stmt *stmt;
++
++	stmt = geoip_stmt_alloc(loc);
++	stmt->geoip.flags = nftnl_expr_get_u32(nle, NFTNL_EXPR_GEOIP_FLAGS);
++
++	cc = nftnl_expr_get(nle, NFTNL_EXPR_GEOIP_CC, &len);
++	for (i = 0; cc && i + 1 < len && stmt->geoip.count < NFT_GEOIP_MAX;
++	     i += 2) {
++		stmt->geoip.cc[stmt->geoip.count][0] = cc[i];
++		stmt->geoip.cc[stmt->geoip.count][1] = cc[i + 1];
++		stmt->geoip.count++;
++	}
++
++	ctx->stmt = stmt;
++}
++
+ static void netlink_parse_counter(struct netlink_parse_ctx *ctx,
+ 				  const struct location *loc,
+ 				  const struct nftnl_expr *nle)
+@@ -1942,6 +1964,7 @@
+ 	{ .name = "rt",		.parse = netlink_parse_rt },
+ 	{ .name = "ct",		.parse = netlink_parse_ct },
+ 	{ .name = "connlimit",	.parse = netlink_parse_connlimit },
++	{ .name = "geoip",	.parse = netlink_parse_geoip },
+ 	{ .name = "counter",	.parse = netlink_parse_counter },
+ 	{ .name = "last",	.parse = netlink_parse_last },
+ 	{ .name = "log",	.parse = netlink_parse_log },
+diff --git a/src/netlink_linearize.c b/src/netlink_linearize.c
+--- a/src/netlink_linearize.c
++++ b/src/netlink_linearize.c
+@@ -1002,6 +1002,24 @@
+ 	return nle;
+ }
+ 
++static struct nftnl_expr *netlink_gen_geoip_stmt(const struct stmt *stmt)
++{
++	struct nftnl_expr *nle;
++	char cc[NFT_GEOIP_MAX * 2];
++	unsigned int i;
++
++	for (i = 0; i < stmt->geoip.count; i++) {
++		cc[2 * i] = stmt->geoip.cc[i][0];
++		cc[2 * i + 1] = stmt->geoip.cc[i][1];
++	}
++
++	nle = alloc_nft_expr("geoip");
++	nftnl_expr_set_u32(nle, NFTNL_EXPR_GEOIP_FLAGS, stmt->geoip.flags);
++	nftnl_expr_set(nle, NFTNL_EXPR_GEOIP_CC, cc, stmt->geoip.count * 2);
++
++	return nle;
++}
++
+ static struct nftnl_expr *netlink_gen_counter_stmt(const struct stmt *stmt)
+ {
+ 	struct nftnl_expr *nle;
+@@ -1749,6 +1767,10 @@
+ 		nle = netlink_gen_stmt_stateful(stmt);
+ 		nft_rule_add_expr(ctx, nle, &stmt->location);
+ 		break;
++	case STMT_GEOIP:
++		nle = netlink_gen_geoip_stmt(stmt);
++		nft_rule_add_expr(ctx, nle, &stmt->location);
++		break;
+ 	case STMT_NOTRACK:
+ 		return netlink_gen_notrack_stmt(ctx, stmt);
+ 	case STMT_FLOW_OFFLOAD:
+diff --git a/src/parser_bison.y b/src/parser_bison.y
+--- a/src/parser_bison.y
++++ b/src/parser_bison.y
+@@ -311,6 +311,8 @@
+ %token SYNPROXY			"synproxy"
+ %token MSS			"mss"
+ %token WSCALE			"wscale"
++
++%token GEOIP			"geoip"
+ 
+ %token TYPEOF			"typeof"
+ 
+@@ -811,6 +813,9 @@
+ %type <val>			level_type log_flags log_flags_tcp log_flag_tcp
+ %type <stmt>			limit_stmt quota_stmt connlimit_stmt
+ %destructor { stmt_free($$); }	limit_stmt quota_stmt connlimit_stmt
++%type <stmt>			geoip_stmt geoip_cc_list
++%destructor { stmt_free($$); }	geoip_stmt geoip_cc_list
++%type <val>			geoip_dir geoip_inv
+ %type <val>			limit_burst_pkts limit_burst_bytes limit_mode limit_bytes time_unit quota_mode
+ %type <stmt>			reject_stmt reject_stmt_alloc
+ %destructor { stmt_free($$); }	reject_stmt reject_stmt_alloc
+@@ -3284,6 +3289,7 @@
+ 			|	optstrip_stmt
+ 			|	xt_stmt		close_scope_xt
+ 			|	objref_stmt
++			|	geoip_stmt
+ 			;
+ 
+ xt_stmt			:	XT	STRING	string
+@@ -3374,6 +3380,79 @@
+ 
+ 				$<stmt>0->connlimit.count = $2;
+ 				$<stmt>0->connlimit.flags = NFT_CONNLIMIT_F_INV;
++			}
++			;
++
++geoip_stmt		:	GEOIP	geoip_dir	geoip_inv	geoip_cc_list
++			{
++				$$ = $4;
++				$$->geoip.flags = $2 | $3;
++			}
++			;
++
++geoip_dir		:	SADDR
++			{
++				$$ = 0;
++			}
++			|	DADDR
++			{
++				$$ = NFT_GEOIP_F_DST;
++			}
++			|	STRING
++			{
++				if (!strcmp($1, "saddr")) {
++					$$ = 0;
++				} else if (!strcmp($1, "daddr")) {
++					$$ = NFT_GEOIP_F_DST;
++				} else {
++					erec_queue(error(&@1, "unknown geoip direction \"%s\", expected saddr or daddr", $1),
++						   state->msgs);
++					free_const($1);
++					YYERROR;
++				}
++				free_const($1);
++			}
++			;
++
++geoip_inv		:	/* empty */
++			{
++				$$ = 0;
++			}
++			|	NEQ
++			{
++				$$ = NFT_GEOIP_F_INV;
++			}
++			;
++
++geoip_cc_list		:	STRING
++			{
++				$$ = geoip_stmt_alloc(&@$);
++				if (geoip_stmt_add_cc($$, $1) < 0) {
++					erec_queue(error(&@1, "invalid country code \"%s\", expected two letters, e.g. RU", $1),
++						   state->msgs);
++					free_const($1);
++					stmt_free($$);
++					YYERROR;
++				}
++				free_const($1);
++			}
++			|	geoip_cc_list	COMMA	STRING
++			{
++				int err = geoip_stmt_add_cc($1, $3);
++
++				if (err < 0) {
++					if (err == -2)
++						erec_queue(error(&@3, "too many countries, at most %d are allowed", NFT_GEOIP_MAX),
++							   state->msgs);
++					else
++						erec_queue(error(&@3, "invalid country code \"%s\", expected two letters, e.g. RU", $3),
++							   state->msgs);
++					free_const($3);
++					stmt_free($1);
++					YYERROR;
++				}
++				free_const($3);
++				$$ = $1;
+ 			}
+ 			;
+ 
+diff --git a/src/scanner.l b/src/scanner.l
+--- a/src/scanner.l
++++ b/src/scanner.l
+@@ -806,2 +806,3 @@
+ "synproxy"		{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_SYNPROXY); return SYNPROXY; }
++"geoip"			{ return GEOIP; }
+ <SCANSTATE_STMT_SYNPROXY>{
+diff --git a/src/statement.c b/src/statement.c
+--- a/src/statement.c
++++ b/src/statement.c
+@@ -225,6 +225,62 @@
+ 	stmt = stmt_alloc(loc, &connlimit_stmt_ops);
+ 	stmt->flags |= STMT_F_STATEFUL;
+ 	return stmt;
++}
++
++static void geoip_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
++{
++	unsigned int i;
++
++	nft_print(octx, "geoip %s %s",
++		  stmt->geoip.flags & NFT_GEOIP_F_DST ? "daddr" : "saddr",
++		  stmt->geoip.flags & NFT_GEOIP_F_INV ? "!= " : "");
++
++	for (i = 0; i < stmt->geoip.count; i++)
++		nft_print(octx, "%s%c%c", i ? "," : "",
++			  stmt->geoip.cc[i][0], stmt->geoip.cc[i][1]);
++}
++
++static const struct stmt_ops geoip_stmt_ops = {
++	.type		= STMT_GEOIP,
++	.name		= "geoip",
++	.print		= geoip_stmt_print,
++	.json		= geoip_stmt_json,
++};
++
++struct stmt *geoip_stmt_alloc(const struct location *loc)
++{
++	return stmt_alloc(loc, &geoip_stmt_ops);
++}
++
++/* returns 0 on success, -1 for a malformed code, -2 for too many countries */
++int geoip_stmt_add_cc(struct stmt *stmt, const char *cc)
++{
++	char c[2];
++	unsigned int i, j;
++
++	for (i = 0; i < 2; i++) {
++		c[i] = cc[i];
++		if (c[i] >= 'a' && c[i] <= 'z')
++			c[i] -= 'a' - 'A';
++		if (!((c[i] >= 'A' && c[i] <= 'Z') ||
++		      (c[i] >= '0' && c[i] <= '9')))
++			return -1;
++	}
++	if (cc[2] != '\0')
++		return -1;
++
++	for (j = 0; j < stmt->geoip.count; j++) {
++		if (stmt->geoip.cc[j][0] == c[0] &&
++		    stmt->geoip.cc[j][1] == c[1])
++			return 0;
++	}
++	if (stmt->geoip.count >= NFT_GEOIP_MAX)
++		return -2;
++
++	stmt->geoip.cc[stmt->geoip.count][0] = c[0];
++	stmt->geoip.cc[stmt->geoip.count][1] = c[1];
++	stmt->geoip.count++;
++	return 0;
+ }
+ 
+ static void counter_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
+@@ -1125,6 +1181,7 @@
+ 	case STMT_CHAIN: return &chain_stmt_ops;
+ 	case STMT_OPTSTRIP: return &optstrip_stmt_ops;
+ 	case STMT_LAST: return &last_stmt_ops;
++	case STMT_GEOIP: return &geoip_stmt_ops;
+ 	default:
+ 		break;
+ 	}

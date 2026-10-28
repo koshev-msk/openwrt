@@ -1,0 +1,220 @@
+Add the "geoip" expression used by the out-of-tree nft_geoip kernel module.
+
+diff --git a/include/libnftnl/expr.h b/include/libnftnl/expr.h
+--- a/include/libnftnl/expr.h
++++ b/include/libnftnl/expr.h
+@@ -132,6 +132,12 @@
+ };
+ 
+ enum {
++	NFTNL_EXPR_GEOIP_FLAGS = NFTNL_EXPR_BASE,
++	NFTNL_EXPR_GEOIP_CC,
++	__NFTNL_EXPR_GEOIP_MAX
++};
++
++enum {
+ 	NFTNL_EXPR_BITWISE_SREG	= NFTNL_EXPR_BASE,
+ 	NFTNL_EXPR_BITWISE_DREG,
+ 	NFTNL_EXPR_BITWISE_LEN,
+diff --git a/src/Makefile.am b/src/Makefile.am
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -27,6 +27,7 @@
+ 		      expr/cmp.c	\
+ 		      expr/range.c	\
+ 		      expr/connlimit.c	\
++		      expr/geoip.c	\
+ 		      expr/counter.c	\
+ 		      expr/ct.c		\
+ 		      expr/data_reg.c	\
+diff --git a/src/expr/geoip.c b/src/expr/geoip.c
+new file mode 100644
+--- /dev/null
++++ b/src/expr/geoip.c
+@@ -0,0 +1,167 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * libnftnl side of the out-of-tree nft_geoip kernel module.
++ */
++
++#include <stdio.h>
++#include <stdint.h>
++#include <string.h>
++#include <arpa/inet.h>
++#include <errno.h>
++#include <inttypes.h>
++
++#include <linux/netfilter/nf_tables.h>
++
++#include "internal.h"
++#include <libmnl/libmnl.h>
++#include <libnftnl/expr.h>
++#include <libnftnl/rule.h>
++
++/*
++ * Netlink attribute ids of nft_geoip. They are not part of the kernel's
++ * nf_tables.h, so they live here and must match nft_geoip.h in the kmod.
++ */
++#define NFTA_GEOIP_FLAGS	1	/* be32 */
++#define NFTA_GEOIP_CC		2	/* binary: N x 2 ASCII chars */
++#define NFTA_GEOIP_MAX		2
++
++#define NFTNL_GEOIP_CC_MAXLEN	32	/* 16 countries, as NFT_GEOIP_MAX * 2 */
++
++struct nftnl_expr_geoip {
++	uint32_t	flags;
++	uint32_t	cc_len;
++	char		cc[NFTNL_GEOIP_CC_MAXLEN];
++};
++
++static int
++nftnl_expr_geoip_set(struct nftnl_expr *e, uint16_t type,
++		     const void *data, uint32_t data_len)
++{
++	struct nftnl_expr_geoip *geoip = nftnl_expr_data(e);
++
++	switch (type) {
++	case NFTNL_EXPR_GEOIP_FLAGS:
++		memcpy(&geoip->flags, data, data_len);
++		break;
++	case NFTNL_EXPR_GEOIP_CC:
++		if (data_len < 2 || data_len % 2 ||
++		    data_len > sizeof(geoip->cc))
++			return -1;
++		memcpy(geoip->cc, data, data_len);
++		geoip->cc_len = data_len;
++		break;
++	}
++	return 0;
++}
++
++static const void *
++nftnl_expr_geoip_get(const struct nftnl_expr *e, uint16_t type,
++		     uint32_t *data_len)
++{
++	struct nftnl_expr_geoip *geoip = nftnl_expr_data(e);
++
++	switch (type) {
++	case NFTNL_EXPR_GEOIP_FLAGS:
++		*data_len = sizeof(geoip->flags);
++		return &geoip->flags;
++	case NFTNL_EXPR_GEOIP_CC:
++		*data_len = geoip->cc_len;
++		return geoip->cc;
++	}
++	return NULL;
++}
++
++static int nftnl_expr_geoip_cb(const struct nlattr *attr, void *data)
++{
++	const struct nlattr **tb = data;
++	int type = mnl_attr_get_type(attr);
++
++	if (mnl_attr_type_valid(attr, NFTA_GEOIP_MAX) < 0)
++		return MNL_CB_OK;
++
++	switch (type) {
++	case NFTA_GEOIP_FLAGS:
++		if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
++			abi_breakage();
++		break;
++	case NFTA_GEOIP_CC:
++		if (mnl_attr_validate(attr, MNL_TYPE_BINARY) < 0)
++			abi_breakage();
++		break;
++	}
++
++	tb[type] = attr;
++	return MNL_CB_OK;
++}
++
++static void
++nftnl_expr_geoip_build(struct nlmsghdr *nlh, const struct nftnl_expr *e)
++{
++	struct nftnl_expr_geoip *geoip = nftnl_expr_data(e);
++
++	if (e->flags & (1 << NFTNL_EXPR_GEOIP_FLAGS))
++		mnl_attr_put_u32(nlh, NFTA_GEOIP_FLAGS, htonl(geoip->flags));
++	if (e->flags & (1 << NFTNL_EXPR_GEOIP_CC))
++		mnl_attr_put(nlh, NFTA_GEOIP_CC, geoip->cc_len, geoip->cc);
++}
++
++static int
++nftnl_expr_geoip_parse(struct nftnl_expr *e, struct nlattr *attr)
++{
++	struct nftnl_expr_geoip *geoip = nftnl_expr_data(e);
++	struct nlattr *tb[NFTA_GEOIP_MAX + 1] = {};
++
++	if (mnl_attr_parse_nested(attr, nftnl_expr_geoip_cb, tb) < 0)
++		return -1;
++
++	if (tb[NFTA_GEOIP_FLAGS]) {
++		geoip->flags = ntohl(mnl_attr_get_u32(tb[NFTA_GEOIP_FLAGS]));
++		e->flags |= (1 << NFTNL_EXPR_GEOIP_FLAGS);
++	}
++	if (tb[NFTA_GEOIP_CC]) {
++		uint32_t len = mnl_attr_get_payload_len(tb[NFTA_GEOIP_CC]);
++
++		if (len < 2 || len % 2 || len > sizeof(geoip->cc))
++			return -1;
++		memcpy(geoip->cc, mnl_attr_get_payload(tb[NFTA_GEOIP_CC]), len);
++		geoip->cc_len = len;
++		e->flags |= (1 << NFTNL_EXPR_GEOIP_CC);
++	}
++
++	return 0;
++}
++
++static int nftnl_expr_geoip_snprintf(char *buf, size_t len, uint32_t flags,
++				     const struct nftnl_expr *e)
++{
++	struct nftnl_expr_geoip *geoip = nftnl_expr_data(e);
++	char list[NFTNL_GEOIP_CC_MAXLEN / 2 * 3 + 1];
++	uint32_t i, off = 0;
++
++	for (i = 0; i + 1 < geoip->cc_len; i += 2) {
++		if (off)
++			list[off++] = ',';
++		list[off++] = geoip->cc[i];
++		list[off++] = geoip->cc[i + 1];
++	}
++	list[off] = '\0';
++
++	return snprintf(buf, len, "flags 0x%x cc %s ", geoip->flags, list);
++}
++
++static struct attr_policy geoip_attr_policy[__NFTNL_EXPR_GEOIP_MAX] = {
++	[NFTNL_EXPR_GEOIP_FLAGS] = { .maxlen = sizeof(uint32_t) },
++	[NFTNL_EXPR_GEOIP_CC]	 = { .maxlen = NFTNL_GEOIP_CC_MAXLEN },
++};
++
++struct expr_ops expr_ops_geoip = {
++	.name		= "geoip",
++	.alloc_len	= sizeof(struct nftnl_expr_geoip),
++	.nftnl_max_attr	= __NFTNL_EXPR_GEOIP_MAX - 1,
++	.attr_policy	= geoip_attr_policy,
++	.set		= nftnl_expr_geoip_set,
++	.get		= nftnl_expr_geoip_get,
++	.parse		= nftnl_expr_geoip_parse,
++	.build		= nftnl_expr_geoip_build,
++	.output		= nftnl_expr_geoip_snprintf,
++};
+diff --git a/src/expr_ops.c b/src/expr_ops.c
+--- a/src/expr_ops.c
++++ b/src/expr_ops.c
+@@ -8,6 +8,7 @@
+ extern struct expr_ops expr_ops_byteorder;
+ extern struct expr_ops expr_ops_cmp;
+ extern struct expr_ops expr_ops_connlimit;
++extern struct expr_ops expr_ops_geoip;
+ extern struct expr_ops expr_ops_counter;
+ extern struct expr_ops expr_ops_ct;
+ extern struct expr_ops expr_ops_dup;
+@@ -53,6 +54,7 @@
+ 	&expr_ops_byteorder,
+ 	&expr_ops_cmp,
+ 	&expr_ops_connlimit,
++	&expr_ops_geoip,
+ 	&expr_ops_counter,
+ 	&expr_ops_ct,
+ 	&expr_ops_dup,
