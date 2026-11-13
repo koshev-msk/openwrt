@@ -1,0 +1,42 @@
+diff --git a/ssl/ssl_ciph.c b/ssl/ssl_ciph.c
+--- a/ssl/ssl_ciph.c
++++ b/ssl/ssl_ciph.c
+@@ -329,6 +329,20 @@
+     return nid;
+ }
+ 
++/* Checks to see if a key management algorithm is fetchable from a provider */
++static int is_keymgmt_fetchable(SSL_CTX *ctx, const char *name)
++{
++    EVP_KEYMGMT *impl;
++
++    ERR_set_mark();
++    impl = EVP_KEYMGMT_fetch(ctx->libctx, name, ctx->propq);
++    ERR_pop_to_mark();
++    if (impl == NULL)
++        return 0;
++    EVP_KEYMGMT_free(impl);
++    return 1;
++}
++
+ int ssl_load_ciphers(SSL_CTX *ctx)
+ {
+     size_t i;
+@@ -433,11 +447,14 @@
+     else
+         ctx->disabled_mac_mask |= SSL_KUZNYECHIKOMAC;
+ 
+-    if (!get_optional_pkey_id(SN_id_GostR3410_2001))
++    if (!get_optional_pkey_id(SN_id_GostR3410_2001)
++        && !is_keymgmt_fetchable(ctx, SN_id_GostR3410_2001))
+         ctx->disabled_auth_mask |= SSL_aGOST01 | SSL_aGOST12;
+-    if (!get_optional_pkey_id(SN_id_GostR3410_2012_256))
++    if (!get_optional_pkey_id(SN_id_GostR3410_2012_256)
++        && !is_keymgmt_fetchable(ctx, SN_id_GostR3410_2012_256))
+         ctx->disabled_auth_mask |= SSL_aGOST12;
+-    if (!get_optional_pkey_id(SN_id_GostR3410_2012_512))
++    if (!get_optional_pkey_id(SN_id_GostR3410_2012_512)
++        && !is_keymgmt_fetchable(ctx, SN_id_GostR3410_2012_512))
+         ctx->disabled_auth_mask |= SSL_aGOST12;
+     /*
+      * Disable GOST key exchange if no GOST signature algs are available *

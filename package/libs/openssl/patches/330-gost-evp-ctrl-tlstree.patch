@@ -1,0 +1,26 @@
+diff --git a/crypto/evp/evp_enc.c b/crypto/evp/evp_enc.c
+--- a/crypto/evp/evp_enc.c
++++ b/crypto/evp/evp_enc.c
+@@ -1616,6 +1616,11 @@
+         params[0] = OSSL_PARAM_construct_octet_string(
+             OSSL_CIPHER_PARAM_AEAD_MAC_KEY, ptr, sz);
+         break;
++    case EVP_CTRL_TLSTREE:
++        /* GOST TLS: arg carries the "decrement sequence" flag, ptr the record sequence */
++        params[0] = OSSL_PARAM_construct_octet_string(
++            OSSL_CIPHER_PARAM_TLSTREE, ptr, sz);
++        break;
+     }
+ 
+     if (set_params)
+diff --git a/util/perl/OpenSSL/paramnames.pm b/util/perl/OpenSSL/paramnames.pm
+--- a/util/perl/OpenSSL/paramnames.pm
++++ b/util/perl/OpenSSL/paramnames.pm
+@@ -150,6 +150,7 @@
+     'CIPHER_PARAM_ALGORITHM_ID_PARAMS' =>  '*ALG_PARAM_ALGORITHM_ID_PARAMS',
+     'CIPHER_PARAM_ALGORITHM_ID_PARAMS_OLD' => "alg_id_param", # octet_string
+     'CIPHER_PARAM_XTS_STANDARD' =>         "xts_standard",# utf8_string
++    'CIPHER_PARAM_TLSTREE' =>              "tlstree",     # octet_string
+ 
+     'CIPHER_PARAM_TLS1_MULTIBLOCK_MAX_SEND_FRAGMENT' =>  "tls1multi_maxsndfrag",# uint
+     'CIPHER_PARAM_TLS1_MULTIBLOCK_MAX_BUFSIZE' =>        "tls1multi_maxbufsz",  # size_t

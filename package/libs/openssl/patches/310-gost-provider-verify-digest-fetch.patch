@@ -1,0 +1,74 @@
+diff --git a/crypto/asn1/a_verify.c b/crypto/asn1/a_verify.c
+index 55f86ee..0a09bfd 100644
+--- a/crypto/asn1/a_verify.c
++++ b/crypto/asn1/a_verify.c
+@@ -113,6 +113,7 @@ int ASN1_item_verify_ctx(const ASN1_ITEM *it, const X509_ALGOR *alg,
+     EVP_MD_CTX *ctx)
+ {
+     EVP_PKEY *pkey;
++    EVP_MD *fetched_type = NULL;
+     unsigned char *buf_in = NULL;
+     int ret = -1, inl = 0;
+     int mdnid, pknid;
+@@ -180,6 +181,13 @@ int ASN1_item_verify_ctx(const ASN1_ITEM *it, const X509_ALGOR *alg,
+ 
+             if (mdnid != NID_undef) {
+                 type = EVP_get_digestbynid(mdnid);
++                if (type == NULL) {
++                    const char *mdname = OBJ_nid2sn(mdnid);
++
++                    if (mdname != NULL)
++                        fetched_type = EVP_MD_fetch(NULL, mdname, NULL);
++                    type = fetched_type;
++                }
+                 if (type == NULL) {
+                     ERR_raise_data(ERR_LIB_ASN1,
+                         ASN1_R_UNKNOWN_MESSAGE_DIGEST_ALGORITHM,
+@@ -221,6 +229,7 @@ int ASN1_item_verify_ctx(const ASN1_ITEM *it, const X509_ALGOR *alg,
+     }
+     ret = 1;
+ err:
++    EVP_MD_free(fetched_type);
+     OPENSSL_clear_free(buf_in, inll);
+     return ret;
+ }
+diff --git a/crypto/x509/x509_set.c b/crypto/x509/x509_set.c
+index e691274..a021825 100644
+--- a/crypto/x509/x509_set.c
++++ b/crypto/x509/x509_set.c
+@@ -213,6 +213,7 @@ static int x509_sig_info_init(X509_SIG_INFO *siginf, const X509_ALGOR *alg,
+     const ASN1_STRING *sig, const EVP_PKEY *pubkey)
+ {
+     int pknid, mdnid, md_size;
++    EVP_MD *fetched_md = NULL;
+     const EVP_MD *md;
+     const EVP_PKEY_ASN1_METHOD *ameth;
+ 
+@@ -275,14 +276,25 @@ static int x509_sig_info_init(X509_SIG_INFO *siginf, const X509_ALGOR *alg,
+         break;
+     default:
+         /* Security bits: half number of bits in digest */
+-        if ((md = EVP_get_digestbynid(mdnid)) == NULL) {
++        md = EVP_get_digestbynid(mdnid);
++        if (md == NULL) {
++            const char *mdname = OBJ_nid2sn(mdnid);
++
++            if (mdname != NULL)
++                fetched_md = EVP_MD_fetch(NULL, mdname, NULL);
++            md = fetched_md;
++        }
++        if (md == NULL) {
+             ERR_raise(ERR_LIB_X509, X509_R_ERROR_GETTING_MD_BY_NID);
+             return 0;
+         }
+         md_size = EVP_MD_get_size(md);
+-        if (md_size <= 0)
++        if (md_size <= 0) {
++            EVP_MD_free(fetched_md);
+             return 0;
++        }
+         siginf->secbits = md_size * 4;
++        EVP_MD_free(fetched_md);
+         break;
+     }
+     switch (mdnid) {
