@@ -82,7 +82,7 @@ diff --git a/src/evaluate.c b/src/evaluate.c
 diff --git a/src/json.c b/src/json.c
 --- a/src/json.c
 +++ b/src/json.c
-@@ -1734,6 +1734,24 @@
+@@ -1734,6 +1734,25 @@
  	return nft_json_pack("{s:o}", "ct count", root);
  }
  
@@ -97,10 +97,11 @@ diff --git a/src/json.c b/src/json.c
 +		json_array_append_new(cc, json_string(buf));
 +	}
 +
-+	return nft_json_pack("{s:{s:s, s:b, s:o}}", "geoip",
++	return nft_json_pack("{s:{s:s, s:s, s:o}}", "geoip",
 +			     "dir", stmt->geoip.flags & NFT_GEOIP_F_DST ?
 +				    "daddr" : "saddr",
-+			     "inv", !!(stmt->geoip.flags & NFT_GEOIP_F_INV),
++			     "op", stmt->geoip.flags & NFT_GEOIP_F_INV ?
++				   "!=" : "==",
 +			     "cc", cc);
 +}
 +
@@ -296,6 +297,78 @@ diff --git a/src/parser_bison.y b/src/parser_bison.y
  			}
  			;
  
+diff --git a/src/parser_json.c b/src/parser_json.c
+--- a/src/parser_json.c
++++ b/src/parser_json.c
+@@ -2851,2 +2851,60 @@
+ 
++static struct stmt *json_parse_geoip_stmt(struct json_ctx *ctx,
++					  const char *key, json_t *value)
++{
++	const char *dir, *op = "==";
++	struct stmt *stmt;
++	json_t *cc, *item;
++	size_t i;
++
++	if (json_unpack_err(ctx, value, "{s:s, s:o}", "dir", &dir, "cc", &cc))
++		return NULL;
++
++	json_unpack(value, "{s:s}", "op", &op);
++
++	if (strcmp(dir, "saddr") && strcmp(dir, "daddr")) {
++		json_error(ctx, "Invalid geoip direction '%s'.", dir);
++		return NULL;
++	}
++	if (strcmp(op, "==") && strcmp(op, "!=")) {
++		json_error(ctx, "Invalid geoip operator '%s'.", op);
++		return NULL;
++	}
++	if (!json_is_array(cc) || !json_array_size(cc)) {
++		json_error(ctx, "Geoip country list must be a non-empty array.");
++		return NULL;
++	}
++
++	stmt = geoip_stmt_alloc(int_loc);
++	if (!strcmp(dir, "daddr"))
++		stmt->geoip.flags |= NFT_GEOIP_F_DST;
++	if (!strcmp(op, "!="))
++		stmt->geoip.flags |= NFT_GEOIP_F_INV;
++
++	json_array_foreach(cc, i, item) {
++		int err;
++
++		if (!json_is_string(item)) {
++			json_error(ctx, "Geoip country codes must be strings.");
++			stmt_free(stmt);
++			return NULL;
++		}
++
++		err = geoip_stmt_add_cc(stmt, json_string_value(item));
++		if (err == -2) {
++			json_error(ctx, "Too many geoip countries, at most %d are allowed.",
++				   NFT_GEOIP_MAX);
++			stmt_free(stmt);
++			return NULL;
++		} else if (err < 0) {
++			json_error(ctx, "Invalid geoip country code '%s'.",
++				   json_string_value(item));
++			stmt_free(stmt);
++			return NULL;
++		}
++	}
++
++	return stmt;
++}
++
+ static struct stmt *json_parse_optstrip_stmt(struct json_ctx *ctx,
+@@ -2901,6 +2959,7 @@
+ 		{ "meter", json_parse_meter_stmt },
+ 		{ "queue", json_parse_queue_stmt },
+ 		{ "ct count", json_parse_connlimit_stmt },
++		{ "geoip", json_parse_geoip_stmt },
+ 		{ "tproxy", json_parse_tproxy_stmt },
+ 		{ "synproxy", json_parse_synproxy_stmt },
+ 		{ "reset", json_parse_optstrip_stmt },
 diff --git a/src/scanner.l b/src/scanner.l
 --- a/src/scanner.l
 +++ b/src/scanner.l
