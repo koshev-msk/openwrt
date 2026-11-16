@@ -17,6 +17,7 @@ PKG_INSTALL:=2
 
 HOST_BUILD_PREFIX:=$(STAGING_DIR_HOST)
 HOST_BUILD_DEPENDS:=lua/host
+PKG_BUILD_DEPENDS:=lua/host
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk
