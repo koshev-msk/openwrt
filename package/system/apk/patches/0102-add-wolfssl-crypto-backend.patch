@@ -1,0 +1,148 @@
+Add wolfSSL crypto backend (OpenSSL compat layer)
+
+Adds `wolfssl` as a selectable crypto_backend (-Dcrypto_backend=wolfssl).
+It reuses crypto_openssl.c built against wolfSSL's OpenSSL compatibility
+layer (libwolfssl needs --enable-opensslall); crypto_wolfssl.c is a thin
+shim that includes it.
+
+wolfSSL does not report a usable OPENSSL_VERSION_NUMBER, so pretend to be
+OpenSSL 1.1.1: no legacy shims, no EVP_MD_fetch(), no ENGINE.
+
+Recent wolfSSL (5.9.x) returns a SubjectPublicKeyInfo from i2d_PublicKey()
+where OpenSSL returns the bare key material, which changes the key id and
+makes every signature UNTRUSTED. Compute the id from the unwrapped
+subjectPublicKey instead.
+
+--- a/meson.build
++++ b/meson.build
+@@ -28,6 +28,9 @@ if get_option('crypto_backend') == 'openssl'
+ 	crypto_dep = dependency('openssl')
+ elif get_option('crypto_backend') == 'mbedtls'
+ 	crypto_dep = [ dependency('mbedtls'), dependency('mbedcrypto') ]
++elif get_option('crypto_backend') == 'wolfssl'
++	crypto_dep = dependency('wolfssl')
++	add_project_arguments('-DAPK_CRYPTO_WOLFSSL', language: 'c')
+ endif
+ 
+ apk_deps = [ crypto_dep, zlib_dep, libzstd_dep ]
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1,6 +1,6 @@
+ option('arch', description: 'Specify a custom arch', type: 'string')
+ option('arch_prefix', description: 'Define a custom arch prefix for default arch', type: 'string')
+-option('crypto_backend', description: 'Crypto backend', type: 'combo', choices: ['openssl', 'mbedtls'], value: 'openssl')
++option('crypto_backend', description: 'Crypto backend', type: 'combo', choices: ['openssl', 'mbedtls', 'wolfssl'], value: 'openssl')
+ option('compressed-help', description: 'Compress help database', type: 'boolean', value: true, deprecated: true)
+ option('docs', description: 'Build manpages with scdoc', type: 'feature', value: 'auto')
+ option('help', description: 'Build help into apk binaries, needs lua', type: 'feature', value: 'auto')
+--- a/src/crypto_openssl.c
++++ b/src/crypto_openssl.c
+@@ -1,12 +1,28 @@
+ #include <errno.h>
+ #include <stdio.h>
+ #include <fcntl.h>
++#ifdef APK_CRYPTO_WOLFSSL
++#include <wolfssl/options.h>
++#include <wolfssl/openssl/bio.h>
++#include <wolfssl/openssl/pem.h>
++#include <wolfssl/openssl/err.h>
++#include <wolfssl/openssl/opensslv.h>
++#include <wolfssl/openssl/crypto.h>
++#include <wolfssl/openssl/evp.h>
++/* wolfSSL reports a bogus OPENSSL_VERSION_NUMBER: treat it as OpenSSL 1.1.1 */
++#undef OPENSSL_VERSION_NUMBER
++#define OPENSSL_VERSION_NUMBER 0x1010100fL
++#ifndef OPENSSL_NO_ENGINE
++#define OPENSSL_NO_ENGINE
++#endif
++#else
+ #include <openssl/bio.h>
+ #include <openssl/pem.h>
+ #include <openssl/err.h>
+ #include <openssl/opensslv.h>
+ #include <openssl/crypto.h>
+ #include <openssl/evp.h>
++#endif
+ #ifndef OPENSSL_NO_ENGINE
+ #include <openssl/engine.h>
+ #endif
+@@ -164,6 +180,59 @@ int apk_digest_ctx_final(struct apk_digest_ctx *dctx, struct apk_digest *d)
+ 	return 0;
+ }
+ 
++#ifdef APK_CRYPTO_WOLFSSL
++/*
++ * The key id is a hash of i2d_PublicKey() output, which in OpenSSL is the bare
++ * key material (RSAPublicKey / EC point). Recent wolfSSL returns a full
++ * SubjectPublicKeyInfo there instead, so unwrap the subjectPublicKey BIT
++ * STRING of the SPKI to get the same bytes as OpenSSL.
++ */
++static int der_hdr(const unsigned char **p, const unsigned char *end, unsigned char tag, size_t *len)
++{
++	size_t l;
++
++	if (*p >= end || **p != tag) return -1;
++	(*p)++;
++	if (*p >= end) return -1;
++	l = *(*p)++;
++	if (l & 0x80) {
++		int nb = l & 0x7f;
++		if (nb < 1 || nb > 2 || end - *p < nb) return -1;
++		for (l = 0; nb--; ) l = l << 8 | *(*p)++;
++	}
++	if (l > (size_t)(end - *p)) return -1;
++	*len = l;
++	return 0;
++}
++
++static int apk_i2d_publickey(EVP_PKEY *key, unsigned char **pub)
++{
++	unsigned char *spki = NULL;
++	const unsigned char *p, *end;
++	size_t l;
++	int n, r = -1;
++
++	if ((n = i2d_PUBKEY(key, &spki)) <= 0) return i2d_PublicKey(key, pub);
++	p = spki;
++	end = spki + n;
++	if (der_hdr(&p, end, 0x30, &l) == 0 &&			/* SubjectPublicKeyInfo */
++	    der_hdr(&p, end, 0x30, &l) == 0 &&			/* AlgorithmIdentifier */
++	    (p += l, der_hdr(&p, end, 0x03, &l)) == 0 &&	/* subjectPublicKey */
++	    l > 1 && *p == 0) {
++		p++;
++		l--;
++		if ((*pub = OPENSSL_malloc(l)) != NULL) {
++			memcpy(*pub, p, l);
++			r = (int)l;
++		}
++	}
++	OPENSSL_free(spki);
++	return r < 0 ? i2d_PublicKey(key, pub) : r;
++}
++#else
++#define apk_i2d_publickey i2d_PublicKey
++#endif
++
+ static int apk_pkey_init(struct apk_pkey *pkey, EVP_PKEY *key)
+ {
+ 	unsigned char dig[EVP_MAX_MD_SIZE], *pub = NULL;
+@@ -171,7 +240,7 @@ static int apk_pkey_init(struct apk_pkey *pkey, EVP_PKEY *key)
+ 	int len, r = -APKE_CRYPTO_ERROR;
+ 
+ 	pkey->priv = NULL;
+-	if ((len = i2d_PublicKey(key, &pub)) < 0) return -APKE_CRYPTO_ERROR;
++	if ((len = apk_i2d_publickey(key, &pub)) < 0) return -APKE_CRYPTO_ERROR;
+ 	if (EVP_Digest(pub, len, dig, &dlen, EVP_sha512(), NULL) == 1) {
+ 		memcpy(pkey->id, dig, sizeof pkey->id);
+ 		r = 0;
+--- /dev/null
++++ b/src/crypto_wolfssl.c
+@@ -0,0 +1,8 @@
++/* crypto_wolfssl.c - Alpine Package Keeper (APK)
++ *
++ * wolfSSL backend: the OpenSSL backend built against wolfSSL's
++ * OpenSSL compatibility layer (needs --enable-opensslall).
++ *
++ * SPDX-License-Identifier: GPL-2.0-only
++ */
++#include "crypto_openssl.c"

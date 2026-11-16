@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=apk
-PKG_RELEASE:=23
+PKG_RELEASE:=24
 
 PKG_SOURCE_URL=https://gitlab.alpinelinux.org/alpine/apk-tools.git
 PKG_SOURCE_PROTO:=git
@@ -30,6 +30,10 @@ define Package/apk-openssl/config
   source "$(SOURCE)/Config-openssl.in"
 endef
 
+define Package/apk-wolfssl/config
+  source "$(SOURCE)/Config-wolfssl.in"
+endef
+
 
 define Package/apk/default
   SECTION:=base
@@ -49,7 +53,7 @@ define Package/apk-mbedtls
   DEFAULT:=y if USE_APK
   VARIANT:=mbedtls
   DEFAULT_VARIANT:=1
-  CONFLICTS:=apk-openssl
+  CONFLICTS:=apk-openssl apk-wolfssl
   MENU:=1
 endef
 
@@ -60,6 +64,17 @@ define Package/apk-openssl
 	+PACKAGE_apk_openssl_url_backend_wget:wget-any \
 	+PACKAGE_apk_openssl_url_backend_curl:libcurl
   VARIANT:=openssl
+  MENU:=1
+endef
+
+define Package/apk-wolfssl
+  $(Package/apk/default)
+  TITLE += (wolfssl)
+  DEPENDS +=+libwolfssl \
+	+PACKAGE_apk_wolfssl_url_backend_wget:wget-any \
+	+PACKAGE_apk_wolfssl_url_backend_curl:libcurl
+  VARIANT:=wolfssl
+  CONFLICTS:=apk-openssl apk-mbedtls
   MENU:=1
 endef
 
@@ -92,6 +107,7 @@ endef
 
 Package/apk-mbedtls/conffiles = $(Package/apk/conffiles)
 Package/apk-openssl/conffiles = $(Package/apk/conffiles)
+Package/apk-wolfssl/conffiles = $(Package/apk/conffiles)
 
 define Package/apk/default/install
 	$(INSTALL_DIR) $(1)/lib/apk/db
@@ -105,7 +121,9 @@ endef
 
 Package/apk-mbedtls/install = $(Package/apk/default/install)
 Package/apk-openssl/install = $(Package/apk/default/install)
+Package/apk-wolfssl/install = $(Package/apk/default/install)
 
 $(eval $(call BuildPackage,apk-mbedtls))
 $(eval $(call BuildPackage,apk-openssl))
+$(eval $(call BuildPackage,apk-wolfssl))
 $(eval $(call HostBuild))
